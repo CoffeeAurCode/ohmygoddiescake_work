@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #FDF8F3;
+  color: #2D2D2D;
+  font-family: var(--font-dm-sans);
+}
+
+@layer utilities {
+  .section-padding {
+    @apply px-6 md:px-12 lg:px-24 py-20 md:py-28;
+  }
+  .heading-xl {
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl leading-tight;
+  }
+  .heading-lg {
+    @apply font-serif text-3xl md:text-4xl leading-tight;
+  }
+  .heading-md {
+    @apply font-serif text-2xl md:text-3xl leading-tight;
+  }
+  .label-tag {
+    @apply text-xs font-semibold tracking-[0.2em] uppercase text-rose-gold;
+  }
+
+  /* Rose-gold accent glass border — light sections */
+  .glass-border {
+    border: 3px solid rgba(201, 149, 106, 0.55);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.12),
+      inset 0 2px 0 rgba(255, 255, 255, 0.9),
+      0 4px 16px rgba(201, 149, 106, 0.1);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-border:hover {
+    border-color: rgba(201, 149, 106, 0.85);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.95),
+      0 0 28px rgba(201, 149, 106, 0.2),
+      0 6px 24px rgba(201, 149, 106, 0.12);
+  }
+
+  /* Rose-gold accent glass border — dark sections */
+  .glass-border-dark {
+    border: 3px solid rgba(201, 149, 106, 0.65);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.18),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-border-dark:hover {
+    border-color: rgba(201, 149, 106, 0.95);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.3),
+      0 0 36px rgba(201, 149, 106, 0.35),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Accent frame for image containers */
+  .glass-border-img {
+    border: 3px solid rgba(201, 149, 106, 0.45);
+    box-shadow: 0 0 0 1px rgba(201, 149, 106, 0.1), 0 0 16px rgba(201, 149, 106, 0.08);
+  }
+
+  /* Button accent glow */
+  .btn-glow:hover {
+    box-shadow: 0 0 24px rgba(201, 149, 106, 0.55), 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  .btn-glow-outline:hover {
+    box-shadow: 0 0 20px rgba(201, 149, 106, 0.4);
+  }
+}
