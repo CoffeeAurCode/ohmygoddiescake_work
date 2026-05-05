@@ -41,7 +41,7 @@ export default function About() {
 
             <div className="mt-8 flex items-center gap-4">
               <a
-                href="#order"
+                href="#order-form"
                 className="btn-glow inline-flex items-center gap-2 bg-charcoal text-cream text-sm font-semibold px-6 py-3 rounded-full hover:bg-charcoal/90 transition-all"
               >
                 Work With Us

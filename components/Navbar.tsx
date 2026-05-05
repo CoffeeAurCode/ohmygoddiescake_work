@@ -3,11 +3,11 @@
 import PillNav from './PillNav'
 
 const items = [
-  { label: 'About', href: '#about' },
-  { label: 'Services', href: '#services' },
+  { label: 'Gallery', href: '#services' },
   { label: 'Process', href: '#process' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Order Now', href: '#order' },
+  { label: 'Reviews', href: '#reviews' },
+  { label: 'Quote', href: '#order-form' },
+  { label: 'Our Story', href: '#about' },
 ]
 
 export default function Navbar() {

@@ -1,45 +1,27 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { FileText, DollarSign, CheckCircle, ChefHat, Package, Banknote } from 'lucide-react'
+import { FileText, DollarSign, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 
 const steps = [
   {
     icon: FileText,
     step: '01',
-    title: 'Fill Out the Order Form',
-    body: 'Find us on Instagram @omygoodiesyyc or call/text us. Complete our Google Form with your cake details — event date, size, flavour, design inspiration, and any add-ons.',
+    title: 'Build Your Cake',
+    body: 'Choose your occasion, size, flavour, and add-ons in our instant quote form. Takes less than 2 minutes.',
   },
   {
     icon: DollarSign,
     step: '02',
-    title: 'Receive Your Quote',
-    body: "We'll review your form and send you a custom quote. For complex designs, we may ask to see your inspiration photos before finalising the price.",
+    title: 'Get Your Price Instantly',
+    body: 'See your custom quote right away — no waiting, no back and forth.',
   },
   {
     icon: CheckCircle,
     step: '03',
-    title: 'Confirm with 50% Deposit',
-    body: "Ready to book? Send a 50% deposit via e-transfer to secure your date. Your spot isn't held until the deposit is received.",
-  },
-  {
-    icon: ChefHat,
-    step: '04',
-    title: 'We Bake Your Dream Cake',
-    body: "We handle everything — baking, filling, designing. We'll reach out if we need to clarify any details. Otherwise, trust the process.",
-  },
-  {
-    icon: Package,
-    step: '05',
-    title: 'Pick Up or Delivery',
-    body: 'Pick up from our Downtown Calgary home studio at the arranged time. Delivery within Calgary available for $25, or you can send an Uber on your account.',
-  },
-  {
-    icon: Banknote,
-    step: '06',
-    title: 'Pay Remaining Balance',
-    body: 'The remaining 50% is due on the day of pickup or when the cake is handed over. Then enjoy — your guests will be talking about this cake for weeks.',
+    title: "Confirm & We'll Handle the Rest",
+    body: 'Send your 50% deposit via e-transfer to lock in your date. We bake, you celebrate.',
   },
 ]
 
@@ -60,7 +42,7 @@ export default function HowItWorks() {
             <span className="text-rose-gold italic">Custom Cake</span>
           </h2>
           <p className="mt-4 text-charcoal/60 max-w-xl mx-auto">
-            Six simple steps from first message to first bite. We keep it straightforward so you can focus on celebrating.
+            Three simple steps from first message to first bite. We keep it straightforward so you can focus on celebrating.
           </p>
         </motion.div>
 

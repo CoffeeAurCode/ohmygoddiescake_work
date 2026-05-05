@@ -64,7 +64,7 @@ export default function Hero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <a
-            href="#order"
+            href="#order-form"
             className="btn-glow w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-rose-gold text-white font-semibold px-8 py-4 rounded-full hover:bg-opacity-90 transition-all hover:-translate-y-0.5 text-base glass-border-dark"
           >
             Order a Cake
