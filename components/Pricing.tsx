@@ -1,42 +1,178 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const tiers = [
-  {
-    range: '$100 – $200',
-    label: 'Starter',
-    desc: 'Single-tier custom cakes, perfect for smaller gatherings and celebrations.',
-    includes: ['Single tier (6" or 8")', 'Custom design', 'Choice of 1 filling', 'All frosting finishes'],
-    highlight: false,
-  },
-  {
-    range: '$200 – $400',
-    label: 'Signature',
-    desc: 'Our most popular range — larger cakes with more intricate designs and add-ons.',
-    includes: ['Single or 2-tier', 'Elaborate custom design', 'Filling upgrade available', 'Add-ons included', 'Priority booking'],
-    highlight: true,
-  },
-  {
-    range: '$400+',
-    label: 'Luxury',
-    desc: 'Multi-tier statement cakes for weddings, galas, and unforgettable moments.',
-    includes: ['Multi-tier (3+ tiers)', 'Full custom design consultation', 'Premium add-ons', 'Wedding-ready finishing', 'Priority scheduling'],
-    highlight: false,
-  },
+const tabs = ['Birthday & Celebration', 'Wedding', 'Corporate', 'Extras'] as const
+type Tab = typeof tabs[number]
+
+const celebrationData = {
+  sixInch: [
+    { size: 'Small 6"', price: '$185' },
+    { size: 'Medium 6"', price: '$245' },
+    { size: 'Tall 6"', price: '$325' },
+  ],
+  eightInch: [
+    { size: 'Small 8"', price: '$240' },
+    { size: 'Medium 8"', price: '$325' },
+    { size: 'Tall 8"', price: '$425' },
+  ],
+  other: [
+    { label: 'Cupcakes', note: 'per dozen', price: '$72' },
+    { label: 'Cupcake Set', note: '4" cake + 8 cupcakes', price: '$185' },
+  ],
+}
+
+const weddingTiers = [
+  { size: '4"',  servings: 8,  price: '$125' },
+  { size: '6"',  servings: 15, price: '$225' },
+  { size: '8"',  servings: 20, price: '$325' },
+  { size: '10"', servings: 25, price: '$425' },
+  { size: '12"', servings: 36, price: '$575' },
+  { size: '14"', servings: 50, price: '$775' },
+  { size: '16"', servings: 65, price: '$975' },
 ]
 
+const corporateItems = [
+  { label: 'Sheet Cake', note: 'minimum 30 servings', price: '$9', unit: '/serving' },
+  { label: 'Sugar Cookies', note: 'with edible image print', price: '$10', unit: ' each' },
+  { label: 'Cupcakes', note: 'with edible image print', price: '$9', unit: ' each' },
+]
+
+const extrasItems = [
+  { label: 'Stacking Fee', note: 'per cake', price: '$40' },
+  { label: 'Fondant Covered Tier', note: 'per tier', price: '$50' },
+  { label: 'Delivery & Setup', note: 'starting at', price: '$125' },
+]
+
+const tabVariants = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.2 } },
+}
+
+function BirthdayPanel() {
+  return (
+    <div className="space-y-8">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="glass-border bg-white rounded-2xl p-6">
+          <p className="label-tag mb-4">6" Cakes</p>
+          <div className="space-y-3">
+            {celebrationData.sixInch.map(item => (
+              <div key={item.size} className="flex justify-between items-center py-2 border-b border-charcoal/8 last:border-0">
+                <span className="text-charcoal/80 text-sm font-medium">{item.size}</span>
+                <span className="font-serif text-xl font-bold text-charcoal">{item.price}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="glass-border bg-white rounded-2xl p-6">
+          <p className="label-tag mb-4">8" Cakes</p>
+          <div className="space-y-3">
+            {celebrationData.eightInch.map(item => (
+              <div key={item.size} className="flex justify-between items-center py-2 border-b border-charcoal/8 last:border-0">
+                <span className="text-charcoal/80 text-sm font-medium">{item.size}</span>
+                <span className="font-serif text-xl font-bold text-charcoal">{item.price}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {celebrationData.other.map(item => (
+          <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex flex-col items-center text-center">
+            <p className="text-charcoal/60 text-xs font-semibold uppercase tracking-wider mb-1">{item.label}</p>
+            <p className="font-serif text-2xl font-bold text-charcoal">{item.price}</p>
+            <p className="text-charcoal/45 text-xs mt-1">{item.note}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function WeddingPanel() {
+  return (
+    <div className="space-y-5">
+      <div className="glass-border-dark bg-charcoal rounded-2xl px-6 py-4 flex items-center gap-3">
+        <span className="text-rose-gold font-serif text-2xl font-bold">$14</span>
+        <div>
+          <p className="text-white text-sm font-semibold">Per serving minimum</p>
+          <p className="text-white/50 text-xs">All tiers priced individually</p>
+        </div>
+      </div>
+
+      <div className="glass-border bg-white rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-3 px-6 py-3 bg-cream-dark border-b border-charcoal/8">
+          <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50">Tier Size</span>
+          <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50 text-center">Servings</span>
+          <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50 text-right">Price</span>
+        </div>
+        {weddingTiers.map((tier, i) => (
+          <div
+            key={tier.size}
+            className={`grid grid-cols-3 px-6 py-3.5 ${i < weddingTiers.length - 1 ? 'border-b border-charcoal/5' : ''} hover:bg-cream/60 transition-colors`}
+          >
+            <span className="font-serif text-lg font-bold text-charcoal">{tier.size}</span>
+            <span className="text-charcoal/60 text-sm text-center self-center">{tier.servings} servings</span>
+            <span className="font-semibold text-rose-gold text-right self-center">{tier.price}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CorporatePanel() {
+  return (
+    <div className="space-y-4">
+      {corporateItems.map(item => (
+        <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p className="font-serif text-lg font-semibold text-charcoal">{item.label}</p>
+            <p className="text-charcoal/50 text-sm">{item.note}</p>
+          </div>
+          <div className="text-right">
+            <span className="font-serif text-2xl font-bold text-charcoal">{item.price}</span>
+            <span className="text-charcoal/50 text-sm">{item.unit}</span>
+          </div>
+        </div>
+      ))}
+      <p className="text-xs text-charcoal/45 text-center pt-2">Sheet cake minimum order: 30 servings ($270)</p>
+    </div>
+  )
+}
+
+function ExtrasPanel() {
+  return (
+    <div className="space-y-4">
+      {extrasItems.map(item => (
+        <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p className="font-serif text-lg font-semibold text-charcoal">{item.label}</p>
+            <p className="text-charcoal/50 text-sm">{item.note}</p>
+          </div>
+          <span className="font-serif text-2xl font-bold text-rose-gold">{item.price}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Pricing() {
+  const [activeTab, setActiveTab] = useState<Tab>('Birthday & Celebration')
+
   return (
     <section id="pricing" className="section-padding bg-cream">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-14"
+          className="text-center mb-10"
         >
           <p className="label-tag mb-4">Investment</p>
           <h2 className="heading-lg text-charcoal">
@@ -44,78 +180,67 @@ export default function Pricing() {
             <span className="text-rose-gold italic">Pricing</span>
           </h2>
           <p className="mt-4 text-charcoal/60 max-w-lg mx-auto">
-            No minimum order. Final price depends on design complexity — fill out the order form for your exact quote.
+            Every cake is made to order. Fill out the order form for your exact quote.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {tiers.map((t, i) => (
-            <motion.div
-              key={t.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className={`relative rounded-3xl p-7 flex flex-col ${
-                t.highlight
-                  ? 'glass-border-dark bg-charcoal text-white shadow-xl scale-105'
-                  : 'glass-border bg-white hover:shadow-md transition-all duration-300'
+        {/* Tab Pills */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="flex flex-wrap justify-center gap-2 mb-8"
+        >
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                activeTab === tab
+                  ? 'bg-charcoal text-white shadow-md'
+                  : 'bg-white text-charcoal/60 glass-border hover:text-rose-gold'
               }`}
             >
-              {t.highlight && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-rose-gold text-white text-xs font-bold px-4 py-1 rounded-full tracking-wide uppercase">
-                  Most Popular
-                </span>
-              )}
-
-              <div className="mb-5">
-                <p className={`text-xs font-semibold tracking-widest uppercase mb-1 ${t.highlight ? 'text-rose-gold' : 'text-rose-gold'}`}>
-                  {t.label}
-                </p>
-                <p className={`font-serif text-3xl font-bold ${t.highlight ? 'text-white' : 'text-charcoal'}`}>
-                  {t.range}
-                </p>
-                <p className={`text-sm mt-2 leading-relaxed ${t.highlight ? 'text-white/60' : 'text-charcoal/55'}`}>
-                  {t.desc}
-                </p>
-              </div>
-
-              <ul className="flex-1 space-y-2.5 mb-7">
-                {t.includes.map(item => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm">
-                    <Check
-                      size={16}
-                      className={`mt-0.5 flex-shrink-0 ${t.highlight ? 'text-rose-gold' : 'text-rose-gold'}`}
-                    />
-                    <span className={t.highlight ? 'text-white/80' : 'text-charcoal/70'}>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href="#order"
-                className={`block text-center text-sm font-semibold px-5 py-3 rounded-full transition-all ${
-                  t.highlight
-                    ? 'btn-glow bg-rose-gold text-white hover:bg-opacity-90'
-                    : 'btn-glow-outline border-2 border-charcoal/20 text-charcoal hover:border-rose-gold hover:text-rose-gold'
-                }`}
-              >
-                Get a Custom Quote
-              </a>
-            </motion.div>
+              {tab}
+            </button>
           ))}
-        </div>
+        </motion.div>
 
-        <motion.p
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            variants={tabVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            {activeTab === 'Birthday & Celebration' && <BirthdayPanel />}
+            {activeTab === 'Wedding' && <WeddingPanel />}
+            {activeTab === 'Corporate' && <CorporatePanel />}
+            {activeTab === 'Extras' && <ExtrasPanel />}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* CTA */}
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-xs text-charcoal/45 mt-8"
+          transition={{ delay: 0.4 }}
+          className="mt-10 flex flex-col items-center gap-4"
         >
-          Prices are estimates. Your final quote depends on cake size, tier count, and design complexity.
-          Rush orders (under 3 days notice) incur an additional $15–25 fee.
-        </motion.p>
+          <a
+            href="#order"
+            className="btn-glow bg-rose-gold text-white text-sm font-semibold px-8 py-3.5 rounded-full hover:bg-opacity-90 transition-all"
+          >
+            Get a Custom Quote
+          </a>
+          <p className="text-xs text-charcoal/45 text-center max-w-sm">
+            Prices are estimates. Final quote depends on design complexity. Rush orders under 3 days notice incur an additional fee.
+          </p>
+        </motion.div>
       </div>
     </section>
   )
