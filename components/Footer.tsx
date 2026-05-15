@@ -1,4 +1,4 @@
-import { Instagram, Phone, Mail, MapPin } from 'lucide-react'
+import { Instagram, Phone, Mail, MapPin, ArrowRight } from 'lucide-react'
 
 const navLinks = [
   { label: 'Gallery', href: '#services' },
@@ -10,13 +10,41 @@ const navLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-amber/10" style={{ background: '#1E1A16' }}>
+    <footer style={{ background: '#1E1A16' }}>
+      {/* Top CTA strip */}
+      <div
+        className="border-b"
+        style={{ borderColor: 'rgba(245,158,66,0.12)' }}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-white font-serif text-lg leading-tight">Ready to order your custom cake?</p>
+            <p className="text-white/45 text-sm mt-0.5">We&apos;ll respond with a quote within 24 hours.</p>
+          </div>
+          <a
+            href="#order-form"
+            className="inline-flex items-center gap-2 bg-rose-gold text-white text-sm font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out flex-shrink-0"
+            style={{ boxShadow: '0 0 24px rgba(245,158,66,0.25)' }}
+          >
+            Start your order
+            <ArrowRight size={15} />
+          </a>
+        </div>
+      </div>
+
+      {/* Main footer columns */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-14">
         <div className="grid md:grid-cols-3 gap-10 mb-12">
           {/* Brand */}
-          <div>
-            <p className="font-serif text-2xl text-white mb-3">O&apos; My Goodies</p>
-            <p className="text-white/45 text-sm leading-relaxed max-w-xs">
+          <div className="relative">
+            {/* Ambient glow behind brand name */}
+            <div
+              className="absolute -top-4 -left-4 w-32 h-16 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at center, rgba(245,158,66,0.12) 0%, transparent 70%)' }}
+              aria-hidden
+            />
+            <p className="font-serif text-2xl text-white mb-3 relative">O&apos; My Goodies</p>
+            <p className="text-white/40 text-sm leading-relaxed max-w-xs">
               Luxury custom cakes in Downtown Calgary. Elevated design, exceptional taste — made for your most important moments.
             </p>
             <div className="flex gap-3 mt-5">
@@ -25,56 +53,72 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 transition-all duration-500 ease-in-out hover:text-amber-glow footer-instagram-btn"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white/45 transition-all duration-500 ease-in-out hover:text-amber-glow footer-instagram-btn"
               >
                 <Instagram size={16} />
               </a>
             </div>
           </div>
 
-          {/* Quick links */}
+          {/* Quick links — two-column micro-grid */}
           <div>
-            <p className="text-white text-sm font-semibold tracking-widest uppercase mb-4">Quick Links</p>
-            <ul className="space-y-2.5">
+            <p className="text-white text-xs font-bold tracking-[0.2em] uppercase mb-5">Quick Links</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               {navLinks.map(l => (
-                <li key={l.href}>
-                  <a href={l.href} className="text-sm text-white/45 hover:text-amber-glow transition-colors duration-500 ease-in-out">
-                    {l.label}
-                  </a>
-                </li>
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out hover:underline underline-offset-2"
+                >
+                  {l.label}
+                </a>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Contact */}
           <div>
-            <p className="text-white text-sm font-semibold tracking-widest uppercase mb-4">Contact</p>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2.5 text-sm text-white/45">
-                <MapPin size={15} className="text-amber flex-shrink-0 mt-0.5" />
-                <span>1122 15 Ave SW<br />Calgary, AB · T2R 1K5<br />(Home Bakery)</span>
+            <p className="text-white text-xs font-bold tracking-[0.2em] uppercase mb-5">Contact</p>
+            <ul className="space-y-3.5">
+              <li className="flex items-start gap-3 text-sm text-white/40">
+                <MapPin size={14} className="text-amber flex-shrink-0 mt-0.5" />
+                <span className="leading-snug">1122 15 Ave SW<br />Calgary, AB · T2R 1K5<br />(Home Bakery)</span>
               </li>
               <li>
-                <a href="tel:4034045262" className="flex items-center gap-2.5 text-sm text-white/45 hover:text-amber-glow transition-colors duration-500 ease-in-out">
-                  <Phone size={15} className="text-amber flex-shrink-0" />
-                  403-404-5262
+                <a
+                  href="tel:4034045262"
+                  className="flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
+                >
+                  <Phone size={14} className="text-amber flex-shrink-0" />
+                  <span className="group-hover:underline underline-offset-2">403-404-5262</span>
                 </a>
               </li>
               <li>
-                <a href="mailto:omygoodies00@gmail.com" className="flex items-center gap-2.5 text-sm text-white/45 hover:text-amber-glow transition-colors duration-500 ease-in-out">
-                  <Mail size={15} className="text-amber flex-shrink-0" />
-                  omygoodies00@gmail.com
+                <a
+                  href="mailto:omygoodies00@gmail.com"
+                  className="flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
+                >
+                  <Mail size={14} className="text-amber flex-shrink-0" />
+                  <span className="group-hover:underline underline-offset-2">omygoodies00@gmail.com</span>
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/25"
-          style={{ borderTop: '1px solid rgba(245,158,66,0.1)' }}>
-          <p>© {new Date().getFullYear()} O&apos; My Goodies Custom Cakes. All rights reserved.</p>
-          <p>Business Reg. TN23607229 · Calgary, AB</p>
+        {/* Bottom bar with diamond ornament */}
+        <div className="relative pt-6">
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center"
+          >
+            <div className="flex-1 h-px" style={{ background: 'rgba(245,158,66,0.1)' }} />
+            <span className="mx-4 text-amber-glow/40 text-xs">◆</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(245,158,66,0.1)' }} />
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/20 pt-2">
+            <p>© {new Date().getFullYear()} O&apos; My Goodies Custom Cakes. All rights reserved.</p>
+            <p>Business Reg. TN23607229 · Calgary, AB</p>
+          </div>
         </div>
       </div>
     </footer>

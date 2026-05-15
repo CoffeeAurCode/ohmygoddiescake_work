@@ -926,7 +926,7 @@ export function OrderForm() {
 
   return (
     <section id="order-form" className="section-padding section-ambient bg-amber-muted overflow-hidden">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -939,7 +939,7 @@ export function OrderForm() {
             Custom Cake{' '}
             <span className="text-rose-gold italic">Order Form</span>
           </h2>
-          <p className="mt-3 text-sm text-charcoal/60 max-w-md mx-auto">
+          <p className="mt-3 text-sm text-charcoal/55 max-w-md mx-auto">
             Tell us about your celebration — one step at a time. We&apos;ll follow up with a personalized quote.
           </p>
         </motion.div>
@@ -970,38 +970,46 @@ export function OrderForm() {
               if (step === TOTAL_STEPS) handleSubmit()
             }}
           >
-            {/* Progress */}
+            {/* Progress — dot-line stepper */}
             <div className="mb-8">
-              <div className="flex justify-between items-center gap-1 mb-2">
+              <div className="flex items-center justify-between relative">
+                {/* Connector line behind dots */}
+                <div className="absolute left-0 right-0 top-4 h-px bg-charcoal/10 z-0" />
                 {STEP_LABELS.map((label, i) => {
                   const n = i + 1
                   const active = step === n
                   const done = step > n
                   return (
-                    <div key={label} className="flex-1 flex flex-col items-center min-w-0">
+                    <div key={label} className="flex-1 flex flex-col items-center z-10 min-w-0">
+                      {/* Dot */}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 ease-in-out mb-2 ${
+                          done
+                            ? 'bg-amber border-amber text-white'
+                            : active
+                              ? 'bg-rose-gold border-rose-gold text-white shadow-[0_0_16px_rgba(201,149,106,0.5)]'
+                              : 'bg-amber-light border-charcoal/15 text-charcoal/35'
+                        }`}
+                      >
+                        {done ? '✓' : n}
+                      </div>
                       <span
-                        className={`text-[10px] font-semibold uppercase tracking-wider truncate w-full text-center ${
-                          active ? 'text-rose-gold' : done ? 'text-charcoal/50' : 'text-charcoal/30'
+                        className={`text-[10px] font-semibold uppercase tracking-wider text-center leading-tight ${
+                          active ? 'text-rose-gold' : done ? 'text-charcoal/50' : 'text-charcoal/28'
                         }`}
                       >
                         {label}
                       </span>
-                      <div
-                        className={`mt-1.5 h-1.5 w-full rounded-full transition-all duration-500 ease-in-out ${
-                          active ? 'bg-amber' : done ? 'bg-amber/45' : 'bg-charcoal/10'
-                        }`}
-                      />
                     </div>
                   )
                 })}
               </div>
-              <p className="text-center text-xs text-charcoal/45 mt-2">
-                Step {step} of {TOTAL_STEPS}
-                {progressSuffix}
+              <p className="text-center text-xs text-charcoal/40 mt-3">
+                Step {step} of {TOTAL_STEPS}{progressSuffix}
               </p>
             </div>
 
-            <div className="glass-border warm-card rounded-3xl p-6 md:p-8 min-h-[320px] flex flex-col">
+            <div className="glass-border warm-card rounded-3xl p-6 md:p-8 min-h-[320px] flex flex-col" style={{ boxShadow: '0 0 60px rgba(245,158,66,0.12), 0 8px 40px rgba(0,0,0,0.07), inset 0 2px 0 rgba(255,255,255,0.95)' }}>
               <div
                 className="mb-4 flex h-10 shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="tablist"
@@ -1878,9 +1886,9 @@ export function OrderForm() {
                   type="button"
                   onClick={goBack}
                   disabled={step === 1 && occasionSubStep === 1}
-                  className="inline-flex items-center gap-1 rounded-full px-4 py-2.5 text-sm font-semibold text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-35 disabled:pointer-events-none transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-charcoal/20 px-5 py-2.5 text-sm font-semibold text-charcoal/65 hover:text-charcoal hover:border-charcoal/35 hover:bg-charcoal/5 disabled:opacity-30 disabled:pointer-events-none transition-all duration-300"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={16} />
                   Back
                 </button>
                 {step === 2 && cakeSubStep === 5 && (
@@ -1888,10 +1896,10 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canDietaryNext()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Next
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </button>
                 )}
                 {step === 3 && (
@@ -1899,20 +1907,20 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Next
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </button>
                 )}
                 {step === 5 && (
                   <button
                     type="submit"
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Submit request
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </button>
                 )}
               </div>
