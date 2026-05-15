@@ -17,13 +17,13 @@ const services = [
 
 export default function Services() {
   return (
-    <section id="services" className="section-padding bg-cream">
-      <div className="max-w-7xl mx-auto">
+    <section id="services" className="section-padding section-ambient bg-amber-light overflow-hidden">
+      <div className="relative z-10 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center mb-14"
         >
           <p className="label-tag mb-4">What We Offer</p>
@@ -41,16 +41,16 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="grid grid-cols-2 gap-4 mb-10"
         >
-          <div className="glass-border-img relative h-48 md:h-64 rounded-2xl overflow-hidden">
-            <Image src="/2FEC4DEF-3821-4C38-B1E6-2E15D3C2D88C.png" alt="Custom cake showcase" fill className="object-cover hover:scale-105 transition-transform duration-500" />
+          <div className="glass-border-img relative h-48 md:h-64 rounded-3xl overflow-hidden">
+            <Image src="/2FEC4DEF-3821-4C38-B1E6-2E15D3C2D88C.png" alt="Custom cake showcase" fill className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             <span className="absolute bottom-3 left-4 text-white text-xs font-semibold tracking-wider uppercase opacity-90">Custom Cakes</span>
           </div>
-          <div className="glass-border-img relative h-48 md:h-64 rounded-2xl overflow-hidden">
-            <Image src="/33FBA6D8-734C-456D-8D4C-199419FEA82C.png" alt="Wedding cake showcase" fill className="object-cover hover:scale-105 transition-transform duration-500" />
+          <div className="glass-border-img relative h-48 md:h-64 rounded-3xl overflow-hidden">
+            <Image src="/33FBA6D8-734C-456D-8D4C-199419FEA82C.png" alt="Wedding cake showcase" fill className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             <span className="absolute bottom-3 left-4 text-white text-xs font-semibold tracking-wider uppercase opacity-90">Wedding Cakes</span>
           </div>
@@ -65,10 +65,10 @@ export default function Services() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.07 }}
-                className="glass-border group bg-white rounded-2xl p-5 hover:shadow-md transition-all duration-300 cursor-default"
+                transition={{ duration: 0.55, delay: i * 0.07, ease: [0.25, 0.1, 0.25, 1] }}
+                className="glass-border warm-card group rounded-3xl p-5 cursor-default"
               >
-                <div className="w-10 h-10 rounded-xl bg-cream-dark flex items-center justify-center mb-3 group-hover:bg-rose-gold/10 transition-colors">
+                <div className="w-10 h-10 rounded-2xl bg-amber-glow/30 flex items-center justify-center mb-3 group-hover:bg-amber/20 transition-colors duration-500">
                   <Icon size={18} className="text-rose-gold" />
                 </div>
                 <h3 className="font-serif text-sm font-semibold text-charcoal mb-1 leading-snug">{s.name}</h3>

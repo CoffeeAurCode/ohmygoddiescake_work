@@ -5,6 +5,8 @@
 :root {
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+  --amber-rgb: 245, 158, 66;
+  --rose-gold-rgb: 201, 149, 106;
 }
 
 html {
@@ -12,7 +14,7 @@ html {
 }
 
 body {
-  background-color: #FDF8F3;
+  background-color: #FFF8EC;
   color: #2D2D2D;
   font-family: var(--font-dm-sans);
 }
@@ -34,51 +36,109 @@ body {
     @apply text-xs font-semibold tracking-[0.2em] uppercase text-rose-gold;
   }
 
-  /* Rose-gold accent glass border — light sections */
+  /* Rose-gold + amber accent glass border — light sections */
   .glass-border {
-    border: 3px solid rgba(201, 149, 106, 0.55);
+    border: 2px solid rgba(201, 149, 106, 0.45);
     box-shadow:
-      0 0 0 1px rgba(201, 149, 106, 0.12),
+      0 0 0 1px rgba(201, 149, 106, 0.08),
+      0 0 32px rgba(245, 158, 66, 0.08),
       inset 0 2px 0 rgba(255, 255, 255, 0.9),
-      0 4px 16px rgba(201, 149, 106, 0.1);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
   }
   .glass-border:hover {
-    border-color: rgba(201, 149, 106, 0.85);
+    border-color: rgba(201, 149, 106, 0.75);
     box-shadow:
-      0 0 0 1px rgba(201, 149, 106, 0.2),
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 40px rgba(245, 158, 66, 0.14),
       inset 0 2px 0 rgba(255, 255, 255, 0.95),
-      0 0 28px rgba(201, 149, 106, 0.2),
-      0 6px 24px rgba(201, 149, 106, 0.12);
+      0 6px 28px rgba(0, 0, 0, 0.07);
   }
 
-  /* Rose-gold accent glass border — dark sections */
+  /* Rose-gold + amber accent glass border — dark sections */
   .glass-border-dark {
-    border: 3px solid rgba(201, 149, 106, 0.65);
+    border: 2px solid rgba(201, 149, 106, 0.55);
     box-shadow:
-      0 0 0 1px rgba(201, 149, 106, 0.18),
-      inset 0 2px 0 rgba(255, 255, 255, 0.15);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 28px rgba(245, 158, 66, 0.12),
+      inset 0 2px 0 rgba(255, 255, 255, 0.12);
+    transition: border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
   }
   .glass-border-dark:hover {
-    border-color: rgba(201, 149, 106, 0.95);
+    border-color: rgba(201, 149, 106, 0.9);
     box-shadow:
-      0 0 0 1px rgba(201, 149, 106, 0.3),
-      0 0 36px rgba(201, 149, 106, 0.35),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2);
+      0 0 0 1px rgba(201, 149, 106, 0.25),
+      0 0 44px rgba(245, 158, 66, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.18);
   }
 
   /* Accent frame for image containers */
   .glass-border-img {
-    border: 3px solid rgba(201, 149, 106, 0.45);
-    box-shadow: 0 0 0 1px rgba(201, 149, 106, 0.1), 0 0 16px rgba(201, 149, 106, 0.08);
+    border: 2px solid rgba(201, 149, 106, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.08),
+      0 0 20px rgba(245, 158, 66, 0.08);
+    transition: box-shadow 0.5s ease-in-out;
+  }
+  .glass-border-img:hover {
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 32px rgba(245, 158, 66, 0.15);
   }
 
-  /* Button accent glow */
+  /* Warm card — amber-tinted background + soft glow */
+  .warm-card {
+    background: rgba(255, 248, 236, 0.75);
+    box-shadow:
+      0 0 40px rgba(245, 158, 66, 0.09),
+      0 4px 24px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.5s ease-in-out, transform 0.5s ease-in-out;
+  }
+  .warm-card:hover {
+    box-shadow:
+      0 0 56px rgba(245, 158, 66, 0.16),
+      0 8px 32px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+
+  /* Ambient section lighting — radial amber halo */
+  .section-ambient {
+    position: relative;
+  }
+  .section-ambient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(245, 158, 66, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(201, 149, 106, 0.06) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Button amber glow */
   .btn-glow:hover {
-    box-shadow: 0 0 24px rgba(201, 149, 106, 0.55), 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 28px rgba(245, 158, 66, 0.45),
+      0 0 16px rgba(201, 149, 106, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.18);
   }
   .btn-glow-outline:hover {
-    box-shadow: 0 0 20px rgba(201, 149, 106, 0.4);
+    box-shadow: 0 0 22px rgba(245, 158, 66, 0.35);
+  }
+  .btn-amber-glow:hover {
+    box-shadow:
+      0 0 28px rgba(245, 158, 66, 0.45),
+      0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Footer Instagram icon */
+  .footer-instagram-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .footer-instagram-btn:hover {
+    border-color: rgba(245, 158, 66, 0.4);
+    box-shadow: 0 0 16px rgba(245, 158, 66, 0.3);
   }
 }

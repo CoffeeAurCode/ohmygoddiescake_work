@@ -925,7 +925,7 @@ export function OrderForm() {
   }
 
   return (
-    <section id="order-form" className="section-padding bg-cream-dark">
+    <section id="order-form" className="section-padding section-ambient bg-amber-muted overflow-hidden">
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -948,7 +948,7 @@ export function OrderForm() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-border bg-white rounded-3xl p-8 md:p-10 text-center"
+            className="glass-border warm-card rounded-3xl p-8 md:p-10 text-center"
           >
             <p className="font-serif text-xl md:text-2xl text-charcoal leading-relaxed mb-4">
               Your order request has been received!
@@ -987,8 +987,8 @@ export function OrderForm() {
                         {label}
                       </span>
                       <div
-                        className={`mt-1.5 h-1.5 w-full rounded-full transition-colors ${
-                          active ? 'bg-rose-gold' : done ? 'bg-rose-gold/40' : 'bg-charcoal/10'
+                        className={`mt-1.5 h-1.5 w-full rounded-full transition-all duration-500 ease-in-out ${
+                          active ? 'bg-amber' : done ? 'bg-amber/45' : 'bg-charcoal/10'
                         }`}
                       />
                     </div>
@@ -1001,7 +1001,7 @@ export function OrderForm() {
               </p>
             </div>
 
-            <div className="glass-border bg-white rounded-3xl p-6 md:p-8 min-h-[320px] flex flex-col">
+            <div className="glass-border warm-card rounded-3xl p-6 md:p-8 min-h-[320px] flex flex-col">
               <div
                 className="mb-4 flex h-10 shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="tablist"
@@ -1023,7 +1023,7 @@ export function OrderForm() {
                         locked
                           ? 'cursor-not-allowed text-charcoal/30 opacity-40'
                           : active
-                            ? 'bg-rose-gold/15 text-rose-gold ring-1 ring-rose-gold/50'
+                            ? 'bg-amber/15 text-rose-gold ring-1 ring-amber/50'
                             : completed
                               ? 'bg-charcoal/[0.06] text-charcoal/50 hover:bg-charcoal/10 hover:text-charcoal/65'
                               : 'text-charcoal/50 hover:bg-charcoal/5 hover:text-charcoal/70'
@@ -1096,17 +1096,17 @@ export function OrderForm() {
                                       nav: { ...w.nav, occasionSubStep: 2 },
                                     }))
                                   }}
-                                  className={`glass-border rounded-2xl text-center transition-all duration-200 relative overflow-hidden ${
+                                  className={`glass-border rounded-2xl text-center transition-all duration-500 ease-in-out relative overflow-hidden ${
                                     hasPhoto
                                       ? `min-h-[140px] flex flex-col items-center justify-center p-2 border-2 ${
                                           selected
-                                            ? 'ring-2 ring-rose-gold ring-offset-2 ring-offset-cream border-rose-gold shadow-md'
-                                            : 'border-transparent hover:border-rose-gold/40 hover:-translate-y-0.5'
+                                            ? 'ring-2 ring-amber ring-offset-2 ring-offset-amber-light border-amber shadow-md'
+                                            : 'border-transparent hover:border-amber/40 hover:-translate-y-0.5'
                                         }`
                                       : `p-5 flex flex-col items-center justify-center gap-3 min-h-[112px] ${
                                           selected
-                                            ? 'bg-rose-gold/15 border-rose-gold shadow-md ring-2 ring-rose-gold/50'
-                                            : 'bg-cream hover:bg-rose-gold/5 hover:-translate-y-0.5'
+                                            ? 'bg-amber/15 border-amber shadow-md ring-2 ring-amber/50'
+                                            : 'bg-amber-light hover:bg-amber/10 hover:-translate-y-0.5'
                                         }`
                                   }`}
                                 >
@@ -1175,8 +1175,8 @@ export function OrderForm() {
                                   }}
                                   className={`glass-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[112px] text-center transition-all duration-200 ${
                                     selected
-                                      ? 'bg-rose-gold/15 border-rose-gold shadow-md ring-2 ring-rose-gold/50'
-                                      : 'bg-cream hover:bg-rose-gold/5 hover:-translate-y-0.5'
+                                      ? 'bg-amber/15 border-amber shadow-md ring-2 ring-amber/50'
+                                      : 'bg-amber-light hover:bg-amber/8 hover:-translate-y-0.5'
                                   }`}
                                 >
                                   <span className={`text-sm font-semibold leading-tight ${selected ? 'text-charcoal' : 'text-charcoal/80'}`}>
@@ -1205,7 +1205,7 @@ export function OrderForm() {
                     <p className="text-center text-xs text-charcoal/50 mb-5">We need at least 3 days&apos; notice</p>
 
                     <div
-                      className="max-w-sm mx-auto w-full rounded-2xl border-2 border-rose-gold/35 bg-cream px-3 py-4 sm:px-4"
+                      className="max-w-sm mx-auto w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-3 py-4 sm:px-4"
                       role="application"
                       aria-label="Pickup date calendar"
                     >
@@ -1213,7 +1213,7 @@ export function OrderForm() {
                         <button
                           type="button"
                           onClick={goPrevMonth}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-rose-gold/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold/50"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-amber/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50"
                           aria-label="Previous month"
                         >
                           <ChevronLeft size={20} aria-hidden />
@@ -1224,7 +1224,7 @@ export function OrderForm() {
                         <button
                           type="button"
                           onClick={goNextMonth}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-rose-gold/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold/50"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-amber/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50"
                           aria-label="Next month"
                         >
                           <ChevronRight size={20} aria-hidden />
@@ -1264,11 +1264,11 @@ export function OrderForm() {
                               type="button"
                               disabled={!selectable}
                               onClick={() => selectable && selectCalendarDay(dayNum)}
-                              className={`aspect-square min-h-[2.25rem] w-full rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold/50 ${
+                              className={`aspect-square min-h-[2.25rem] w-full rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 ${
                                 !selectable
                                   ? 'cursor-not-allowed text-charcoal/25 bg-charcoal/[0.04]'
                                   : selected
-                                    ? 'bg-rose-gold/20 text-charcoal ring-2 ring-rose-gold shadow-sm'
+                                    ? 'bg-amber/20 text-charcoal ring-2 ring-amber shadow-sm'
                                     : 'text-charcoal hover:bg-rose-gold/10'
                               }`}
                             >
@@ -1279,7 +1279,7 @@ export function OrderForm() {
                       </div>
                     </div>
                     {showRushNote && (
-                      <p className="mt-4 text-center text-sm text-rose-gold font-medium bg-rose-gold/10 rounded-2xl px-4 py-3 border border-rose-gold/25">
+                      <p className="mt-4 text-center text-sm text-rose-gold font-medium bg-amber/10 rounded-2xl px-4 py-3 border border-amber/25">
                         Orders under 3 days notice incur a rush fee of $15–$25
                       </p>
                     )}
@@ -1333,8 +1333,8 @@ export function OrderForm() {
                                   }}
                                   className={`glass-border rounded-2xl flex h-full min-h-[6.5rem] sm:min-h-[7.5rem] w-full items-center justify-center px-3 font-semibold text-lg sm:text-xl transition-all ${
                                     selected
-                                      ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                      : 'bg-cream text-charcoal hover:bg-rose-gold/10'
+                                      ? 'bg-rose-gold text-white border-amber shadow-md'
+                                      : 'bg-amber-light text-charcoal hover:bg-amber/10'
                                   }`}
                                 >
                                   {s}
@@ -1372,8 +1372,8 @@ export function OrderForm() {
                                   onClick={() => pickTier(t)}
                                   className={`glass-border rounded-2xl flex h-full min-h-[6.5rem] sm:min-h-[7.5rem] w-full items-center justify-center px-3 font-semibold text-lg sm:text-xl transition-all ${
                                     selected
-                                      ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                      : 'bg-cream text-charcoal hover:bg-rose-gold/10'
+                                      ? 'bg-rose-gold text-white border-amber shadow-md'
+                                      : 'bg-amber-light text-charcoal hover:bg-amber/10'
                                   }`}
                                 >
                                   {t}
@@ -1396,7 +1396,7 @@ export function OrderForm() {
                           <p className="label-tag mb-2 text-center shrink-0">Cake details</p>
                           {tierCountToFlavorCount(tierCount) > 0 && (
                             <div
-                              className="mb-3 shrink-0 space-y-1 rounded-xl border border-charcoal/10 bg-cream/50 px-3 py-2.5 text-left"
+                              className="mb-3 shrink-0 space-y-1 rounded-xl border border-charcoal/10 bg-amber-light/60 px-3 py-2.5 text-left"
                               aria-live="polite"
                             >
                               {Array.from({ length: flavourTierStep }, (_, i) => {
@@ -1458,10 +1458,10 @@ export function OrderForm() {
                                     hasPhoto
                                       ? selected
                                         ? 'border-rose-gold shadow-md ring-2 ring-rose-gold'
-                                        : 'border-rose-gold/35 hover:brightness-[0.98]'
+                                        : 'border-amber/30 hover:brightness-[0.98]'
                                       : selected
-                                        ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                        : 'bg-cream text-charcoal hover:bg-rose-gold/10'
+                                        ? 'bg-rose-gold text-white border-amber shadow-md'
+                                        : 'bg-amber-light text-charcoal hover:bg-amber/10'
                                   }`}
                                 >
                                   {hasPhoto && (
@@ -1525,13 +1525,13 @@ export function OrderForm() {
                                     hasPhoto
                                       ? `min-h-[4.75rem] sm:min-h-[5.35rem] flex items-center justify-center p-2 border-2 ${
                                           selected
-                                            ? 'ring-2 ring-rose-gold ring-offset-2 ring-offset-cream border-rose-gold shadow-md'
-                                            : 'border-transparent hover:border-rose-gold/40 hover:-translate-y-0.5'
+                                            ? 'ring-2 ring-amber ring-offset-2 ring-offset-amber-light border-amber shadow-md'
+                                            : 'border-transparent hover:border-amber/40 hover:-translate-y-0.5'
                                         }`
                                       : `flex h-full min-h-[4.5rem] sm:min-h-[5.25rem] w-full items-center justify-center px-2 py-2 ${
                                           selected
-                                            ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                            : 'bg-cream text-charcoal hover:bg-rose-gold/10'
+                                            ? 'bg-rose-gold text-white border-amber shadow-md'
+                                            : 'bg-amber-light text-charcoal hover:bg-amber/10'
                                         }`
                                   }`}
                                 >
@@ -1583,8 +1583,8 @@ export function OrderForm() {
                                   onClick={() => toggleDietaryOption(opt)}
                                   className={`glass-border rounded-2xl flex min-h-[5.25rem] sm:min-h-[5.75rem] w-full items-center justify-center px-3 py-3 text-center text-sm sm:text-base font-semibold leading-snug transition-all ${
                                     selected
-                                      ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                      : 'bg-cream text-charcoal border-rose-gold/35 hover:bg-rose-gold/10'
+                                      ? 'bg-rose-gold text-white border-amber shadow-md'
+                                      : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                                   }`}
                                 >
                                   {opt}
@@ -1629,11 +1629,11 @@ export function OrderForm() {
                             className={`glass-border relative aspect-square w-full rounded-2xl flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-center shadow-sm overflow-hidden ${
                               hasPhoto
                                 ? selected
-                                  ? 'border-2 border-rose-gold ring-2 ring-rose-gold ring-offset-2 ring-offset-cream shadow-md'
-                                  : 'border-2 border-rose-gold/35 bg-cream hover:border-rose-gold/50 hover:-translate-y-0.5'
+                                  ? 'border-2 border-rose-gold ring-2 ring-rose-gold ring-offset-2 ring-offset-amber-light shadow-md'
+                                  : 'border-2 border-amber/30 bg-amber-light hover:border-amber/50 hover:-translate-y-0.5'
                                 : selected
                                   ? 'bg-rose-gold text-white border-rose-gold ring-2 ring-rose-gold/50'
-                                  : 'bg-cream text-charcoal border-rose-gold/35 hover:bg-rose-gold/10'
+                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                             }`}
                           >
                             {hasPhoto && photoSrc && (
@@ -1689,7 +1689,7 @@ export function OrderForm() {
                       })}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-rose-gold/35 bg-cream px-4 py-3">
+                    <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber/30 bg-amber-light px-4 py-3">
                       <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-charcoal/50">
                         Add-ons total
                       </span>
@@ -1718,7 +1718,7 @@ export function OrderForm() {
                     <h3 className="font-serif text-xl text-charcoal mb-0 shrink-0 text-center">Contact</h3>
                     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,2fr)] gap-2">
                       <div className="flex min-h-0 flex-col overflow-hidden">
-                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-rose-gold/25 bg-cream px-2 py-1 text-left">
+                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-amber/25 bg-amber-light px-2 py-1 text-left">
                           <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
                             Order summary
                           </p>
@@ -1743,7 +1743,7 @@ export function OrderForm() {
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, name: e.target.value } }))
                             }
-                            className="mt-1 w-full rounded-xl border-2 border-rose-gold/25 bg-cream px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="name"
                           />
                         </div>
@@ -1755,7 +1755,7 @@ export function OrderForm() {
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, email: e.target.value } }))
                             }
-                            className="mt-1 w-full rounded-xl border-2 border-rose-gold/25 bg-cream px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="email"
                           />
                         </div>
@@ -1769,7 +1769,7 @@ export function OrderForm() {
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, phone: e.target.value } }))
                             }
-                            className="mt-1 w-full rounded-xl border-2 border-rose-gold/25 bg-cream px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="tel"
                           />
                         </div>
@@ -1790,8 +1790,8 @@ export function OrderForm() {
                               }}
                               className={`glass-border relative overflow-hidden rounded-2xl p-4 text-left transition-all ${
                                 fulfillment === 'pickup'
-                                  ? 'border-rose-gold bg-rose-gold text-white shadow-md ring-2 ring-rose-gold/55'
-                                  : 'bg-cream hover:bg-rose-gold/10'
+                                  ? 'border-amber bg-rose-gold text-white shadow-md ring-2 ring-amber/55'
+                                  : 'bg-amber-light hover:bg-amber/10'
                               }`}
                             >
                               {fulfillment === 'pickup' && (
@@ -1826,8 +1826,8 @@ export function OrderForm() {
                               }}
                               className={`glass-border relative overflow-hidden rounded-2xl p-4 text-left transition-all ${
                                 fulfillment === 'delivery'
-                                  ? 'border-rose-gold bg-rose-gold text-white shadow-md ring-2 ring-rose-gold/55'
-                                  : 'bg-cream hover:bg-rose-gold/10'
+                                  ? 'border-amber bg-rose-gold text-white shadow-md ring-2 ring-amber/55'
+                                  : 'bg-amber-light hover:bg-amber/10'
                               }`}
                             >
                               {fulfillment === 'delivery' && (
@@ -1888,7 +1888,7 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canDietaryNext()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all btn-glow"
+                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
                   >
                     Next
                     <ChevronRight size={18} />
@@ -1899,7 +1899,7 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all btn-glow"
+                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
                   >
                     Next
                     <ChevronRight size={18} />
@@ -1909,7 +1909,7 @@ export function OrderForm() {
                   <button
                     type="submit"
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all btn-glow"
+                    className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-6 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow"
                   >
                     Submit request
                     <ChevronRight size={18} />
@@ -1942,7 +1942,7 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border bg-white rounded-2xl p-5 shadow-xl"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
                     <h4 id="other-celebration-title" className="font-serif text-lg text-charcoal text-center mb-1">
@@ -1959,7 +1959,7 @@ export function OrderForm() {
                       value={otherCelebrationDraft}
                       onChange={e => setOtherCelebrationDraft(e.target.value)}
                       placeholder="e.g. graduation, engagement party, housewarming…"
-                      className="w-full rounded-xl border border-charcoal/15 bg-cream/40 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-rose-gold/40 resize-none mb-4"
+                      className="w-full rounded-xl border border-charcoal/15 bg-amber-light/60 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-amber/40 resize-none mb-4 rounded-2xl"
                     />
                     <div className="flex flex-wrap gap-2 justify-end">
                       <button
@@ -2018,7 +2018,7 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border bg-white rounded-2xl p-5 shadow-xl"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
                     <h4 id="delivery-address-title" className="font-serif text-lg text-charcoal text-center mb-1">
@@ -2037,7 +2037,7 @@ export function OrderForm() {
                       value={deliveryAddressDraft}
                       onChange={e => setDeliveryAddressDraft(e.target.value)}
                       placeholder="Street address, unit, buzzer code, city, postal code…"
-                      className="w-full rounded-xl border border-charcoal/15 bg-cream/40 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-rose-gold/40 resize-none mb-4"
+                      className="w-full rounded-xl border border-charcoal/15 bg-amber-light/60 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-amber/40 resize-none mb-4 rounded-2xl"
                     />
                     <div className="flex flex-wrap gap-2 justify-end">
                       <button
@@ -2095,7 +2095,7 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border bg-white rounded-2xl p-5 shadow-xl"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
                     <h4 id="large-cake-size-title" className="font-serif text-lg text-charcoal text-center mb-1">
@@ -2119,8 +2119,8 @@ export function OrderForm() {
                               }}
                               className={`glass-border w-full rounded-2xl px-4 py-3.5 text-left text-base font-semibold transition-all ${
                                 picked
-                                  ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                  : 'bg-cream text-charcoal border-rose-gold/35 hover:bg-rose-gold/10'
+                                  ? 'bg-rose-gold text-white border-amber shadow-md'
+                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                               }`}
                             >
                               {inch.replace('"', '')} inches
@@ -2164,7 +2164,7 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border bg-white rounded-2xl p-5 shadow-xl"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
                     <h4 id="multi-tier-title" className="font-serif text-lg text-charcoal text-center mb-1">
@@ -2189,8 +2189,8 @@ export function OrderForm() {
                               }}
                               className={`glass-border w-full rounded-2xl px-4 py-3.5 text-left text-base font-semibold transition-all ${
                                 picked
-                                  ? 'bg-rose-gold text-white border-rose-gold shadow-md'
-                                  : 'bg-cream text-charcoal border-rose-gold/35 hover:bg-rose-gold/10'
+                                  ? 'bg-rose-gold text-white border-amber shadow-md'
+                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                               }`}
                             >
                               {count} tiers

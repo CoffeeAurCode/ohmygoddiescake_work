@@ -27,13 +27,13 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="process" className="section-padding bg-cream-dark">
-      <div className="max-w-6xl mx-auto">
+    <section id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center mb-14"
         >
           <p className="label-tag mb-4">The Process</p>
@@ -55,16 +55,16 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="glass-border relative bg-white rounded-3xl p-6 hover:shadow-md transition-all duration-300"
+                transition={{ duration: 0.65, delay: i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                className="glass-border warm-card relative rounded-3xl p-6"
               >
                 {/* Step number */}
-                <span className="absolute top-5 right-5 font-serif text-4xl font-bold text-blush/40 leading-none">
+                <span className="absolute top-5 right-5 font-serif text-4xl font-bold text-amber-glow/60 leading-none">
                   {s.step}
                 </span>
 
                 {/* Icon */}
-                <div className="w-11 h-11 rounded-xl bg-rose-gold/10 flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-2xl bg-amber/10 flex items-center justify-center mb-4">
                   <Icon size={20} className="text-rose-gold" />
                 </div>
 
@@ -80,7 +80,7 @@ export default function HowItWorks() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           className="mt-10 grid grid-cols-3 gap-4"
         >
           {[
@@ -88,8 +88,8 @@ export default function HowItWorks() {
             { src: '/5E2A5DFB-B609-4BAB-B9F5-89EF60E8178A.png', alt: 'Finished custom cake' },
             { src: '/606FB398-83B5-4291-9662-7B11DDABD84C.png', alt: 'Cake art detail' },
           ].map(({ src, alt }) => (
-            <div key={src} className="glass-border-img relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
-              <Image src={src} alt={alt} fill className="object-cover hover:scale-105 transition-transform duration-500" />
+            <div key={src} className="glass-border-img relative aspect-[4/3] rounded-3xl overflow-hidden shadow-sm">
+              <Image src={src} alt={alt} fill className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out" />
             </div>
           ))}
         </motion.div>
@@ -99,14 +99,15 @@ export default function HowItWorks() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="glass-border mt-10 bg-rose-gold/10 rounded-2xl px-6 py-4 flex flex-wrap gap-4 justify-center text-sm text-charcoal/70 text-center"
+          transition={{ delay: 0.5, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="glass-border mt-10 bg-amber/8 rounded-3xl px-6 py-4 flex flex-wrap gap-4 justify-center text-sm text-charcoal/70 text-center"
+          style={{ background: 'rgba(245,158,66,0.07)' }}
         >
-          <span>⏰ <strong className="text-charcoal">Minimum notice:</strong> 3 days (rush fee $15–25 applies if under 3 days)</span>
-          <span className="hidden md:block text-blush">·</span>
-          <span>📅 <strong className="text-charcoal">Recommended:</strong> 2 weeks in advance</span>
-          <span className="hidden md:block text-blush">·</span>
-          <span>💸 <strong className="text-charcoal">Deposit:</strong> 50% via e-transfer to book</span>
+          <span><strong className="text-charcoal">Minimum notice:</strong> 3 days (rush fee $15–25 applies if under 3 days)</span>
+          <span className="hidden md:block text-amber-glow">·</span>
+          <span><strong className="text-charcoal">Recommended:</strong> 2 weeks in advance</span>
+          <span className="hidden md:block text-amber-glow">·</span>
+          <span><strong className="text-charcoal">Deposit:</strong> 50% via e-transfer to book</span>
         </motion.div>
       </div>
     </section>

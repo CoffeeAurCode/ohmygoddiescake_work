@@ -47,19 +47,19 @@ const extrasItems = [
 
 const tabVariants = {
   initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  exit:    { opacity: 0, y: -8, transition: { duration: 0.2 } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } },
 }
 
 function BirthdayPanel() {
   return (
     <div className="space-y-8">
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="glass-border bg-white rounded-2xl p-6">
+        <div className="glass-border warm-card rounded-3xl p-6">
           <p className="label-tag mb-4">6" Cakes</p>
           <div className="space-y-3">
             {celebrationData.sixInch.map(item => (
-              <div key={item.size} className="flex justify-between items-center py-2 border-b border-charcoal/8 last:border-0">
+              <div key={item.size} className="flex justify-between items-center py-2 border-b border-amber/20 last:border-0">
                 <span className="text-charcoal/80 text-sm font-medium">{item.size}</span>
                 <span className="font-serif text-xl font-bold text-charcoal">{item.price}</span>
               </div>
@@ -67,11 +67,11 @@ function BirthdayPanel() {
           </div>
         </div>
 
-        <div className="glass-border bg-white rounded-2xl p-6">
+        <div className="glass-border warm-card rounded-3xl p-6">
           <p className="label-tag mb-4">8" Cakes</p>
           <div className="space-y-3">
             {celebrationData.eightInch.map(item => (
-              <div key={item.size} className="flex justify-between items-center py-2 border-b border-charcoal/8 last:border-0">
+              <div key={item.size} className="flex justify-between items-center py-2 border-b border-amber/20 last:border-0">
                 <span className="text-charcoal/80 text-sm font-medium">{item.size}</span>
                 <span className="font-serif text-xl font-bold text-charcoal">{item.price}</span>
               </div>
@@ -82,7 +82,7 @@ function BirthdayPanel() {
 
       <div className="grid grid-cols-2 gap-4">
         {celebrationData.other.map(item => (
-          <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex flex-col items-center text-center">
+          <div key={item.label} className="glass-border warm-card rounded-3xl p-5 flex flex-col items-center text-center">
             <p className="text-charcoal/60 text-xs font-semibold uppercase tracking-wider mb-1">{item.label}</p>
             <p className="font-serif text-2xl font-bold text-charcoal">{item.price}</p>
             <p className="text-charcoal/45 text-xs mt-1">{item.note}</p>
@@ -96,16 +96,17 @@ function BirthdayPanel() {
 function WeddingPanel() {
   return (
     <div className="space-y-5">
-      <div className="glass-border-dark bg-charcoal rounded-2xl px-6 py-4 flex items-center gap-3">
-        <span className="text-rose-gold font-serif text-2xl font-bold">$14</span>
+      <div className="glass-border-dark bg-charcoal rounded-3xl px-6 py-4 flex items-center gap-3"
+        style={{ boxShadow: '0 0 40px rgba(245,158,66,0.12), 0 4px 24px rgba(0,0,0,0.2)' }}>
+        <span className="text-amber-glow font-serif text-2xl font-bold">$14</span>
         <div>
           <p className="text-white text-sm font-semibold">Per serving minimum</p>
           <p className="text-white/50 text-xs">All tiers priced individually</p>
         </div>
       </div>
 
-      <div className="glass-border bg-white rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-3 px-6 py-3 bg-cream-dark border-b border-charcoal/8">
+      <div className="glass-border warm-card rounded-3xl overflow-hidden">
+        <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
           <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50">Tier Size</span>
           <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50 text-center">Servings</span>
           <span className="text-xs font-semibold tracking-wider uppercase text-charcoal/50 text-right">Price</span>
@@ -113,7 +114,7 @@ function WeddingPanel() {
         {weddingTiers.map((tier, i) => (
           <div
             key={tier.size}
-            className={`grid grid-cols-3 px-6 py-3.5 ${i < weddingTiers.length - 1 ? 'border-b border-charcoal/5' : ''} hover:bg-cream/60 transition-colors`}
+            className={`grid grid-cols-3 px-6 py-3.5 ${i < weddingTiers.length - 1 ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/20 transition-colors duration-500`}
           >
             <span className="font-serif text-lg font-bold text-charcoal">{tier.size}</span>
             <span className="text-charcoal/60 text-sm text-center self-center">{tier.servings} servings</span>
@@ -129,7 +130,7 @@ function CorporatePanel() {
   return (
     <div className="space-y-4">
       {corporateItems.map(item => (
-        <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex items-center justify-between">
+        <div key={item.label} className="glass-border warm-card rounded-3xl p-5 flex items-center justify-between">
           <div>
             <p className="font-serif text-lg font-semibold text-charcoal">{item.label}</p>
             <p className="text-charcoal/50 text-sm">{item.note}</p>
@@ -149,7 +150,7 @@ function ExtrasPanel() {
   return (
     <div className="space-y-4">
       {extrasItems.map(item => (
-        <div key={item.label} className="glass-border bg-white rounded-2xl p-5 flex items-center justify-between">
+        <div key={item.label} className="glass-border warm-card rounded-3xl p-5 flex items-center justify-between">
           <div>
             <p className="font-serif text-lg font-semibold text-charcoal">{item.label}</p>
             <p className="text-charcoal/50 text-sm">{item.note}</p>
@@ -165,13 +166,13 @@ export default function Pricing() {
   const [activeTab, setActiveTab] = useState<Tab>('Birthday & Celebration')
 
   return (
-    <section id="pricing" className="section-padding bg-cream">
-      <div className="max-w-3xl mx-auto">
+    <section id="pricing" className="section-padding section-ambient bg-amber-light overflow-hidden">
+      <div className="relative z-10 max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center mb-10"
         >
           <p className="label-tag mb-4">Investment</p>
@@ -189,17 +190,17 @@ export default function Pricing() {
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
           className="flex flex-wrap justify-center gap-2 mb-8"
         >
           {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-500 ease-in-out ${
                 activeTab === tab
-                  ? 'bg-charcoal text-white shadow-md'
-                  : 'bg-white text-charcoal/60 glass-border hover:text-rose-gold'
+                  ? 'bg-rose-gold text-white shadow-md'
+                  : 'warm-card text-charcoal/60 glass-border hover:text-rose-gold'
               }`}
             >
               {tab}
@@ -228,12 +229,12 @@ export default function Pricing() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
           className="mt-10 flex flex-col items-center gap-4"
         >
           <a
             href="#order"
-            className="btn-glow bg-rose-gold text-white text-sm font-semibold px-8 py-3.5 rounded-full hover:bg-opacity-90 transition-all"
+            className="btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-9 py-3.5 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
           >
             Get a Custom Quote
           </a>
