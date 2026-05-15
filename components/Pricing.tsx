@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, useInView, useMotionValue, animate } from 'framer-motion'
 import { Cake, Crown, Briefcase, Plus } from 'lucide-react'
 
 const tabs = ['Birthday & Celebration', 'Wedding', 'Corporate', 'Extras'] as const
@@ -15,61 +15,116 @@ const tabIcons: Record<Tab, typeof Cake> = {
 }
 
 const celebrationData = {
-  sixInch: [
-    { size: 'Small 6"', price: '$185' },
-    { size: 'Medium 6"', price: '$245' },
-    { size: 'Tall 6"', price: '$325' },
-  ],
-  eightInch: [
-    { size: 'Small 8"', price: '$240' },
-    { size: 'Medium 8"', price: '$325' },
-    { size: 'Tall 8"', price: '$425' },
+  rows: [
+    { label: 'Small',  six: { price: '$185', num: 185 }, eight: { price: '$240', num: 240 } },
+    { label: 'Medium', six: { price: '$245', num: 245 }, eight: { price: '$325', num: 325 } },
+    { label: 'Tall',   six: { price: '$325', num: 325 }, eight: { price: '$425', num: 425 } },
   ],
   other: [
-    { label: 'Cupcakes', note: 'per dozen', price: '$72' },
-    { label: 'Cupcake Set', note: '4" cake + 8 cupcakes', price: '$185' },
+    { label: 'Cupcakes', note: 'per dozen', price: '$72', num: 72 },
+    { label: 'Cupcake Set', note: '4" cake + 8 cupcakes', price: '$185', num: 185 },
   ],
 }
 
 const weddingTiers = [
-  { size: '4"',  servings: 8,  price: '$125' },
-  { size: '6"',  servings: 15, price: '$225' },
-  { size: '8"',  servings: 20, price: '$325' },
-  { size: '10"', servings: 25, price: '$425' },
-  { size: '12"', servings: 36, price: '$575' },
-  { size: '14"', servings: 50, price: '$775' },
-  { size: '16"', servings: 65, price: '$975' },
+  { size: '4"',  servings: 8,  price: '$125', num: 125 },
+  { size: '6"',  servings: 15, price: '$225', num: 225 },
+  { size: '8"',  servings: 20, price: '$325', num: 325 },
+  { size: '10"', servings: 25, price: '$425', num: 425 },
+  { size: '12"', servings: 36, price: '$575', num: 575 },
+  { size: '14"', servings: 50, price: '$775', num: 775 },
+  { size: '16"', servings: 65, price: '$975', num: 975 },
 ]
 
 const corporateItems = [
-  { label: 'Sheet Cake', note: 'minimum 30 servings', price: '$9', unit: '/serving' },
-  { label: 'Sugar Cookies', note: 'with edible image print', price: '$10', unit: ' each' },
-  { label: 'Cupcakes', note: 'with edible image print', price: '$9', unit: ' each' },
+  { label: 'Sheet Cake', note: 'minimum 30 servings', price: '$9', unit: '/serving', num: 9 },
+  { label: 'Sugar Cookies', note: 'with edible image print', price: '$10', unit: ' each', num: 10 },
+  { label: 'Cupcakes', note: 'with edible image print', price: '$9', unit: ' each', num: 9 },
 ]
 
 const extrasItems = [
-  { label: 'Stacking Fee', note: 'per cake', price: '$40' },
-  { label: 'Fondant Covered Tier', note: 'per tier', price: '$50' },
-  { label: 'Delivery & Setup', note: 'starting at', price: '$125' },
+  { label: 'Stacking Fee', note: 'per cake', price: '$40', num: 40 },
+  { label: 'Fondant Covered Tier', note: 'per tier', price: '$50', num: 50 },
+  { label: 'Delivery & Setup', note: 'starting at', price: '$125', num: 125 },
 ]
 
 const panelVariants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] } },
-  exit:    { opacity: 0, y: -6, transition: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] } },
+  initial: (direction: number) => ({ opacity: 0, x: direction * 40 }),
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+  },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction * -40,
+    transition: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+  }),
 }
 
-function PriceRow({ label, note, price, unit = '', last = false }: { label: string; note: string; price: string; unit?: string; last?: boolean }) {
+/* Animated price cell — each is its own component so hooks are called at top level */
+function AnimatedPrice({
+  num,
+  fallback,
+  className,
+}: {
+  num: number
+  fallback: string
+  className?: string
+}) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.5 })
+  const mv = useMotionValue(0)
+
+  useEffect(() => {
+    if (!inView) return
+    const c = animate(mv, num, {
+      duration: 0.8,
+      ease: 'easeOut',
+      onUpdate: (v) => {
+        if (ref.current) ref.current.textContent = `$${Math.round(v)}`
+      },
+    })
+    return c.stop
+  }, [inView, num, mv])
+
   return (
-    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-amber/15' : ''}`}>
-      <div>
-        <p className="font-medium text-charcoal text-sm">{label}</p>
-        <p className="text-xs text-charcoal/45 mt-0.5">{note}</p>
-      </div>
-      <div className="text-right ml-4">
-        <span className="font-serif text-2xl font-bold text-charcoal">{price}</span>
-        {unit && <span className="text-charcoal/45 text-xs ml-0.5">{unit}</span>}
-      </div>
+    <span ref={ref} className={className}>
+      {fallback}
+    </span>
+  )
+}
+
+/* Single row for the birthday comparison table */
+function BirthdayRow({
+  label,
+  six,
+  eight,
+  last,
+}: {
+  label: string
+  six: { price: string; num: number }
+  eight: { price: string; num: number }
+  last: boolean
+}) {
+  return (
+    <div
+      className={`grid grid-cols-3 px-6 py-3.5 ${!last ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/10 transition-colors duration-300`}
+    >
+      <span className="text-xs font-semibold text-charcoal/60 self-center">{label}</span>
+      <AnimatedPrice num={six.num} fallback={six.price} className="font-serif text-lg font-bold text-charcoal text-center self-center block" />
+      <AnimatedPrice num={eight.num} fallback={eight.price} className="font-serif text-lg font-bold text-rose-gold text-right self-center block" />
+    </div>
+  )
+}
+
+/* Single extra card with count-up */
+function ExtraCard({ label, note, price, num }: { label: string; note: string; price: string; num: number }) {
+  return (
+    <div className="glass-border warm-card rounded-3xl p-5 text-center">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal/45 mb-2">{label}</p>
+      <AnimatedPrice num={num} fallback={price} className="font-serif text-3xl font-bold text-charcoal block" />
+      <p className="text-xs text-charcoal/40 mt-1">{note}</p>
     </div>
   )
 }
@@ -77,32 +132,46 @@ function PriceRow({ label, note, price, unit = '', last = false }: { label: stri
 function BirthdayPanel() {
   return (
     <div className="space-y-5">
-      {/* Combined comparison table */}
       <div className="glass-border warm-card rounded-3xl overflow-hidden">
         <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
           <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Size</span>
           <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-center">6&quot; Cake</span>
           <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">8&quot; Cake</span>
         </div>
-        {celebrationData.sixInch.map((item, i) => (
-          <div key={item.size} className={`grid grid-cols-3 px-6 py-3.5 ${i < celebrationData.sixInch.length - 1 ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/10 transition-colors duration-300`}>
-            <span className="text-xs font-semibold text-charcoal/60 self-center">{item.size.replace('6"', '').trim()}</span>
-            <span className="font-serif text-lg font-bold text-charcoal text-center self-center">{item.price}</span>
-            <span className="font-serif text-lg font-bold text-rose-gold text-right self-center">{celebrationData.eightInch[i]?.price ?? '—'}</span>
-          </div>
+        {celebrationData.rows.map((row, i) => (
+          <BirthdayRow
+            key={row.label}
+            label={row.label}
+            six={row.six}
+            eight={row.eight}
+            last={i === celebrationData.rows.length - 1}
+          />
         ))}
       </div>
-
-      {/* Extras row */}
       <div className="grid grid-cols-2 gap-3">
         {celebrationData.other.map(item => (
-          <div key={item.label} className="glass-border warm-card rounded-3xl p-5 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal/45 mb-2">{item.label}</p>
-            <p className="font-serif text-3xl font-bold text-charcoal">{item.price}</p>
-            <p className="text-xs text-charcoal/40 mt-1">{item.note}</p>
-          </div>
+          <ExtraCard key={item.label} label={item.label} note={item.note} price={item.price} num={item.num} />
         ))}
       </div>
+    </div>
+  )
+}
+
+/* Single wedding tier row */
+function WeddingTierRow({
+  tier,
+  last,
+}: {
+  tier: { size: string; servings: number; price: string; num: number }
+  last: boolean
+}) {
+  return (
+    <div
+      className={`grid grid-cols-3 px-6 py-3 ${!last ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/12 transition-colors duration-300`}
+    >
+      <span className="font-serif text-lg font-bold text-charcoal self-center">{tier.size}</span>
+      <span className="text-sm text-charcoal/55 text-center self-center">{tier.servings}</span>
+      <AnimatedPrice num={tier.num} fallback={tier.price} className="font-semibold text-rose-gold text-right self-center block" />
     </div>
   )
 }
@@ -110,9 +179,13 @@ function BirthdayPanel() {
 function WeddingPanel() {
   return (
     <div className="space-y-4">
-      {/* Per-serving hero strip */}
-      <div className="rounded-3xl px-6 py-5 flex items-center gap-4"
-        style={{ background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)', boxShadow: '0 0 40px rgba(245,158,66,0.2), 0 4px 20px rgba(0,0,0,0.15)' }}>
+      <div
+        className="rounded-3xl px-6 py-5 flex items-center gap-4"
+        style={{
+          background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+          boxShadow: '0 0 40px rgba(245,158,66,0.2), 0 4px 20px rgba(0,0,0,0.15)',
+        }}
+      >
         <div>
           <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1">Per serving minimum</p>
           <span className="font-serif text-4xl font-bold text-white">$14</span>
@@ -122,8 +195,6 @@ function WeddingPanel() {
           <p className="text-white/50 text-xs mt-0.5">Final quote on request</p>
         </div>
       </div>
-
-      {/* Tier table */}
       <div className="glass-border warm-card rounded-3xl overflow-hidden">
         <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
           <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Tier</span>
@@ -131,15 +202,30 @@ function WeddingPanel() {
           <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">Price</span>
         </div>
         {weddingTiers.map((tier, i) => (
-          <div
-            key={tier.size}
-            className={`grid grid-cols-3 px-6 py-3 ${i < weddingTiers.length - 1 ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/12 transition-colors duration-300`}
-          >
-            <span className="font-serif text-lg font-bold text-charcoal self-center">{tier.size}</span>
-            <span className="text-sm text-charcoal/55 text-center self-center">{tier.servings}</span>
-            <span className="font-semibold text-rose-gold text-right self-center">{tier.price}</span>
-          </div>
+          <WeddingTierRow key={tier.size} tier={tier} last={i === weddingTiers.length - 1} />
         ))}
+      </div>
+    </div>
+  )
+}
+
+/* Corporate item row */
+function CorporateRow({
+  item,
+  last,
+}: {
+  item: { label: string; note: string; price: string; unit: string; num: number }
+  last: boolean
+}) {
+  return (
+    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-amber/15' : ''}`}>
+      <div>
+        <p className="font-medium text-charcoal text-sm">{item.label}</p>
+        <p className="text-xs text-charcoal/45 mt-0.5">{item.note}</p>
+      </div>
+      <div className="text-right ml-4 flex items-baseline gap-0.5">
+        <AnimatedPrice num={item.num} fallback={item.price} className="font-serif text-2xl font-bold text-charcoal" />
+        <span className="text-charcoal/45 text-xs">{item.unit}</span>
       </div>
     </div>
   )
@@ -149,8 +235,8 @@ function CorporatePanel() {
   return (
     <div className="glass-border warm-card rounded-3xl overflow-hidden">
       {corporateItems.map((item, i) => (
-        <div key={item.label} className={`${i < corporateItems.length - 1 ? 'border-b border-amber/15' : ''}`}>
-          <PriceRow label={item.label} note={item.note} price={item.price} unit={item.unit} last={i === corporateItems.length - 1} />
+        <div key={item.label} className="px-6">
+          <CorporateRow item={item} last={i === corporateItems.length - 1} />
         </div>
       ))}
       <div className="px-6 pb-4">
@@ -160,18 +246,31 @@ function CorporatePanel() {
   )
 }
 
+/* Extras item row */
+function ExtrasRow({
+  item,
+  last,
+}: {
+  item: { label: string; note: string; price: string; num: number }
+  last: boolean
+}) {
+  return (
+    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-amber/15' : ''}`}>
+      <div>
+        <p className="font-medium text-charcoal text-sm">{item.label}</p>
+        <p className="text-xs text-charcoal/45 mt-0.5">{item.note}</p>
+      </div>
+      <AnimatedPrice num={item.num} fallback={item.price} className="font-serif text-2xl font-bold text-rose-gold ml-4" />
+    </div>
+  )
+}
+
 function ExtrasPanel() {
   return (
     <div className="glass-border warm-card rounded-3xl overflow-hidden">
       {extrasItems.map((item, i) => (
-        <div key={item.label} className={`px-6 ${i < extrasItems.length - 1 ? 'border-b border-amber/15' : ''}`}>
-          <div className="flex items-center justify-between py-3.5">
-            <div>
-              <p className="font-medium text-charcoal text-sm">{item.label}</p>
-              <p className="text-xs text-charcoal/45 mt-0.5">{item.note}</p>
-            </div>
-            <span className="font-serif text-2xl font-bold text-rose-gold ml-4">{item.price}</span>
-          </div>
+        <div key={item.label} className="px-6">
+          <ExtrasRow item={item} last={i === extrasItems.length - 1} />
         </div>
       ))}
     </div>
@@ -180,6 +279,14 @@ function ExtrasPanel() {
 
 export default function Pricing() {
   const [activeTab, setActiveTab] = useState<Tab>('Birthday & Celebration')
+  const [direction, setDirection] = useState(0)
+  const tabIndex = tabs.indexOf(activeTab)
+
+  const handleTabChange = (tab: Tab) => {
+    const newIndex = tabs.indexOf(tab)
+    setDirection(newIndex > tabIndex ? 1 : -1)
+    setActiveTab(tab)
+  }
 
   return (
     <section id="pricing" className="section-padding section-ambient bg-amber-light overflow-hidden">
@@ -201,7 +308,7 @@ export default function Pricing() {
           </p>
         </motion.div>
 
-        {/* Underline tab switcher */}
+        {/* Direction-aware underline tab switcher */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -214,7 +321,7 @@ export default function Pricing() {
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
                 className="relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors duration-300 flex-shrink-0"
                 style={{ color: activeTab === tab ? '#C9956A' : 'rgba(45,45,45,0.45)' }}
               >
@@ -232,10 +339,11 @@ export default function Pricing() {
           })}
         </motion.div>
 
-        {/* Tab panel */}
-        <AnimatePresence mode="wait">
+        {/* Direction-aware panel transition */}
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={activeTab}
+            custom={direction}
             variants={panelVariants}
             initial="initial"
             animate="animate"

@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { FileText, DollarSign, CheckCircle, Clock, Calendar, CreditCard } from 'lucide-react'
 import Image from 'next/image'
 
@@ -31,9 +32,31 @@ const steps = [
   },
 ]
 
+const cardVariants = {
+  hidden: { opacity: 0, rotateX: -8, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    rotateX: 0,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      delay: i * 0.12,
+      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+    },
+  }),
+}
+
 export default function HowItWorks() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  })
+  const photoMiddleY = useTransform(scrollYProgress, [0, 1], ['0%', '-6%'])
+  const photoOuterY  = useTransform(scrollYProgress, [0, 1], ['0%', '-2%'])
+
   return (
-    <section id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
+    <section ref={sectionRef} id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
       <div className="relative z-10 max-w-6xl mx-auto">
 
         {/* Header */}
@@ -56,9 +79,30 @@ export default function HowItWorks() {
 
         {/* Timeline */}
         <div className="relative">
-          {/* Connector line (desktop only) */}
-          <div className="hidden md:block absolute top-12 left-[16.666%] right-[16.666%] h-px">
-            <div className="w-full h-full border-t-2 border-dashed border-amber/40" />
+          {/* SVG connector line with draw-in animation */}
+          <div
+            className="hidden md:block absolute top-12 left-[16.666%] right-[16.666%]"
+            style={{ overflow: 'visible', height: '2px' }}
+          >
+            <svg
+              width="100%"
+              height="2"
+              viewBox="0 0 100 2"
+              preserveAspectRatio="none"
+              style={{ overflow: 'visible' }}
+            >
+              <motion.path
+                d="M0 1 L100 1"
+                stroke="rgba(245,158,66,0.4)"
+                strokeWidth="0.25"
+                strokeDasharray="1.2 1.2"
+                fill="none"
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.2 }}
+              />
+            </svg>
             {/* Animated glow dot */}
             <motion.div
               animate={{ x: ['0%', '100%', '0%'] }}
@@ -74,17 +118,23 @@ export default function HowItWorks() {
               return (
                 <motion.div
                   key={s.step}
-                  initial={{ opacity: 0, y: 32 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="visible"
                   viewport={{ once: true }}
-                  transition={{ duration: 0.65, delay: i * 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+                  style={{ perspective: 800 }}
                   className="relative flex flex-col items-center md:items-start text-center md:text-left"
                 >
-                  {/* Step circle */}
+                  {/* Step circle with pulse */}
                   <div className="relative mb-6 z-10">
-                    <div className="w-24 h-24 rounded-full bg-amber-light border-2 border-amber/20 flex items-center justify-center shadow-[0_0_32px_rgba(245,158,66,0.12)]">
+                    <motion.div
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.7 }}
+                      className="w-24 h-24 rounded-full bg-amber-light border-2 border-amber/20 flex items-center justify-center shadow-[0_0_32px_rgba(245,158,66,0.12)]"
+                    >
                       <Icon size={28} className="text-rose-gold" />
-                    </div>
+                    </motion.div>
                     {/* Step number badge */}
                     <span className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-rose-gold flex items-center justify-center text-white text-[11px] font-bold font-serif shadow-md">
                       {i + 1}
@@ -113,28 +163,26 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* Photo row — middle image offset upward */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-12 grid grid-cols-3 gap-4 items-end"
-        >
+        {/* Photo row — per-image parallax */}
+        <div className="mt-12 grid grid-cols-3 gap-4 items-end">
           {[
-            { src: '/5D581933-F7D4-4D2A-A509-B39B9880E450.png', alt: 'Cake in progress', offset: false },
-            { src: '/5E2A5DFB-B609-4BAB-B9F5-89EF60E8178A.png', alt: 'Finished custom cake', offset: true },
-            { src: '/606FB398-83B5-4291-9662-7B11DDABD84C.png', alt: 'Cake art detail', offset: false },
-          ].map(({ src, alt, offset }) => (
-            <div
+            { src: '/5D581933-F7D4-4D2A-A509-B39B9880E450.png', alt: 'Cake in progress', offset: false, parallax: photoOuterY },
+            { src: '/5E2A5DFB-B609-4BAB-B9F5-89EF60E8178A.png', alt: 'Finished custom cake', offset: true, parallax: photoMiddleY },
+            { src: '/606FB398-83B5-4291-9662-7B11DDABD84C.png', alt: 'Cake art detail', offset: false, parallax: photoOuterY },
+          ].map(({ src, alt, offset, parallax }) => (
+            <motion.div
               key={src}
-              className={`glass-border-img relative rounded-3xl overflow-hidden shadow-sm transition-transform duration-700 ${offset ? '-translate-y-5' : ''}`}
-              style={{ aspectRatio: '4/3' }}
+              style={{ y: parallax, aspectRatio: '4/3' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className={`glass-border-img relative rounded-3xl overflow-hidden shadow-sm ${offset ? '-translate-y-5' : ''}`}
             >
               <Image src={src} alt={alt} fill className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out" />
-            </div>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Notice band */}
         <motion.div

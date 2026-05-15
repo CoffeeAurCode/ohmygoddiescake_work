@@ -7,6 +7,7 @@ import Reviews from '@/components/Reviews'
 import { OrderForm } from '@/components/OrderCTA'
 import About from '@/components/About'
 import Footer from '@/components/Footer'
+import SectionReveal from '@/components/SectionReveal'
 
 export default function Home() {
   return (
@@ -15,11 +16,11 @@ export default function Home() {
       <main>
         <Hero />
         <Services />
-        <HowItWorks />
-        <Pricing />
-        <Reviews />
-        <OrderForm />
-        <About />
+        <SectionReveal><HowItWorks /></SectionReveal>
+        <SectionReveal><Pricing /></SectionReveal>
+        <SectionReveal><Reviews /></SectionReveal>
+        <SectionReveal><OrderForm /></SectionReveal>
+        <SectionReveal><About /></SectionReveal>
       </main>
       <Footer />
     </>

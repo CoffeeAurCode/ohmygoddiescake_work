@@ -11,25 +11,23 @@ const navLinks = [
 export default function Footer() {
   return (
     <footer style={{ background: '#1E1A16' }}>
+      {/* Animated gradient top border */}
+      <div className="footer-gradient-border" />
+
       {/* Top CTA strip */}
-      <div
-        className="border-b"
-        style={{ borderColor: 'rgba(245,158,66,0.12)' }}
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="text-white font-serif text-lg leading-tight">Ready to order your custom cake?</p>
-            <p className="text-white/45 text-sm mt-0.5">We&apos;ll respond with a quote within 24 hours.</p>
-          </div>
-          <a
-            href="#order-form"
-            className="inline-flex items-center gap-2 bg-rose-gold text-white text-sm font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out flex-shrink-0"
-            style={{ boxShadow: '0 0 24px rgba(245,158,66,0.25)' }}
-          >
-            Start your order
-            <ArrowRight size={15} />
-          </a>
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-b" style={{ borderColor: 'rgba(245,158,66,0.12)' }}>
+        <div>
+          <p className="text-white font-serif text-lg leading-tight">Ready to order your custom cake?</p>
+          <p className="text-white/45 text-sm mt-0.5">We&apos;ll respond with a quote within 24 hours.</p>
         </div>
+        <a
+          href="#order-form"
+          className="inline-flex items-center gap-2 bg-rose-gold text-white text-sm font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out flex-shrink-0"
+          style={{ boxShadow: '0 0 24px rgba(245,158,66,0.25)' }}
+        >
+          Start your order
+          <ArrowRight size={15} />
+        </a>
       </div>
 
       {/* Main footer columns */}
@@ -37,7 +35,6 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-10 mb-12">
           {/* Brand */}
           <div className="relative">
-            {/* Ambient glow behind brand name */}
             <div
               className="absolute -top-4 -left-4 w-32 h-16 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse at center, rgba(245,158,66,0.12) 0%, transparent 70%)' }}
@@ -60,7 +57,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick links — two-column micro-grid */}
+          {/* Quick links with draw-in underline */}
           <div>
             <p className="text-white text-xs font-bold tracking-[0.2em] uppercase mb-5">Quick Links</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -68,7 +65,7 @@ export default function Footer() {
                 <a
                   key={l.href}
                   href={l.href}
-                  className="text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out hover:underline underline-offset-2"
+                  className="footer-link-animated text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out"
                 >
                   {l.label}
                 </a>
@@ -87,19 +84,19 @@ export default function Footer() {
               <li>
                 <a
                   href="tel:4034045262"
-                  className="flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
+                  className="footer-link-animated flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
                 >
                   <Phone size={14} className="text-amber flex-shrink-0" />
-                  <span className="group-hover:underline underline-offset-2">403-404-5262</span>
+                  <span>403-404-5262</span>
                 </a>
               </li>
               <li>
                 <a
                   href="mailto:omygoodies00@gmail.com"
-                  className="flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
+                  className="footer-link-animated flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
                 >
                   <Mail size={14} className="text-amber flex-shrink-0" />
-                  <span className="group-hover:underline underline-offset-2">omygoodies00@gmail.com</span>
+                  <span>omygoodies00@gmail.com</span>
                 </a>
               </li>
             </ul>
@@ -108,9 +105,7 @@ export default function Footer() {
 
         {/* Bottom bar with diamond ornament */}
         <div className="relative pt-6">
-          <div
-            className="absolute top-0 left-0 right-0 flex items-center"
-          >
+          <div className="absolute top-0 left-0 right-0 flex items-center">
             <div className="flex-1 h-px" style={{ background: 'rgba(245,158,66,0.1)' }} />
             <span className="mx-4 text-amber-glow/40 text-xs">◆</span>
             <div className="flex-1 h-px" style={{ background: 'rgba(245,158,66,0.1)' }} />

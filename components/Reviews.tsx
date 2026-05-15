@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { Star } from 'lucide-react'
 
 const testimonials = [
@@ -26,7 +27,16 @@ const testimonials = [
 
 const starSizes = [14, 16, 18, 16, 14]
 
+const reviewMarqueeText = "★★★★★  5-Star Reviews  ·  Calgary  ·  O' My Goodies  ·  "
+
 export default function Reviews() {
+  const founderRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: founderScroll } = useScroll({
+    target: founderRef,
+    offset: ['start end', 'end start'],
+  })
+  const founderTextY = useTransform(founderScroll, [0, 1], ['0%', '-3%'])
+
   return (
     <section id="reviews" className="section-padding section-ambient bg-amber-muted overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto">
@@ -37,7 +47,7 @@ export default function Reviews() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center mb-14"
+          className="text-center mb-10"
         >
           <p className="label-tag mb-4">Reviews</p>
           <h2 className="heading-lg text-charcoal">
@@ -49,15 +59,40 @@ export default function Reviews() {
           </p>
         </motion.div>
 
-        {/* Testimonial cards */}
+        {/* Amber star marquee band */}
+        <div className="marquee-wrap mb-10 -mx-6 md:-mx-12 lg:-mx-24">
+          <div
+            className="marquee-track py-2.5"
+            style={{
+              background: 'rgba(245,158,66,0.12)',
+              borderTop: '1px solid rgba(245,158,66,0.2)',
+              borderBottom: '1px solid rgba(245,158,66,0.2)',
+            }}
+          >
+            {[0, 1].map((setIdx) => (
+              <span key={setIdx} className="flex items-center flex-shrink-0">
+                {Array(8).fill(null).map((_, j) => (
+                  <span
+                    key={j}
+                    className="text-[11px] font-semibold text-amber/80 tracking-wider whitespace-nowrap px-6"
+                  >
+                    {reviewMarqueeText}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonial cards — slide in from right */}
         <div className="grid lg:grid-cols-3 gap-5 mb-10">
           {testimonials.map((t, i) => (
             <motion.article
               key={t.name}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.25, 0.1, 0.25, 1] }}
               className="warm-card group rounded-3xl p-8 flex flex-col h-full relative overflow-hidden border-t-2 border-rose-gold/40 hover:-translate-y-1 transition-all duration-500 ease-in-out"
               style={{ background: 'rgba(255,248,236,0.85)' }}
             >
@@ -81,7 +116,6 @@ export default function Reviews() {
               </p>
 
               <div className="mt-6 pt-5 flex items-center gap-3" style={{ borderTop: '1px solid rgba(245,158,66,0.2)' }}>
-                {/* Avatar initial */}
                 <div className="w-9 h-9 rounded-full bg-rose-gold/15 border border-rose-gold/30 flex items-center justify-center flex-shrink-0">
                   <span className="font-serif text-sm font-bold text-rose-gold">{t.name[0]}</span>
                 </div>
@@ -94,8 +128,9 @@ export default function Reviews() {
           ))}
         </div>
 
-        {/* Founder quote — full-bleed strip */}
+        {/* Founder quote — full-bleed strip with parallax text */}
         <motion.div
+          ref={founderRef}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -113,9 +148,12 @@ export default function Reviews() {
               <div className="h-px flex-1 max-w-16 bg-white/30" />
             </div>
 
-            <p className="font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed text-white">
+            <motion.p
+              style={{ y: founderTextY }}
+              className="font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed text-white"
+            >
               &ldquo;My clients are consistently surprised that the cake tastes even better than it looks — and they love that their cake becomes the focal point of the event. Something guests talk about, photograph, and remember.&rdquo;
-            </p>
+            </motion.p>
 
             <div className="mt-8 flex items-center justify-center gap-3">
               <div className="h-px w-8 bg-white/40" />

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, DM_Sans } from 'next/font/google'
 import './globals.css'
+import ScrollProgressBar from '@/components/ScrollProgressBar'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -33,7 +34,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ScrollProgressBar />
+        <div className="grain-overlay" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   )
 }

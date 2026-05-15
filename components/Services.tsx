@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { Cake, Crown, Coffee, Star, Baby, Grid2x2, Utensils, Briefcase } from 'lucide-react'
 import Image from 'next/image'
 
@@ -15,9 +16,28 @@ const services = [
   { icon: Briefcase, name: 'Corporate Orders',          desc: 'Branded cakes and treats for business events' },
 ]
 
+const marqueeItems = [
+  '🎂 Custom Celebration Cakes',
+  '💍 Wedding Cakes',
+  '🧁 Cupcakes',
+  '🍡 Cake Pops',
+  '👶 Smash Cakes',
+  '📋 Sheet Cakes',
+  '✨ Dessert Tables',
+  '💼 Corporate Orders',
+]
+
 export default function Services() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  })
+  const img1Y = useTransform(scrollYProgress, [0, 1], ['0%', '-8%'])
+  const img2Y = useTransform(scrollYProgress, [0, 1], ['0%', '-4%'])
+
   return (
-    <section id="services" className="section-padding section-ambient bg-amber-light overflow-hidden">
+    <section ref={sectionRef} id="services" className="section-padding section-ambient bg-amber-light overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto">
 
         {/* Section header with horizontal rule */}
@@ -45,7 +65,7 @@ export default function Services() {
         {/* Bento grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-          {/* Left column: 2 stacked feature images */}
+          {/* Left column: 2 stacked feature images with parallax */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -53,8 +73,11 @@ export default function Services() {
             transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
             className="lg:col-span-1 flex flex-col gap-4"
           >
-            {/* Feature image 1 */}
-            <div className="glass-border-img relative rounded-3xl overflow-hidden" style={{ height: '260px' }}>
+            {/* Feature image 1 — parallax */}
+            <motion.div
+              style={{ y: img1Y, height: '260px' }}
+              className="glass-border-img relative rounded-3xl overflow-hidden"
+            >
               <Image
                 src="/2FEC4DEF-3821-4C38-B1E6-2E15D3C2D88C.png"
                 alt="Custom cake showcase"
@@ -70,10 +93,13 @@ export default function Services() {
                   <Cake size={13} className="text-white" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Feature image 2 */}
-            <div className="glass-border-img relative rounded-3xl overflow-hidden flex-1" style={{ minHeight: '220px' }}>
+            {/* Feature image 2 — parallax */}
+            <motion.div
+              style={{ y: img2Y, minHeight: '220px' }}
+              className="glass-border-img relative rounded-3xl overflow-hidden flex-1"
+            >
               <Image
                 src="/33FBA6D8-734C-456D-8D4C-199419FEA82C.png"
                 alt="Wedding cake showcase"
@@ -89,7 +115,7 @@ export default function Services() {
                   <Crown size={13} className="text-white" />
                 </span>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Right area: 8 service tiles in 2×4 grid */}
@@ -101,6 +127,7 @@ export default function Services() {
                   key={s.name}
                   initial={{ opacity: 0, y: 20, scale: 0.97 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  whileHover={{ y: -6, scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
                   className="glass-border warm-card group rounded-3xl p-5 cursor-default flex flex-col justify-between min-h-[140px] relative overflow-hidden"
@@ -121,6 +148,24 @@ export default function Services() {
                 </motion.div>
               )
             })}
+          </div>
+        </div>
+
+        {/* Infinite marquee strip */}
+        <div className="mt-10 marquee-wrap">
+          <div className="marquee-track">
+            {[0, 1].map((setIdx) => (
+              <div key={setIdx} className="flex items-center">
+                {marqueeItems.map((item) => (
+                  <span
+                    key={item + setIdx}
+                    className="inline-flex items-center gap-2 px-5 py-2 mx-2 rounded-full bg-amber-glow/25 border border-rose-gold/20 text-charcoal/70 text-xs font-semibold tracking-wider whitespace-nowrap"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>
