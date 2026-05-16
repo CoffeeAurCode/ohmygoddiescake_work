@@ -6,25 +6,25 @@ import { Cake, Crown, Coffee, Star, Baby, Grid2x2, Utensils, Briefcase } from 'l
 import Image from 'next/image'
 
 const services = [
-  { icon: Cake,      name: 'Custom Celebration Cakes', desc: 'Birthdays, anniversaries, graduations — fully custom' },
-  { icon: Crown,     name: 'Wedding Cakes',             desc: 'Tiered masterpieces for your most important day' },
-  { icon: Coffee,    name: 'Cupcakes',                  desc: 'Individual treats with the same elevated finish' },
-  { icon: Star,      name: 'Cake Pops & Cakesicles',   desc: 'Fun, portable, and just as delicious' },
-  { icon: Baby,      name: 'Smash Cakes',               desc: "Perfect for baby's first birthday milestone" },
-  { icon: Grid2x2,   name: 'Sheet Cakes',               desc: 'Generous portions for larger gatherings' },
-  { icon: Utensils,  name: 'Dessert Tables',            desc: 'Curated sweet spreads for events' },
-  { icon: Briefcase, name: 'Corporate Orders',          desc: 'Branded cakes and treats for business events' },
+  { icon: Cake, name: 'Custom Celebration Cakes', desc: 'Birthdays, anniversaries, graduations — fully custom', img: '/Celebration Birthday.png' },
+  { icon: Crown, name: 'Wedding Cakes', desc: 'Tiered masterpieces for your most important day', img: '/Celebration Wedding.png' },
+  { icon: Coffee, name: 'Cupcakes', desc: 'Individual treats with the same elevated finish', img: '/ECA51ED4-11A4-48E9-9229-5D75D2376304.png' },
+  { icon: Star, name: 'Cake Pops & Cakesicles', desc: 'Fun, portable, and just as delicious', img: '/49FD205B-4BB0-4811-B5CD-74D935ED6658.png' },
+  { icon: Baby, name: 'Smash Cakes', desc: "Perfect for baby's first birthday milestone", img: '/Celebration Baby Shower.png' },
+  { icon: Grid2x2, name: 'Sheet Cakes', desc: 'Generous portions for larger gatherings', img: '/3C4FC48A-4EC7-4FD4-8495-F59CF7C9F294.png' },
+  { icon: Utensils, name: 'Dessert Tables', desc: 'Curated sweet spreads for events', img: '/18FB0FAB-46E3-49BE-B543-73CF7120E76F.png' },
+  { icon: Briefcase, name: 'Corporate Orders', desc: 'Branded cakes and treats for business events', img: '/Celebration Corporate.png' },
 ]
 
 const marqueeItems = [
-  '🎂 Custom Celebration Cakes',
-  '💍 Wedding Cakes',
-  '🧁 Cupcakes',
-  '🍡 Cake Pops',
-  '👶 Smash Cakes',
-  '📋 Sheet Cakes',
-  '✨ Dessert Tables',
-  '💼 Corporate Orders',
+  ' Custom Celebration Cakes',
+  ' Wedding Cakes',
+  ' Cupcakes',
+  ' Cake Pops',
+  ' Smash Cakes',
+  ' Sheet Cakes',
+  ' Dessert Tables',
+  ' Corporate Orders',
 ]
 
 export default function Services() {
@@ -130,26 +130,50 @@ export default function Services() {
                   whileHover={{ y: -6, scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="glass-border warm-card group rounded-3xl p-5 cursor-default flex flex-col justify-between min-h-[140px] relative overflow-hidden"
+                  className="glass-border group rounded-3xl cursor-default flex flex-col justify-between min-h-[140px] relative overflow-hidden"
                 >
+                  {/* Background photo */}
+                  <Image
+                    src={s.img}
+                    alt=""
+                    fill
+                    className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                    aria-hidden
+                  />
+                  {/* Dark gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10 group-hover:from-black/75 transition-all duration-500" />
+
                   {/* Icon top-right */}
-                  <div className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-amber-glow/25 flex items-center justify-center group-hover:bg-rose-gold/15 transition-colors duration-500">
-                    <Icon size={15} className="text-rose-gold" />
+                  <div className="relative z-10 self-end m-4 w-8 h-8 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                    <Icon size={15} className="text-white" />
                   </div>
 
                   {/* Name bottom */}
-                  <div className="mt-auto pt-8">
-                    <h3 className="font-serif text-[13px] font-semibold text-charcoal leading-snug mb-1">{s.name}</h3>
-                    <p className="text-[11px] text-charcoal/50 leading-relaxed">{s.desc}</p>
+                  <div className="relative z-10 p-4 pt-0">
+                    <h3 className="font-serif text-[13px] font-semibold text-white leading-snug mb-1">{s.name}</h3>
+                    <p className="text-[11px] text-white/65 leading-relaxed">{s.desc}</p>
                   </div>
-
-                  {/* Subtle hover tint */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-glow/0 to-amber/0 group-hover:from-amber-glow/8 group-hover:to-amber/5 transition-all duration-500 rounded-3xl pointer-events-none" />
                 </motion.div>
               )
             })}
           </div>
         </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-10 flex justify-center"
+        >
+          <a
+            href="#order-form"
+            className="btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
+          >
+            Get My Custom Quote
+          </a>
+        </motion.div>
 
         {/* Infinite marquee strip */}
         <div className="mt-10 marquee-wrap">

@@ -126,36 +126,6 @@ const GUEST_OPTIONS = [
   { id: '40plus', label: '40+' },
 ] as const
 
-const CAKE_SIZES = ['4"', '6"', '8"', '10"+'] as const
-/** Shown when user taps the `10"+` tile — stored value is the chosen inch size. */
-const OVERSIZE_CAKE_TRIGGER = '10"+'
-const OVERSIZE_CAKE_CHOICES = ['10"', '12"', '14"', '16"'] as const
-const TIERS = ['1', '2', '3', '4+'] as const
-
-/** `4+` tile opens a modal; chosen count is stored as one of these strings. */
-const OVERSIZE_TIER_TRIGGER = '4+'
-const OVERSIZE_TIER_CHOICE_COUNTS = [4, 5, 6, 7] as const
-
-function tierCountToFlavorCount(tierCount: string): number {
-  if (tierCount === '1') return 1
-  if (tierCount === '2') return 2
-  if (tierCount === '3') return 3
-  if (tierCount === '4' || tierCount === '5' || tierCount === '6' || tierCount === '7') {
-    const v = Number(tierCount)
-    return Number.isInteger(v) && v >= 4 && v <= 7 ? v : 0
-  }
-  return 0
-}
-
-/** 1-based step for first tier missing a flavour (defaults to last tier if all filled). */
-function firstIncompleteFlavourTierStep(flavours: string[], tierCount: string): number {
-  const n = tierCountToFlavorCount(tierCount)
-  if (n <= 0) return 1
-  for (let i = 0; i < n; i++) {
-    if (!flavours[i]) return i + 1
-  }
-  return n
-}
 const FLAVOURS = [
   'Vanilla',
   'Chocolate',
@@ -167,16 +137,16 @@ const FLAVOURS = [
   'Funfetti',
 ] as const
 
-/** Public assets: `public/flavor <name>.png` */
+/** Public assets: `public/Flavor <name>.png` */
 const FLAVOR_CARD_IMAGES: Record<string, string> = {
-  Vanilla: '/flavor vanilla.png',
-  Chocolate: '/flavor chocolate.png',
-  Marble: '/flavor marble.png',
-  Lemon: '/flavor lemon.png',
-  Coconut: '/flavor coconut.png',
-  Carrot: '/flavor carrot.png',
-  'Red Velvet': '/flavor red velvet.png',
-  Funfetti: '/flavor funfetti.png',
+  Vanilla: '/Flavor Vanilla.png',
+  Chocolate: '/Flavor Chocolate.png',
+  Marble: '/Flavor Marble.png',
+  Lemon: '/Flavor lemon.png',
+  Coconut: '/Flavor Coconut.png',
+  Carrot: '/Flavor Carrot.png',
+  'Red Velvet': '/Flavor Red Velvet.png',
+  Funfetti: '/Flavor Funfetti.png',
 }
 const FROSTINGS = ['Buttercream', 'Fondant', 'Ganache', 'Semi-naked', 'Naked', 'Not sure'] as const
 
@@ -222,13 +192,14 @@ const ADD_ON_CARD_IMAGES: Partial<Record<AddonId, string>> = {
   burnaway: '/Burn-away Image.png',
 }
 
+const WEDDING_PRICE_PER_SERVING = 13
+
 type OrderFormValues = {
   celebration: string
   celebrationOtherNote: string
   guestCount: string
-  cakeSize: string
-  tierCount: string
-  flavours: string[]
+  servings: number | ''
+  flavour: string
   frosting: string
   addonIds: string[]
   pickupDate: string
@@ -245,33 +216,18 @@ type OrderFormValues = {
 type OrderFormNav = {
   step: number
   occasionSubStep: number
+  /** Cake sub-steps: 1=flavour, 2=frosting, 3=dietary */
   cakeSubStep: number
-  flavourTierStep: number
 }
 
 function cakeDetailsComplete(form: OrderFormValues): boolean {
-  const fc = tierCountToFlavorCount(form.tierCount)
-  const flavoursComplete =
-    fc > 0 && form.flavours.length === fc && form.flavours.every(x => x.length > 0)
-  return !!(form.cakeSize && form.tierCount && flavoursComplete && form.frosting)
+  return !!(form.flavour && form.frosting)
 }
 
-function cakeNavFromForm(form: OrderFormValues): Pick<OrderFormNav, 'cakeSubStep' | 'flavourTierStep'> {
-  const { cakeSize, tierCount, flavours } = form
-  const fc = tierCountToFlavorCount(tierCount)
-  const flavoursComplete =
-    fc > 0 && flavours.length === fc && flavours.every(x => x.length > 0)
-  if (cakeDetailsComplete(form)) {
-    return { cakeSubStep: 5, flavourTierStep: Math.max(1, fc) }
-  }
-  if (flavoursComplete && tierCount && cakeSize) {
-    return { cakeSubStep: 4, flavourTierStep: Math.max(1, fc) }
-  }
-  if (tierCount && cakeSize) {
-    return { cakeSubStep: 3, flavourTierStep: firstIncompleteFlavourTierStep(flavours, tierCount) }
-  }
-  if (cakeSize) return { cakeSubStep: 2, flavourTierStep: 1 }
-  return { cakeSubStep: 1, flavourTierStep: 1 }
+function cakeNavFromForm(form: OrderFormValues): Pick<OrderFormNav, 'cakeSubStep'> {
+  if (cakeDetailsComplete(form)) return { cakeSubStep: 3 }
+  if (form.flavour) return { cakeSubStep: 2 }
+  return { cakeSubStep: 1 }
 }
 
 type OrderWizardState = {
@@ -284,9 +240,8 @@ const INITIAL_FORM: OrderFormValues = {
   celebration: '',
   celebrationOtherNote: '',
   guestCount: '',
-  cakeSize: '',
-  tierCount: '',
-  flavours: [],
+  servings: '',
+  flavour: '',
   frosting: '',
   addonIds: [],
   pickupDate: '',
@@ -302,7 +257,6 @@ const INITIAL_NAV: OrderFormNav = {
   step: 1,
   occasionSubStep: 1,
   cakeSubStep: 1,
-  flavourTierStep: 1,
 }
 
 const DIETARY_OPTIONS = ['Gluten-free', 'Dairy-free', 'Vegan', 'Halal', 'None'] as const
@@ -320,15 +274,14 @@ export function OrderForm() {
   }))
 
   const { form, nav, submitted } = wizard
-  const { step, occasionSubStep, cakeSubStep, flavourTierStep } = nav
+  const { step, occasionSubStep, cakeSubStep } = nav
   const {
     celebration,
     celebrationOtherNote,
     guestCount,
+    servings,
     pickupDate,
-    cakeSize,
-    tierCount,
-    flavours,
+    flavour,
     frosting,
     addonIds,
     name,
@@ -343,8 +296,6 @@ export function OrderForm() {
   const [otherCelebrationDraft, setOtherCelebrationDraft] = useState('')
   const [deliveryAddressModalOpen, setDeliveryAddressModalOpen] = useState(false)
   const [deliveryAddressDraft, setDeliveryAddressDraft] = useState('')
-  const [largeCakeSizeModalOpen, setLargeCakeSizeModalOpen] = useState(false)
-  const [multiTierModalOpen, setMultiTierModalOpen] = useState(false)
   const [maxReachedStep, setMaxReachedStep] = useState(1)
   const resumeAfterEditingFromStepRef = useRef<number | null>(null)
 
@@ -393,24 +344,6 @@ export function OrderForm() {
     [calendarView.year, calendarView.month]
   )
 
-  const rvFlavourAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [rvTierWarningVisible, setRvTierWarningVisible] = useState(false)
-
-  useEffect(() => {
-    return () => {
-      if (rvFlavourAdvanceRef.current) clearTimeout(rvFlavourAdvanceRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (step !== 2 || cakeSubStep !== 3) {
-      if (rvFlavourAdvanceRef.current) {
-        clearTimeout(rvFlavourAdvanceRef.current)
-        rvFlavourAdvanceRef.current = null
-      }
-    }
-  }, [step, cakeSubStep])
-
   useEffect(() => {
     if (!otherCelebrationModalOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -429,48 +362,18 @@ export function OrderForm() {
     return () => window.removeEventListener('keydown', onKey)
   }, [deliveryAddressModalOpen])
 
-  useEffect(() => {
-    if (!largeCakeSizeModalOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLargeCakeSizeModalOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [largeCakeSizeModalOpen])
-
-  useEffect(() => {
-    if (step !== 2 || cakeSubStep !== 1) setLargeCakeSizeModalOpen(false)
-  }, [step, cakeSubStep])
-
-  useEffect(() => {
-    if (!multiTierModalOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMultiTierModalOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [multiTierModalOpen])
-
-  useEffect(() => {
-    if (step !== 2 || cakeSubStep !== 2) setMultiTierModalOpen(false)
-  }, [step, cakeSubStep])
-
   const progressSuffix = useMemo(() => {
     if (step === 1 && occasionSubStep === 1) return ' · Occasion'
     if (step === 1 && occasionSubStep === 2) return ' · Guests'
-    if (step === 2 && cakeSubStep === 1) return ' · Size'
-    if (step === 2 && cakeSubStep === 2) return ' · Tiers'
-    if (step === 2 && cakeSubStep === 3) {
-      const n = tierCountToFlavorCount(tierCount)
-      return n ? ` · Flavour (${flavourTierStep}/${n})` : ' · Flavours'
-    }
-    if (step === 2 && cakeSubStep === 4) return ' · Frosting'
-    if (step === 2 && cakeSubStep === 5) return ' · Dietary'
+    if (step === 1 && occasionSubStep === 3) return ' · Servings'
+    if (step === 2 && cakeSubStep === 1) return ' · Flavour'
+    if (step === 2 && cakeSubStep === 2) return ' · Frosting'
+    if (step === 2 && cakeSubStep === 3) return ' · Dietary'
     if (step === 3) return ' · Add-ons'
     if (step === 4) return ' · Date'
     if (step === 5) return ' · Contact'
     return ''
-  }, [step, occasionSubStep, cakeSubStep, flavourTierStep, tierCount])
+  }, [step, occasionSubStep, cakeSubStep])
 
   const showRushNote = useMemo(() => {
     if (!pickupDate || !minPickupStr) return false
@@ -498,6 +401,11 @@ export function OrderForm() {
     }, 0)
   }, [addonIds])
 
+  const weddingEstimate = useMemo(() => {
+    if (celebration !== 'Wedding' || servings === '' || servings <= 0) return null
+    return servings * WEDDING_PRICE_PER_SERVING
+  }, [celebration, servings])
+
   const contactSummaryRows = useMemo(() => {
     const rows: { key: string; label: string; value: string }[] = []
 
@@ -510,20 +418,9 @@ export function OrderForm() {
     const guestLabel = GUEST_OPTIONS.find(g => g.id === guestCount)?.label
     rows.push({ key: 'guests', label: 'Guests', value: guestLabel ?? '—' })
 
-    rows.push({ key: 'size', label: 'Size', value: cakeSize || '—' })
-    rows.push({ key: 'tiers', label: 'Tiers', value: tierCount || '—' })
+    rows.push({ key: 'servings', label: 'Servings', value: servings !== '' ? String(servings) : '—' })
 
-    const n = tierCountToFlavorCount(tierCount)
-    let flavourDisplay = '—'
-    if (n > 0) {
-      const parts = Array.from({ length: n }, (_, i) => {
-        const f = flavours[i]?.trim()
-        const label = f || '—'
-        return n > 1 ? `T${i + 1} ${label}` : label
-      })
-      flavourDisplay = parts.join(', ')
-    }
-    rows.push({ key: 'flavours', label: 'Flavours', value: flavourDisplay })
+    rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
 
     rows.push({ key: 'frosting', label: 'Frosting', value: frosting || '—' })
     rows.push({
@@ -554,15 +451,14 @@ export function OrderForm() {
   }, [
     addonIds,
     addonTotal,
-    cakeSize,
     celebration,
     celebrationOtherNote,
     dietaryRestrictions,
-    flavours,
+    flavour,
     frosting,
     guestCount,
     pickupDate,
-    tierCount,
+    servings,
   ])
 
   const goPrevMonth = () => {
@@ -608,14 +504,12 @@ export function OrderForm() {
         return (
           !!celebration &&
           !!guestCount &&
+          servings !== '' &&
+          (servings as number) > 0 &&
           (celebration !== 'Other' || celebrationOtherNote.trim().length > 0)
         )
-      case 2: {
-        const fc = tierCountToFlavorCount(tierCount)
-        const flavoursComplete =
-          fc > 0 && flavours.length === fc && flavours.every(x => x.length > 0)
-        return !!cakeSize && !!tierCount && flavoursComplete && !!frosting
-      }
+      case 2:
+        return !!flavour && !!frosting
       case 3:
         return true
       case 4:
@@ -654,7 +548,7 @@ export function OrderForm() {
   }
 
   const goNext = () => {
-    if (step === 2 && cakeSubStep === 5 && canDietaryNext()) {
+    if (step === 2 && cakeSubStep === 3 && canDietaryNext()) {
       advanceToAddOnsStepWithResume()
       return
     }
@@ -663,7 +557,27 @@ export function OrderForm() {
     }
   }
 
+  const advanceServingsToStep2 = () => {
+    const resume = resumeAfterEditingFromStepRef.current
+    const nextStep = resume != null && resume >= 4 ? resume : 2
+    if (resume != null && resume >= 4) {
+      resumeAfterEditingFromStepRef.current = null
+    }
+    setWizard(w => {
+      const nextNav: OrderFormNav = { ...w.nav, step: nextStep }
+      if (nextStep === 2) {
+        const c = cakeNavFromForm(w.form)
+        nextNav.cakeSubStep = c.cakeSubStep
+      }
+      return { ...w, nav: nextNav }
+    })
+  }
+
   const goBack = () => {
+    if (step === 1 && occasionSubStep === 3) {
+      setWizard(w => ({ ...w, nav: { ...w.nav, occasionSubStep: 2 } }))
+      return
+    }
     if (step === 1 && occasionSubStep === 2) {
       setWizard(w => ({ ...w, nav: { ...w.nav, occasionSubStep: 1 } }))
       return
@@ -671,66 +585,15 @@ export function OrderForm() {
     if (step <= 1) return
 
     if (step === 2 && cakeSubStep > 1) {
-      if (rvFlavourAdvanceRef.current) {
-        clearTimeout(rvFlavourAdvanceRef.current)
-        rvFlavourAdvanceRef.current = null
-      }
-      setRvTierWarningVisible(false)
-
-      if (cakeSubStep === 5) {
-        setWizard(w => ({
-          ...w,
-          nav: { ...w.nav, cakeSubStep: 4 },
-        }))
-        return
-      }
-      if (cakeSubStep === 4) {
-        const nTiers = tierCountToFlavorCount(tierCount)
-        setWizard(w => ({
-          ...w,
-          form: { ...w.form, frosting: '', dietaryRestrictions: [] },
-          nav: {
-            ...w.nav,
-            cakeSubStep: 3,
-            flavourTierStep: Math.max(1, nTiers),
-          },
-        }))
-        return
-      }
       if (cakeSubStep === 3) {
-        if (flavourTierStep > 1) {
-          setWizard(w => ({
-            ...w,
-            nav: { ...w.nav, flavourTierStep: flavourTierStep - 1 },
-          }))
-          return
-        }
-        setWizard(w => ({
-          ...w,
-          form: { ...w.form, flavours: [] },
-          nav: {
-            ...w.nav,
-            cakeSubStep: 2,
-            flavourTierStep: 1,
-          },
-        }))
+        setWizard(w => ({ ...w, nav: { ...w.nav, cakeSubStep: 2 } }))
         return
       }
       if (cakeSubStep === 2) {
         setWizard(w => ({
           ...w,
-          form: {
-            ...w.form,
-            tierCount: '',
-            flavours: [],
-            frosting: '',
-            dietaryRestrictions: [],
-          },
-          nav: {
-            ...w.nav,
-            cakeSubStep: 1,
-            flavourTierStep: 1,
-          },
+          form: { ...w.form, frosting: '', dietaryRestrictions: [] },
+          nav: { ...w.nav, cakeSubStep: 1 },
         }))
         return
       }
@@ -738,26 +601,18 @@ export function OrderForm() {
     }
 
     if (step === 2 && cakeSubStep === 1) {
-      if (rvFlavourAdvanceRef.current) {
-        clearTimeout(rvFlavourAdvanceRef.current)
-        rvFlavourAdvanceRef.current = null
-      }
-      setRvTierWarningVisible(false)
       setWizard(w => ({
         ...w,
         form: {
           ...w.form,
-          cakeSize: '',
-          tierCount: '',
-          flavours: [],
+          flavour: '',
           frosting: '',
           dietaryRestrictions: [],
         },
         nav: {
           step: 1,
-          occasionSubStep: 2,
+          occasionSubStep: 3,
           cakeSubStep: 1,
-          flavourTierStep: 1,
         },
       }))
       return
@@ -774,7 +629,6 @@ export function OrderForm() {
             ...w.nav,
             step: 2,
             cakeSubStep: c.cakeSubStep,
-            flavourTierStep: c.flavourTierStep,
           },
         }
       })
@@ -784,87 +638,12 @@ export function OrderForm() {
     setWizard(w => ({ ...w, nav: { ...w.nav, step: next } }))
   }
 
-  const pickCakeSize = (s: string) => {
+  const pickFlavour = (f: string) => {
     setWizard(w => ({
       ...w,
-      form: { ...w.form, cakeSize: s, dietaryRestrictions: [] },
+      form: { ...w.form, flavour: f },
       nav: { ...w.nav, cakeSubStep: 2 },
     }))
-  }
-
-  const applyTierSelection = (tierKey: string) => {
-    const n = tierCountToFlavorCount(tierKey)
-    if (n <= 0) return
-    setRvTierWarningVisible(false)
-    if (rvFlavourAdvanceRef.current) {
-      clearTimeout(rvFlavourAdvanceRef.current)
-      rvFlavourAdvanceRef.current = null
-    }
-    setWizard(w => ({
-      ...w,
-      form: {
-        ...w.form,
-        tierCount: tierKey,
-        flavours: Array.from({ length: n }, () => ''),
-        dietaryRestrictions: [],
-      },
-      nav: { ...w.nav, cakeSubStep: 3, flavourTierStep: 1 },
-    }))
-  }
-
-  const pickTier = (t: string) => {
-    if (t === OVERSIZE_TIER_TRIGGER) {
-      setMultiTierModalOpen(true)
-      return
-    }
-    applyTierSelection(t)
-  }
-
-  const RV_TIER_ADVANCE_MS = 900
-
-  const pickFlavour = (f: string) => {
-    if (rvFlavourAdvanceRef.current) {
-      clearTimeout(rvFlavourAdvanceRef.current)
-      rvFlavourAdvanceRef.current = null
-    }
-
-    const n = tierCountToFlavorCount(tierCount)
-    const slot = flavourTierStep - 1
-    if (n <= 0 || slot < 0 || slot >= n) return
-
-    setRvTierWarningVisible(false)
-
-    const fromStep = flavourTierStep
-    const nextFlavours =
-      flavours.length === n ? [...flavours] : Array.from({ length: n }, (_, i) => flavours[i] ?? '')
-    nextFlavours[slot] = f
-    for (let i = slot + 1; i < n; i++) nextFlavours[i] = ''
-
-    if (f === 'Red Velvet') {
-      setWizard(w => ({ ...w, form: { ...w.form, flavours: nextFlavours } }))
-      setRvTierWarningVisible(true)
-      rvFlavourAdvanceRef.current = setTimeout(() => {
-        rvFlavourAdvanceRef.current = null
-        setRvTierWarningVisible(false)
-        setWizard(w => {
-          const tierN = tierCountToFlavorCount(w.form.tierCount)
-          if (fromStep < tierN) {
-            return { ...w, nav: { ...w.nav, flavourTierStep: fromStep + 1 } }
-          }
-          return { ...w, nav: { ...w.nav, cakeSubStep: 4 } }
-        })
-      }, RV_TIER_ADVANCE_MS)
-      return
-    }
-
-    setWizard(w => {
-      const tierN = tierCountToFlavorCount(w.form.tierCount)
-      const fs = w.nav.flavourTierStep
-      const nextNav = { ...w.nav }
-      if (fs < tierN) nextNav.flavourTierStep = fs + 1
-      else nextNav.cakeSubStep = 4
-      return { ...w, form: { ...w.form, flavours: nextFlavours }, nav: nextNav }
-    })
   }
 
   const pickFrosting = (f: string) => {
@@ -872,7 +651,7 @@ export function OrderForm() {
       const nextForm = { ...w.form, frosting: f }
       const nextNav = { ...w.nav }
       if (w.nav.step === 2 && cakeDetailsComplete(nextForm)) {
-        nextNav.cakeSubStep = 5
+        nextNav.cakeSubStep = 3
       }
       return { ...w, form: nextForm, nav: nextNav }
     })
@@ -918,7 +697,6 @@ export function OrderForm() {
         nextNav.occasionSubStep = 1
       } else if (target === 2) {
         nextNav.cakeSubStep = 1
-        nextNav.flavourTierStep = 1
       }
       return { ...w, nav: nextNav }
     })
@@ -1165,21 +943,11 @@ export function OrderForm() {
                                   key={id}
                                   type="button"
                                   onClick={() => {
-                                    const resume = resumeAfterEditingFromStepRef.current
-                                    const nextStep = resume != null && resume >= 4 ? resume : 2
-                                    if (resume != null && resume >= 4) {
-                                      resumeAfterEditingFromStepRef.current = null
-                                    }
-                                    setWizard(w => {
-                                      const nextForm = { ...w.form, guestCount: id }
-                                      const nextNav: OrderFormNav = { ...w.nav, step: nextStep }
-                                      if (nextStep === 2) {
-                                        const c = cakeNavFromForm(nextForm)
-                                        nextNav.cakeSubStep = c.cakeSubStep
-                                        nextNav.flavourTierStep = c.flavourTierStep
-                                      }
-                                      return { ...w, form: nextForm, nav: nextNav }
-                                    })
+                                    setWizard(w => ({
+                                      ...w,
+                                      form: { ...w.form, guestCount: id },
+                                      nav: { ...w.nav, occasionSubStep: 3 },
+                                    }))
                                   }}
                                   className={`glass-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[112px] text-center transition-all duration-200 ${
                                     selected
@@ -1193,6 +961,74 @@ export function OrderForm() {
                                 </button>
                               )
                             })}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {occasionSubStep === 3 && (
+                        <motion.div
+                          key="occasion-3"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.22 }}
+                          className="flex-1 flex flex-col"
+                        >
+                          <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
+                            How many servings do you need?
+                          </h3>
+                          <p className="text-center text-xs text-charcoal/50 mb-6">Enter the number of servings</p>
+
+                          <div className="max-w-xs mx-auto w-full">
+                            <input
+                              type="number"
+                              min={1}
+                              value={servings === '' ? '' : servings}
+                              onChange={e => {
+                                const val = e.target.value
+                                setWizard(w => ({
+                                  ...w,
+                                  form: {
+                                    ...w.form,
+                                    servings: val === '' ? '' : Math.max(1, parseInt(val, 10) || 1),
+                                  },
+                                }))
+                              }}
+                              placeholder="e.g. 50"
+                              className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
+                            />
+
+                            {weddingEstimate !== null && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-5 rounded-2xl px-5 py-4 text-center"
+                                style={{
+                                  background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                                  boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
+                                }}
+                              >
+                                <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
+                                  Estimated starting price
+                                </p>
+                                <p className="font-serif text-3xl font-bold text-white">
+                                  ${weddingEstimate.toLocaleString()}
+                                </p>
+                                <p className="text-white/60 text-xs mt-1">
+                                  ${WEDDING_PRICE_PER_SERVING}/serving · final quote on request
+                                </p>
+                              </motion.div>
+                            )}
+
+                            <button
+                              type="button"
+                              disabled={servings === '' || (servings as number) <= 0}
+                              onClick={advanceServingsToStep2}
+                              className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
+                            >
+                              Next
+                              <ChevronRight size={16} />
+                            </button>
                           </div>
                         </motion.div>
                       )}
@@ -1303,14 +1139,12 @@ export function OrderForm() {
                     transition={{ duration: 0.25 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {cakeSubStep !== 3 && (
-                      <p className="label-tag mb-2 text-center shrink-0">Cake details</p>
-                    )}
+                    <p className="label-tag mb-2 text-center shrink-0">Cake details</p>
 
                     <AnimatePresence mode="wait">
                       {cakeSubStep === 1 && (
                         <motion.div
-                          key="cake-sub-1"
+                          key="cake-sub-1-flavour"
                           initial={{ opacity: 0, x: 14 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -14 }}
@@ -1318,145 +1152,14 @@ export function OrderForm() {
                           className="flex-1 flex flex-col min-h-0"
                         >
                           <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
-                            What size are you looking for?
-                          </h3>
-                          <p className="text-center text-xs text-charcoal/50 mb-3 shrink-0">Tap an option to continue</p>
-                          <div className="grid grid-cols-2 grid-rows-2 gap-3 flex-1 min-h-0">
-                            {CAKE_SIZES.map(s => {
-                              const isOversizeTile = s === OVERSIZE_CAKE_TRIGGER
-                              const oversizeSelected =
-                                isOversizeTile &&
-                                (OVERSIZE_CAKE_CHOICES as readonly string[]).includes(cakeSize)
-                              const selected = cakeSize === s || oversizeSelected
-                              return (
-                                <button
-                                  key={s}
-                                  type="button"
-                                  onClick={() => {
-                                    if (isOversizeTile) {
-                                      setLargeCakeSizeModalOpen(true)
-                                      return
-                                    }
-                                    pickCakeSize(s)
-                                  }}
-                                  className={`glass-border rounded-2xl flex h-full min-h-[6.5rem] sm:min-h-[7.5rem] w-full items-center justify-center px-3 font-semibold text-lg sm:text-xl transition-all ${
-                                    selected
-                                      ? 'bg-rose-gold text-white border-amber shadow-md'
-                                      : 'bg-amber-light text-charcoal hover:bg-amber/10'
-                                  }`}
-                                >
-                                  {s}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {cakeSubStep === 2 && (
-                        <motion.div
-                          key="cake-sub-2"
-                          initial={{ opacity: 0, x: 14 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -14 }}
-                          transition={{ duration: 0.22 }}
-                          className="flex-1 flex flex-col min-h-0"
-                        >
-                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">How many tiers?</h3>
-                          <p className="text-center text-xs text-charcoal/50 mb-3 shrink-0">Tap an option to continue</p>
-                          <div className="grid grid-cols-2 grid-rows-2 gap-3 flex-1 min-h-0">
-                            {TIERS.map(t => {
-                              const isOversizeTierTile = t === OVERSIZE_TIER_TRIGGER
-                              const oversizeTierSelected =
-                                isOversizeTierTile &&
-                                (OVERSIZE_TIER_CHOICE_COUNTS as readonly number[]).some(
-                                  c => String(c) === tierCount
-                                )
-                              const selected = tierCount === t || oversizeTierSelected
-                              return (
-                                <button
-                                  key={t}
-                                  type="button"
-                                  onClick={() => pickTier(t)}
-                                  className={`glass-border rounded-2xl flex h-full min-h-[6.5rem] sm:min-h-[7.5rem] w-full items-center justify-center px-3 font-semibold text-lg sm:text-xl transition-all ${
-                                    selected
-                                      ? 'bg-rose-gold text-white border-amber shadow-md'
-                                      : 'bg-amber-light text-charcoal hover:bg-amber/10'
-                                  }`}
-                                >
-                                  {t}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {cakeSubStep === 3 && (
-                        <motion.div
-                          key={`cake-sub-3-${tierCount}-${flavourTierStep}`}
-                          initial={{ opacity: 0, x: 14 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -14 }}
-                          transition={{ duration: 0.22 }}
-                          className="flex-1 flex flex-col min-h-0"
-                        >
-                          <p className="label-tag mb-2 text-center shrink-0">Cake details</p>
-                          {tierCountToFlavorCount(tierCount) > 0 && (
-                            <div
-                              className="mb-3 shrink-0 space-y-1 rounded-xl border border-charcoal/10 bg-amber-light/60 px-3 py-2.5 text-left"
-                              aria-live="polite"
-                            >
-                              {Array.from({ length: flavourTierStep }, (_, i) => {
-                                const tierNum = i + 1
-                                const fl = flavours[i] ?? ''
-                                const isPast = tierNum < flavourTierStep
-                                if (isPast) {
-                                  if (!fl) return null
-                                  const thumb = FLAVOR_CARD_IMAGES[fl]
-                                  return (
-                                    <div
-                                      key={`tier-sum-${tierNum}`}
-                                      className="flex items-center gap-2.5 text-[11px] sm:text-xs leading-snug text-charcoal/45"
-                                    >
-                                      {thumb ? (
-                                        <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md border border-charcoal/15 bg-white shadow-sm">
-                                          <Image
-                                            src={encodeURI(thumb)}
-                                            alt=""
-                                            fill
-                                            className="object-cover"
-                                            sizes="32px"
-                                          />
-                                        </span>
-                                      ) : null}
-                                      <p className="min-w-0 flex-1">
-                                        Tier {tierNum} — {fl} ✓
-                                      </p>
-                                    </div>
-                                  )
-                                }
-                                return (
-                                  <p
-                                    key={`tier-sum-${tierNum}`}
-                                    className="text-xs leading-snug text-charcoal/55 font-medium"
-                                  >
-                                    Tier {tierNum} — ...
-                                  </p>
-                                )
-                              })}
-                            </div>
-                          )}
-                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
-                            What flavour for Tier {flavourTierStep}?
+                            What flavour would you like?
                           </h3>
                           <p className="text-center text-xs text-charcoal/50 mb-3 shrink-0">Tap an option to continue</p>
                           <div className="grid grid-cols-2 grid-rows-4 gap-2 sm:gap-3 flex-1 min-h-0">
                             {FLAVOURS.map(f => {
-                              const slot = flavourTierStep - 1
                               const cardImage = FLAVOR_CARD_IMAGES[f] ?? null
                               const hasPhoto = cardImage != null
-                              const selected = flavours[slot] === f
+                              const selected = flavour === f
                               return (
                                 <button
                                   key={f}
@@ -1497,18 +1200,12 @@ export function OrderForm() {
                               )
                             })}
                           </div>
-                          {rvTierWarningVisible && (
-                            <p className="mt-3 shrink-0 text-xs text-charcoal/80 bg-amber-50 border border-amber-200/80 rounded-xl px-3 py-2.5 leading-relaxed">
-                              Heads up — dark colours require heavy food colouring which may taste bitter and stain your
-                              mouth.
-                            </p>
-                          )}
                         </motion.div>
                       )}
 
-                      {cakeSubStep === 4 && (
+                      {cakeSubStep === 2 && (
                         <motion.div
-                          key="cake-sub-4"
+                          key="cake-sub-2-frosting"
                           initial={{ opacity: 0, x: 14 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -14 }}
@@ -1568,9 +1265,9 @@ export function OrderForm() {
                         </motion.div>
                       )}
 
-                      {cakeSubStep === 5 && (
+                      {cakeSubStep === 3 && (
                         <motion.div
-                          key="cake-sub-5-dietary"
+                          key="cake-sub-3-dietary"
                           initial={{ opacity: 0, x: 14 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -14 }}
@@ -1877,7 +1574,7 @@ export function OrderForm() {
 
               <div
                 className={`flex items-center gap-3 mt-8 pt-6 border-t border-charcoal/10 ${
-                  step === 3 || step === 5 || (step === 2 && cakeSubStep === 5)
+                  step === 3 || step === 5 || (step === 2 && cakeSubStep === 3)
                     ? 'justify-between'
                     : 'justify-start'
                 }`}
@@ -1891,7 +1588,7 @@ export function OrderForm() {
                   <ChevronLeft size={16} />
                   Back
                 </button>
-                {step === 2 && cakeSubStep === 5 && (
+                {step === 2 && cakeSubStep === 3 && (
                   <button
                     type="button"
                     onClick={goNext}
@@ -2080,237 +1777,9 @@ export function OrderForm() {
                   </motion.div>
                 </motion.div>
               )}
-              {largeCakeSizeModalOpen && (
-                <motion.div
-                  key="large-cake-size-overlay"
-                  className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <button
-                    type="button"
-                    aria-label="Close dialog"
-                    className="absolute inset-0 bg-charcoal/45 backdrop-blur-[1px]"
-                    onClick={() => setLargeCakeSizeModalOpen(false)}
-                  />
-                  <motion.div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="large-cake-size-title"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 16 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <h4 id="large-cake-size-title" className="font-serif text-lg text-charcoal text-center mb-1">
-                      Large cake size
-                    </h4>
-                    <p className="text-center text-xs text-charcoal/55 mb-4">
-                      Choose a diameter in inches.
-                    </p>
-                    <ul className="flex flex-col gap-2 mb-4" role="listbox" aria-label="Cake sizes in inches">
-                      {OVERSIZE_CAKE_CHOICES.map(inch => {
-                        const picked = cakeSize === inch
-                        return (
-                          <li key={inch}>
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={picked}
-                              onClick={() => {
-                                pickCakeSize(inch)
-                                setLargeCakeSizeModalOpen(false)
-                              }}
-                              className={`glass-border w-full rounded-2xl px-4 py-3.5 text-left text-base font-semibold transition-all ${
-                                picked
-                                  ? 'bg-rose-gold text-white border-amber shadow-md'
-                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
-                              }`}
-                            >
-                              {inch.replace('"', '')} inches
-                            </button>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setLargeCakeSizeModalOpen(false)}
-                        className="rounded-full px-4 py-2.5 text-sm font-semibold text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-              {multiTierModalOpen && (
-                <motion.div
-                  key="multi-tier-overlay"
-                  className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <button
-                    type="button"
-                    aria-label="Close dialog"
-                    className="absolute inset-0 bg-charcoal/45 backdrop-blur-[1px]"
-                    onClick={() => setMultiTierModalOpen(false)}
-                  />
-                  <motion.div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="multi-tier-title"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 16 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <h4 id="multi-tier-title" className="font-serif text-lg text-charcoal text-center mb-1">
-                      How many tiers?
-                    </h4>
-                    <p className="text-center text-xs text-charcoal/55 mb-4">
-                      Choose from four to seven tiers.
-                    </p>
-                    <ul className="flex flex-col gap-2 mb-4" role="listbox" aria-label="Number of cake tiers">
-                      {OVERSIZE_TIER_CHOICE_COUNTS.map(count => {
-                        const key = String(count)
-                        const picked = tierCount === key
-                        return (
-                          <li key={key}>
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={picked}
-                              onClick={() => {
-                                applyTierSelection(key)
-                                setMultiTierModalOpen(false)
-                              }}
-                              className={`glass-border w-full rounded-2xl px-4 py-3.5 text-left text-base font-semibold transition-all ${
-                                picked
-                                  ? 'bg-rose-gold text-white border-amber shadow-md'
-                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
-                              }`}
-                            >
-                              {count} tiers
-                            </button>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setMultiTierModalOpen(false)}
-                        className="rounded-full px-4 py-2.5 text-sm font-semibold text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
             </AnimatePresence>
           </form>
         )}
-      </div>
-    </section>
-  )
-}
-
-export default function OrderCTA() {
-  return (
-    <section id="order" className="section-padding bg-charcoal relative overflow-hidden">
-      {/* Background cake image */}
-      <div className="absolute inset-0">
-        <Image
-          src="/719244DA-380B-43BD-B1EC-CF3F5F4F2DB6.png"
-          alt="Background cake"
-          fill
-          className="object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/90 to-charcoal/95" />
-      </div>
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        {/* Decorative dots */}
-        <div className="flex justify-center gap-2 mb-8">
-          {[0, 1, 2].map(i => (
-            <span key={i} className={`rounded-full bg-rose-gold ${i === 1 ? 'w-3 h-3' : 'w-2 h-2 opacity-50 mt-0.5'}`} />
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-rose-gold mb-4">
-            Ready to Order
-          </p>
-          <h2 className="heading-lg text-white mb-5">
-            Let&apos;s Create Something{' '}
-            <span className="text-rose-gold italic">Unforgettable</span>
-          </h2>
-          <p className="text-white/55 max-w-xl mx-auto leading-relaxed mb-10">
-            Fill out the order form to get started — or reach us directly on Instagram, by phone, or email. We typically respond within 24 hours.
-          </p>
-
-          {/* Primary CTA */}
-          <a
-            href="#order-form"
-            className="btn-glow glass-border-dark inline-flex items-center gap-2.5 bg-rose-gold text-white font-bold text-base px-10 py-4 rounded-full hover:bg-opacity-90 hover:-translate-y-0.5 transition-all mb-10"
-          >
-            <ClipboardList size={18} aria-hidden />
-            Fill Out the Order Form
-          </a>
-
-          {/* Contact methods */}
-          <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <a
-              href="https://instagram.com/omygoodiesyyc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass-border-dark flex flex-col items-center gap-2 bg-white/5 rounded-2xl py-5 px-4 hover:bg-white/10 transition-all group"
-            >
-              <Instagram size={22} className="text-rose-gold" />
-              <span className="text-xs font-semibold text-white group-hover:text-rose-gold transition-colors">@omygoodiesyyc</span>
-              <span className="text-[10px] text-white/40 uppercase tracking-wider">Instagram / DMs</span>
-            </a>
-
-            <a
-              href="tel:4034045262"
-              className="glass-border-dark flex flex-col items-center gap-2 bg-white/5 rounded-2xl py-5 px-4 hover:bg-white/10 transition-all group"
-            >
-              <Phone size={22} className="text-rose-gold" />
-              <span className="text-xs font-semibold text-white group-hover:text-rose-gold transition-colors">403-404-5262</span>
-              <span className="text-[10px] text-white/40 uppercase tracking-wider">Call / Text</span>
-            </a>
-
-            <a
-              href="mailto:omygoodies00@gmail.com"
-              className="glass-border-dark flex flex-col items-center gap-2 bg-white/5 rounded-2xl py-5 px-4 hover:bg-white/10 transition-all group"
-            >
-              <Mail size={22} className="text-rose-gold" />
-              <span className="text-xs font-semibold text-white group-hover:text-rose-gold transition-colors break-all">omygoodies00@gmail.com</span>
-              <span className="text-[10px] text-white/40 uppercase tracking-wider">Email</span>
-            </a>
-          </div>
-
-          {/* Location note */}
-          <p className="mt-8 text-white/35 text-xs">
-            📍 Home studio · Downtown Calgary · 1122 15 Ave SW, T2R 1K5
-          </p>
-        </motion.div>
       </div>
     </section>
   )

@@ -167,7 +167,7 @@ export default function HowItWorks() {
         <div className="mt-12 grid grid-cols-3 gap-4 items-end">
           {[
             { src: '/5D581933-F7D4-4D2A-A509-B39B9880E450.png', alt: 'Cake in progress', offset: false, parallax: photoOuterY },
-            { src: '/5E2A5DFB-B609-4BAB-B9F5-89EF60E8178A.png', alt: 'Finished custom cake', offset: true, parallax: photoMiddleY },
+            { src: '/Celebration Wedding.png', alt: 'Elegant wedding cake', offset: true, parallax: photoMiddleY },
             { src: '/606FB398-83B5-4291-9662-7B11DDABD84C.png', alt: 'Cake art detail', offset: false, parallax: photoOuterY },
           ].map(({ src, alt, offset, parallax }) => (
             <motion.div
@@ -184,28 +184,20 @@ export default function HowItWorks() {
           ))}
         </div>
 
-        {/* Notice band */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.45, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="glass-border mt-10 rounded-3xl overflow-hidden"
-          style={{ background: 'rgba(245,158,66,0.06)' }}
+          className="mt-10 flex justify-center"
         >
-          <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-amber/15">
-            {[
-              { label: 'Minimum notice', value: '3 days', note: 'Rush fee $15–25 if under 3 days' },
-              { label: 'Recommended', value: '2 weeks', note: 'Book early for your date' },
-              { label: 'Deposit', value: '50%', note: 'Via e-transfer to confirm' },
-            ].map(item => (
-              <div key={item.label} className="flex-1 px-6 py-4 text-center">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-charcoal/40 mb-1">{item.label}</p>
-                <p className="font-serif text-xl font-bold text-charcoal">{item.value}</p>
-                <p className="text-[11px] text-charcoal/50 mt-0.5">{item.note}</p>
-              </div>
-            ))}
-          </div>
+          <a
+            href="#order-form"
+            className="btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
+          >
+            Get My Custom Quote
+          </a>
         </motion.div>
       </div>
     </section>

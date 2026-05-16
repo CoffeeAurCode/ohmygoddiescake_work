@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Star } from 'lucide-react'
+import Image from 'next/image'
 
 const testimonials = [
   {
@@ -38,7 +39,8 @@ export default function Reviews() {
   const founderTextY = useTransform(founderScroll, [0, 1], ['0%', '-3%'])
 
   return (
-    <section id="reviews" className="section-padding section-ambient bg-amber-muted overflow-hidden">
+    <section id="reviews" className="section-padding section-ambient overflow-hidden relative" style={{ backgroundImage: 'url(/Celebration Wedding.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <div className="absolute inset-0 bg-amber-muted/88 z-0" />
       <div className="relative z-10 max-w-7xl mx-auto">
 
         {/* Header */}
@@ -128,6 +130,41 @@ export default function Reviews() {
           ))}
         </div>
 
+        {/* Portfolio photo grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+          className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-10"
+        >
+          {[
+            '/5B99DEE4-E800-4DF2-B996-E194343F3627.png',
+            '/13C93E34-9AE7-4229-860B-5C30D64A3501.png',
+            '/8B0413F2-95B7-4B1C-AA81-F4316D8E16DC.png',
+            '/F8FF9757-50F0-4FF1-B6C5-EB0B30785CB4.png',
+            '/9E94165E-DB30-4B8E-A797-5E58FB3C7D0E.png',
+            '/7D294E86-802D-4F67-B12C-E32BD7B29B65.png',
+          ].map((src, i) => (
+            <motion.div
+              key={src}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.25, 0.1, 0.25, 1] }}
+              className="relative aspect-square rounded-2xl overflow-hidden glass-border-img"
+            >
+              <Image
+                src={src}
+                alt="Cake gallery"
+                fill
+                className="object-cover hover:scale-110 transition-transform duration-700 ease-in-out"
+                sizes="(max-width: 768px) 33vw, 16vw"
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+
         {/* Founder quote — full-bleed strip with parallax text */}
         <motion.div
           ref={founderRef}
@@ -161,6 +198,22 @@ export default function Reviews() {
               <div className="h-px w-8 bg-white/40" />
             </div>
           </div>
+        </motion.div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-10 flex justify-center"
+        >
+          <a
+            href="#order-form"
+            className="btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
+          >
+            Get My Custom Quote
+          </a>
         </motion.div>
       </div>
     </section>
