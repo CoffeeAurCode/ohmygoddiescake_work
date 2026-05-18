@@ -1,32 +1,30 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { FileText, DollarSign, CheckCircle, Clock, Calendar, CreditCard } from 'lucide-react'
-import Image from 'next/image'
 
 const steps = [
   {
     icon: FileText,
     step: '01',
-    title: 'Build Your Cake',
-    body: 'Choose your occasion, size, flavour, and add-ons in our instant quote form. Takes less than 2 minutes.',
+    title: 'Fill Out Our Quote Form',
+    body: 'Choose your occasion, size, flavour, and add-ons. Takes less than 2 minutes.',
     accent: Clock,
     accentLabel: '< 2 min',
   },
   {
     icon: DollarSign,
     step: '02',
-    title: 'Get Your Price Instantly',
-    body: 'See your custom quote right away — no waiting, no back and forth.',
+    title: 'Receive Your Custom Quote',
+    body: 'Get your personalised quote within 48 hours — no back and forth.',
     accent: Calendar,
-    accentLabel: 'Instant quote',
+    accentLabel: 'Within 48 hrs',
   },
   {
     icon: CheckCircle,
     step: '03',
-    title: "Confirm & We'll Handle the Rest",
-    body: 'Send your 50% deposit via e-transfer to lock in your date. We bake, you celebrate.',
+    title: 'Approve & Pay Your Deposit',
+    body: 'Confirm your order with a 50% deposit via e-transfer to lock in your date.',
     accent: CreditCard,
     accentLabel: '50% deposit',
   },
@@ -47,16 +45,8 @@ const cardVariants = {
 }
 
 export default function HowItWorks() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const photoMiddleY = useTransform(scrollYProgress, [0, 1], ['0%', '-6%'])
-  const photoOuterY  = useTransform(scrollYProgress, [0, 1], ['0%', '-2%'])
-
   return (
-    <section ref={sectionRef} id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
+    <section id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
       <div className="relative z-10 max-w-6xl mx-auto">
 
         {/* Header */}
@@ -161,27 +151,6 @@ export default function HowItWorks() {
               )
             })}
           </div>
-        </div>
-
-        {/* Photo row — per-image parallax */}
-        <div className="mt-12 grid grid-cols-3 gap-4 items-end">
-          {[
-            { src: '/5D581933-F7D4-4D2A-A509-B39B9880E450.png', alt: 'Cake in progress', offset: false, parallax: photoOuterY },
-            { src: '/Celebration Wedding.png', alt: 'Elegant wedding cake', offset: true, parallax: photoMiddleY },
-            { src: '/606FB398-83B5-4291-9662-7B11DDABD84C.png', alt: 'Cake art detail', offset: false, parallax: photoOuterY },
-          ].map(({ src, alt, offset, parallax }) => (
-            <motion.div
-              key={src}
-              style={{ y: parallax, aspectRatio: '4/3' }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              className={`glass-border-img relative rounded-3xl overflow-hidden shadow-sm ${offset ? '-translate-y-5' : ''}`}
-            >
-              <Image src={src} alt={alt} fill className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out" />
-            </motion.div>
-          ))}
         </div>
 
         {/* CTA */}

@@ -179,12 +179,6 @@ export default function Reviews() {
           }}
         >
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="h-px flex-1 max-w-16 bg-white/30" />
-              <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/60">From the studio</p>
-              <div className="h-px flex-1 max-w-16 bg-white/30" />
-            </div>
-
             <motion.p
               style={{ y: founderTextY }}
               className="font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed text-white"

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Instagram, ArrowDown } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 export default function Hero() {
   return (
@@ -68,15 +68,6 @@ export default function Hero() {
             className="btn-glow w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-rose-gold text-white font-semibold px-8 py-4 rounded-full hover:bg-opacity-90 transition-all hover:-translate-y-0.5 text-base glass-border-dark"
           >
             Order a Cake
-          </a>
-          <a
-            href="https://instagram.com/omygoodiesyyc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-glow-outline w-full sm:w-auto inline-flex items-center justify-center gap-2 border-2 border-white/40 text-white font-semibold px-8 py-4 rounded-full hover:border-rose-gold hover:text-rose-gold transition-all text-base backdrop-blur-sm"
-          >
-            <Instagram size={18} />
-            See Our Work
           </a>
         </motion.div>
 

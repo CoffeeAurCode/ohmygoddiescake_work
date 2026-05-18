@@ -119,12 +119,6 @@ const CELEBRATION_CARD_IMAGES: Partial<Record<(typeof CELEBRATIONS)[number]['id'
   Other: '/Celebration Other.png',
 }
 
-const GUEST_OPTIONS = [
-  { id: 'under10', label: 'Under 10' },
-  { id: '10-20', label: '10–20' },
-  { id: '20-40', label: '20–40' },
-  { id: '40plus', label: '40+' },
-] as const
 
 const FLAVOURS = [
   'Vanilla',
@@ -197,7 +191,6 @@ const WEDDING_PRICE_PER_SERVING = 13
 type OrderFormValues = {
   celebration: string
   celebrationOtherNote: string
-  guestCount: string
   servings: number | ''
   flavour: string
   frosting: string
@@ -239,7 +232,6 @@ type OrderWizardState = {
 const INITIAL_FORM: OrderFormValues = {
   celebration: '',
   celebrationOtherNote: '',
-  guestCount: '',
   servings: '',
   flavour: '',
   frosting: '',
@@ -278,7 +270,6 @@ export function OrderForm() {
   const {
     celebration,
     celebrationOtherNote,
-    guestCount,
     servings,
     pickupDate,
     flavour,
@@ -364,8 +355,7 @@ export function OrderForm() {
 
   const progressSuffix = useMemo(() => {
     if (step === 1 && occasionSubStep === 1) return ' · Occasion'
-    if (step === 1 && occasionSubStep === 2) return ' · Guests'
-    if (step === 1 && occasionSubStep === 3) return ' · Servings'
+    if (step === 1 && occasionSubStep === 2) return ' · Servings'
     if (step === 2 && cakeSubStep === 1) return ' · Flavour'
     if (step === 2 && cakeSubStep === 2) return ' · Frosting'
     if (step === 2 && cakeSubStep === 3) return ' · Dietary'
@@ -415,9 +405,6 @@ export function OrderForm() {
         : celebration || '—'
     rows.push({ key: 'occasion', label: 'Occasion', value: occasionDisplay })
 
-    const guestLabel = GUEST_OPTIONS.find(g => g.id === guestCount)?.label
-    rows.push({ key: 'guests', label: 'Guests', value: guestLabel ?? '—' })
-
     rows.push({ key: 'servings', label: 'Servings', value: servings !== '' ? String(servings) : '—' })
 
     rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
@@ -456,7 +443,6 @@ export function OrderForm() {
     dietaryRestrictions,
     flavour,
     frosting,
-    guestCount,
     pickupDate,
     servings,
   ])
@@ -503,7 +489,6 @@ export function OrderForm() {
       case 1:
         return (
           !!celebration &&
-          !!guestCount &&
           servings !== '' &&
           (servings as number) > 0 &&
           (celebration !== 'Other' || celebrationOtherNote.trim().length > 0)
@@ -533,7 +518,7 @@ export function OrderForm() {
   }
 
   const canDietaryNext = (): boolean =>
-    dietaryRestrictions.length > 0 && !dietaryRestrictions.includes('None')
+    dietaryRestrictions.length > 0
 
   const advanceToAddOnsStepWithResume = () => {
     const resumeSnap = resumeAfterEditingFromStepRef.current
@@ -574,10 +559,6 @@ export function OrderForm() {
   }
 
   const goBack = () => {
-    if (step === 1 && occasionSubStep === 3) {
-      setWizard(w => ({ ...w, nav: { ...w.nav, occasionSubStep: 2 } }))
-      return
-    }
     if (step === 1 && occasionSubStep === 2) {
       setWizard(w => ({ ...w, nav: { ...w.nav, occasionSubStep: 1 } }))
       return
@@ -611,7 +592,7 @@ export function OrderForm() {
         },
         nav: {
           step: 1,
-          occasionSubStep: 3,
+          occasionSubStep: 2,
           cakeSubStep: 1,
         },
       }))
@@ -925,49 +906,6 @@ export function OrderForm() {
                       {occasionSubStep === 2 && (
                         <motion.div
                           key="occasion-2"
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -10 }}
-                          transition={{ duration: 0.22 }}
-                          className="flex-1 flex flex-col"
-                        >
-                          <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
-                            How many guests are you expecting?
-                          </h3>
-                          <p className="text-center text-xs text-charcoal/50 mb-6">Tap an option to continue</p>
-                          <div className="grid grid-cols-2 gap-3">
-                            {GUEST_OPTIONS.map(({ id, label }) => {
-                              const selected = guestCount === id
-                              return (
-                                <button
-                                  key={id}
-                                  type="button"
-                                  onClick={() => {
-                                    setWizard(w => ({
-                                      ...w,
-                                      form: { ...w.form, guestCount: id },
-                                      nav: { ...w.nav, occasionSubStep: 3 },
-                                    }))
-                                  }}
-                                  className={`glass-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[112px] text-center transition-all duration-200 ${
-                                    selected
-                                      ? 'bg-amber/15 border-amber shadow-md ring-2 ring-amber/50'
-                                      : 'bg-amber-light hover:bg-amber/8 hover:-translate-y-0.5'
-                                  }`}
-                                >
-                                  <span className={`text-sm font-semibold leading-tight ${selected ? 'text-charcoal' : 'text-charcoal/80'}`}>
-                                    {label}
-                                  </span>
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {occasionSubStep === 3 && (
-                        <motion.div
-                          key="occasion-3"
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}

@@ -2,16 +2,12 @@
 
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Cake, Crown, Coffee, Star, Baby, Grid2x2, Utensils, Briefcase } from 'lucide-react'
+import { Cake, Crown, Utensils, Briefcase } from 'lucide-react'
 import Image from 'next/image'
 
 const services = [
   { icon: Cake, name: 'Custom Celebration Cakes', desc: 'Birthdays, anniversaries, graduations — fully custom', img: '/Celebration Birthday.png' },
   { icon: Crown, name: 'Wedding Cakes', desc: 'Tiered masterpieces for your most important day', img: '/Celebration Wedding.png' },
-  { icon: Coffee, name: 'Cupcakes', desc: 'Individual treats with the same elevated finish', img: '/ECA51ED4-11A4-48E9-9229-5D75D2376304.png' },
-  { icon: Star, name: 'Cake Pops & Cakesicles', desc: 'Fun, portable, and just as delicious', img: '/49FD205B-4BB0-4811-B5CD-74D935ED6658.png' },
-  { icon: Baby, name: 'Smash Cakes', desc: "Perfect for baby's first birthday milestone", img: '/Celebration Baby Shower.png' },
-  { icon: Grid2x2, name: 'Sheet Cakes', desc: 'Generous portions for larger gatherings', img: '/3C4FC48A-4EC7-4FD4-8495-F59CF7C9F294.png' },
   { icon: Utensils, name: 'Dessert Tables', desc: 'Curated sweet spreads for events', img: '/18FB0FAB-46E3-49BE-B543-73CF7120E76F.png' },
   { icon: Briefcase, name: 'Corporate Orders', desc: 'Branded cakes and treats for business events', img: '/Celebration Corporate.png' },
 ]
@@ -19,10 +15,6 @@ const services = [
 const marqueeItems = [
   ' Custom Celebration Cakes',
   ' Wedding Cakes',
-  ' Cupcakes',
-  ' Cake Pops',
-  ' Smash Cakes',
-  ' Sheet Cakes',
   ' Dessert Tables',
   ' Corporate Orders',
 ]
@@ -118,8 +110,8 @@ export default function Services() {
             </motion.div>
           </motion.div>
 
-          {/* Right area: 8 service tiles in 2×4 grid */}
-          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 content-start">
+          {/* Right area: 4 service tiles in 2×2 grid */}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-3 content-start">
             {services.map((s, i) => {
               const Icon = s.icon
               return (
@@ -130,7 +122,7 @@ export default function Services() {
                   whileHover={{ y: -6, scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="glass-border group rounded-3xl cursor-default flex flex-col justify-between min-h-[140px] relative overflow-hidden"
+                  className="glass-border group rounded-3xl cursor-default flex flex-col justify-between min-h-[220px] relative overflow-hidden"
                 >
                   {/* Background photo */}
                   <Image
