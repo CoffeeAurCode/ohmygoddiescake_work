@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Minus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const faqs = [
   {
@@ -35,57 +35,68 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="section-padding bg-cream">
-      <div className="max-w-3xl mx-auto">
+    <section className="relative section-padding section-ambient overflow-hidden">
+      <div className="blob bg-clay-violet/30 w-72 h-72 -top-12 right-0 animate-float" />
+      <div className="relative z-10 max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
-          <p className="label-tag mb-4">FAQ</p>
-          <h2 className="heading-lg text-charcoal">
+          <span className="eyebrow eyebrow-dot mb-6">FAQ</span>
+          <h2 className="heading-lg text-ink">
             Questions We{' '}
-            <span className="text-rose-gold italic">Always Get</span>
+            <span className="italic text-clay-pink-deep">Always Get</span>
           </h2>
         </motion.div>
 
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="glass-border bg-white rounded-2xl overflow-hidden"
-            >
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+        <div className="space-y-4">
+          {faqs.map((faq, i) => {
+            const isOpen = open === i
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className={`bg-surface rounded-clay-lg overflow-hidden transition-shadow duration-300 ${
+                  isOpen ? 'shadow-neu-pressed' : 'shadow-neu-raised'
+                }`}
               >
-                <span className="font-serif text-charcoal font-medium leading-snug">{faq.q}</span>
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-cream-dark flex items-center justify-center text-rose-gold">
-                  {open === i ? <Minus size={16} /> : <Plus size={16} />}
-                </span>
-              </button>
-              <AnimatePresence>
-                {open === i && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 px-6 md:px-7 py-5 md:py-6 text-left focus-clay"
+                  aria-expanded={isOpen}
+                >
+                  <span className="font-display text-lg md:text-xl text-ink font-medium leading-snug">{faq.q}</span>
+                  <span
+                    className={`shrink-0 w-10 h-10 rounded-clay-pill bg-surface text-clay-pink-deep flex items-center justify-center transition-all duration-300 ease-clay ${
+                      isOpen ? 'shadow-neu-inset-deep rotate-45' : 'shadow-neu-raised'
+                    }`}
                   >
-                    <p className="px-6 pb-5 text-sm text-charcoal/65 leading-relaxed border-t border-blush/20 pt-4">
-                      {faq.a}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
+                    <Plus size={18} />
+                  </span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+                    >
+                      <p className="px-6 md:px-7 pb-6 text-base text-ink-soft leading-relaxed">
+                        {faq.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

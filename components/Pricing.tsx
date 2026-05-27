@@ -50,81 +50,29 @@ const extrasItems = [
 
 const panelVariants = {
   initial: (direction: number) => ({ opacity: 0, x: direction * 40 }),
-  animate: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
-  },
-  exit: (direction: number) => ({
-    opacity: 0,
-    x: direction * -40,
-    transition: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
-  }),
+  animate: { opacity: 1, x: 0, transition: { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] } },
+  exit: (direction: number) => ({ opacity: 0, x: direction * -40, transition: { duration: 0.22 } }),
 }
 
-/* Animated price cell — each is its own component so hooks are called at top level */
-function AnimatedPrice({
-  num,
-  fallback,
-  className,
-}: {
-  num: number
-  fallback: string
-  className?: string
-}) {
+function AnimatedPrice({ num, fallback, className }: { num: number; fallback: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.5 })
   const mv = useMotionValue(0)
-
   useEffect(() => {
     if (!inView) return
     const c = animate(mv, num, {
-      duration: 0.8,
-      ease: 'easeOut',
-      onUpdate: (v) => {
-        if (ref.current) ref.current.textContent = `$${Math.round(v)}`
-      },
+      duration: 0.8, ease: 'easeOut',
+      onUpdate: v => { if (ref.current) ref.current.textContent = `$${Math.round(v)}` },
     })
     return c.stop
   }, [inView, num, mv])
-
-  return (
-    <span ref={ref} className={className}>
-      {fallback}
-    </span>
-  )
+  return <span ref={ref} className={className}>{fallback}</span>
 }
 
-/* Single row for the birthday comparison table */
-function BirthdayRow({
-  label,
-  six,
-  eight,
-  last,
-}: {
-  label: string
-  six: { price: string; num: number }
-  eight: { price: string; num: number }
-  last: boolean
-}) {
+function PanelCard({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className={`grid grid-cols-3 px-6 py-3.5 ${!last ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/10 transition-colors duration-300`}
-    >
-      <span className="text-xs font-semibold text-charcoal/60 self-center">{label}</span>
-      <AnimatedPrice num={six.num} fallback={six.price} className="font-serif text-lg font-bold text-charcoal text-center self-center block" />
-      <AnimatedPrice num={eight.num} fallback={eight.price} className="font-serif text-lg font-bold text-rose-gold text-right self-center block" />
-    </div>
-  )
-}
-
-/* Single extra card with count-up */
-function ExtraCard({ label, note, price, num }: { label: string; note: string; price: string; num: number }) {
-  return (
-    <div className="glass-border warm-card rounded-3xl p-5 text-center">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal/45 mb-2">{label}</p>
-      <AnimatedPrice num={num} fallback={price} className="font-serif text-3xl font-bold text-charcoal block" />
-      <p className="text-xs text-charcoal/40 mt-1">{note}</p>
+    <div className="bg-surface rounded-clay-xl shadow-neu-raised overflow-hidden">
+      {children}
     </div>
   )
 }
@@ -132,46 +80,32 @@ function ExtraCard({ label, note, price, num }: { label: string; note: string; p
 function BirthdayPanel() {
   return (
     <div className="space-y-5">
-      <div className="glass-border warm-card rounded-3xl overflow-hidden">
-        <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Size</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-center">6&quot; Cake</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">8&quot; Cake</span>
+      <PanelCard>
+        <div className="grid grid-cols-3 px-7 py-4 bg-clay-pink/30 border-b border-ink/[0.06]">
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft">Size</span>
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft text-center">6&quot; Cake</span>
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft text-right">8&quot; Cake</span>
         </div>
         {celebrationData.rows.map((row, i) => (
-          <BirthdayRow
+          <div
             key={row.label}
-            label={row.label}
-            six={row.six}
-            eight={row.eight}
-            last={i === celebrationData.rows.length - 1}
-          />
+            className={`grid grid-cols-3 px-7 py-4 ${i < celebrationData.rows.length - 1 ? 'border-b border-ink/[0.06]' : ''} hover:bg-clay-pink/10 transition-colors duration-300`}
+          >
+            <span className="text-sm font-semibold text-ink-soft self-center">{row.label}</span>
+            <AnimatedPrice num={row.six.num} fallback={row.six.price} className="font-display text-xl font-bold text-ink text-center self-center block" />
+            <AnimatedPrice num={row.eight.num} fallback={row.eight.price} className="font-display text-xl font-bold text-clay-pink-deep text-right self-center block" />
+          </div>
         ))}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
+      </PanelCard>
+      <div className="grid grid-cols-2 gap-4">
         {celebrationData.other.map(item => (
-          <ExtraCard key={item.label} label={item.label} note={item.note} price={item.price} num={item.num} />
+          <div key={item.label} className="bg-surface rounded-clay-lg p-5 text-center shadow-neu-raised hover:shadow-clay-float hover:-translate-y-0.5 transition-all duration-300">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-muted mb-2">{item.label}</p>
+            <AnimatedPrice num={item.num} fallback={item.price} className="font-display text-3xl font-bold text-ink block" />
+            <p className="text-xs text-ink-muted mt-1.5">{item.note}</p>
+          </div>
         ))}
       </div>
-    </div>
-  )
-}
-
-/* Single wedding tier row */
-function WeddingTierRow({
-  tier,
-  last,
-}: {
-  tier: { size: string; servings: number; price: string; num: number }
-  last: boolean
-}) {
-  return (
-    <div
-      className={`grid grid-cols-3 px-6 py-3 ${!last ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/12 transition-colors duration-300`}
-    >
-      <span className="font-serif text-lg font-bold text-charcoal self-center">{tier.size}</span>
-      <span className="text-sm text-charcoal/55 text-center self-center">{tier.servings}</span>
-      <AnimatedPrice num={tier.num} fallback={tier.price} className="font-semibold text-rose-gold text-right self-center block" />
     </div>
   )
 }
@@ -179,101 +113,73 @@ function WeddingTierRow({
 function WeddingPanel() {
   return (
     <div className="space-y-4">
-      <div
-        className="rounded-3xl px-6 py-5 flex items-center gap-4"
-        style={{
-          background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
-          boxShadow: '0 0 40px rgba(245,158,66,0.2), 0 4px 20px rgba(0,0,0,0.15)',
-        }}
-      >
-        <div>
-          <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1">Per serving minimum</p>
-          <span className="font-serif text-4xl font-bold text-white">$14</span>
+      <div className="relative rounded-clay-xl px-7 py-6 flex items-center gap-4 bg-clay-pink-deep text-ink-inverse shadow-clay-card overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber/40 blur-2xl" />
+        <div className="relative">
+          <p className="text-white/75 text-[10px] font-bold uppercase tracking-[0.18em] mb-1.5">Per serving minimum</p>
+          <span className="font-display text-4xl font-bold text-white">$14</span>
         </div>
-        <div className="ml-auto text-right">
-          <p className="text-white/80 text-sm">All tiers priced individually</p>
-          <p className="text-white/50 text-xs mt-0.5">Final quote on request</p>
+        <div className="relative ml-auto text-right">
+          <p className="text-white/85 text-sm font-semibold">All tiers priced individually</p>
+          <p className="text-white/60 text-xs mt-1">Final quote on request</p>
         </div>
       </div>
-      <div className="glass-border warm-card rounded-3xl overflow-hidden">
-        <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Tier</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-center">Serves</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">Price</span>
+      <PanelCard>
+        <div className="grid grid-cols-3 px-7 py-4 bg-amber-glow/40 border-b border-ink/[0.06]">
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft">Tier</span>
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft text-center">Serves</span>
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-ink-soft text-right">Price</span>
         </div>
         {weddingTiers.map((tier, i) => (
-          <WeddingTierRow key={tier.size} tier={tier} last={i === weddingTiers.length - 1} />
+          <div
+            key={tier.size}
+            className={`grid grid-cols-3 px-7 py-3.5 ${i < weddingTiers.length - 1 ? 'border-b border-ink/[0.06]' : ''} hover:bg-amber-glow/15 transition-colors duration-300`}
+          >
+            <span className="font-display text-lg font-bold text-ink self-center">{tier.size}</span>
+            <span className="text-sm text-ink-soft text-center self-center">{tier.servings}</span>
+            <AnimatedPrice num={tier.num} fallback={tier.price} className="font-semibold text-clay-pink-deep text-right self-center block" />
+          </div>
         ))}
-      </div>
-    </div>
-  )
-}
-
-/* Corporate item row */
-function CorporateRow({
-  item,
-  last,
-}: {
-  item: { label: string; note: string; price: string; unit: string; num: number }
-  last: boolean
-}) {
-  return (
-    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-amber/15' : ''}`}>
-      <div>
-        <p className="font-medium text-charcoal text-sm">{item.label}</p>
-        <p className="text-xs text-charcoal/45 mt-0.5">{item.note}</p>
-      </div>
-      <div className="text-right ml-4 flex items-baseline gap-0.5">
-        <AnimatedPrice num={item.num} fallback={item.price} className="font-serif text-2xl font-bold text-charcoal" />
-        <span className="text-charcoal/45 text-xs">{item.unit}</span>
-      </div>
+      </PanelCard>
     </div>
   )
 }
 
 function CorporatePanel() {
   return (
-    <div className="glass-border warm-card rounded-3xl overflow-hidden">
+    <PanelCard>
       {corporateItems.map((item, i) => (
-        <div key={item.label} className="px-6">
-          <CorporateRow item={item} last={i === corporateItems.length - 1} />
+        <div key={item.label} className={`flex items-center justify-between px-7 py-4 ${i < corporateItems.length - 1 ? 'border-b border-ink/[0.06]' : ''}`}>
+          <div>
+            <p className="font-semibold text-ink text-sm">{item.label}</p>
+            <p className="text-xs text-ink-muted mt-1">{item.note}</p>
+          </div>
+          <div className="text-right ml-4 flex items-baseline gap-0.5">
+            <AnimatedPrice num={item.num} fallback={item.price} className="font-display text-2xl font-bold text-ink" />
+            <span className="text-ink-muted text-xs">{item.unit}</span>
+          </div>
         </div>
       ))}
-      <div className="px-6 pb-4">
-        <p className="text-[11px] text-charcoal/40">Sheet cake minimum order: 30 servings ($270)</p>
+      <div className="px-7 pb-5">
+        <p className="text-xs text-ink-muted">Sheet cake minimum order: 30 servings ($270)</p>
       </div>
-    </div>
-  )
-}
-
-/* Extras item row */
-function ExtrasRow({
-  item,
-  last,
-}: {
-  item: { label: string; note: string; price: string; num: number }
-  last: boolean
-}) {
-  return (
-    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-amber/15' : ''}`}>
-      <div>
-        <p className="font-medium text-charcoal text-sm">{item.label}</p>
-        <p className="text-xs text-charcoal/45 mt-0.5">{item.note}</p>
-      </div>
-      <AnimatedPrice num={item.num} fallback={item.price} className="font-serif text-2xl font-bold text-rose-gold ml-4" />
-    </div>
+    </PanelCard>
   )
 }
 
 function ExtrasPanel() {
   return (
-    <div className="glass-border warm-card rounded-3xl overflow-hidden">
+    <PanelCard>
       {extrasItems.map((item, i) => (
-        <div key={item.label} className="px-6">
-          <ExtrasRow item={item} last={i === extrasItems.length - 1} />
+        <div key={item.label} className={`flex items-center justify-between px-7 py-4 ${i < extrasItems.length - 1 ? 'border-b border-ink/[0.06]' : ''}`}>
+          <div>
+            <p className="font-semibold text-ink text-sm">{item.label}</p>
+            <p className="text-xs text-ink-muted mt-1">{item.note}</p>
+          </div>
+          <AnimatedPrice num={item.num} fallback={item.price} className="font-display text-2xl font-bold text-clay-pink-deep ml-4" />
         </div>
       ))}
-    </div>
+    </PanelCard>
   )
 }
 
@@ -289,57 +195,54 @@ export default function Pricing() {
   }
 
   return (
-    <section id="pricing" className="section-padding section-ambient bg-amber-light overflow-hidden">
+    <section id="pricing" className="relative section-padding section-ambient overflow-hidden">
+      <div className="blob bg-clay-pink/40 w-80 h-80 -top-16 right-10 animate-drift" />
       <div className="relative z-10 max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center mb-10"
+          transition={{ duration: 0.7 }}
+          className="text-center mb-12"
         >
-          <p className="label-tag mb-4">Investment</p>
-          <h2 className="heading-lg text-charcoal">
+          <span className="eyebrow eyebrow-dot mb-6">Investment</span>
+          <h2 className="heading-lg text-ink">
             Transparent{' '}
-            <span className="text-rose-gold italic">Pricing</span>
+            <span className="italic text-clay-pink-deep">Pricing</span>
           </h2>
-          <p className="mt-4 text-charcoal/55 max-w-lg mx-auto text-sm">
+          <p className="mt-5 text-ink-soft max-w-lg mx-auto text-lg">
             Every cake is made to order. Fill out the order form for your exact quote.
           </p>
         </motion.div>
 
-        {/* Direction-aware underline tab switcher */}
+        {/* Tab switcher — neumorphic pill */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-          className="flex border-b border-amber/20 mb-8 overflow-x-auto"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-surface rounded-clay-xl shadow-neu-inset p-1.5 mb-10 flex gap-1 overflow-x-auto"
         >
           {tabs.map(tab => {
             const Icon = tabIcons[tab]
+            const isActive = activeTab === tab
             return (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
-                className="relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors duration-300 flex-shrink-0"
-                style={{ color: activeTab === tab ? '#C9956A' : 'rgba(45,45,45,0.45)' }}
+                className={`relative flex-1 min-w-max flex items-center justify-center gap-2 px-4 py-3 rounded-clay-lg text-sm font-bold whitespace-nowrap transition-all duration-300 ease-press ${
+                  isActive
+                    ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button'
+                    : 'text-ink-soft hover:text-ink'
+                }`}
               >
                 <Icon size={14} />
                 {tab}
-                {activeTab === tab && (
-                  <motion.div
-                    layoutId="tab-underline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-gold rounded-full"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
               </button>
             )
           })}
         </motion.div>
 
-        {/* Direction-aware panel transition */}
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={activeTab}
@@ -356,21 +259,20 @@ export default function Pricing() {
           </motion.div>
         </AnimatePresence>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="mt-10 flex flex-col items-center gap-3"
+          className="mt-12 flex flex-col items-center gap-4"
         >
           <a
-            href="#order"
-            className="btn-glow btn-amber-glow w-full sm:w-auto bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out text-center"
+            href="#order-form"
+            className="inline-flex items-center justify-center gap-2.5 px-10 py-4 rounded-clay-pill font-semibold text-base bg-clay-pink-deep text-ink-inverse shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press"
           >
             Get a Custom Quote
           </a>
-          <p className="text-xs text-charcoal/40 text-center max-w-sm leading-relaxed">
+          <p className="text-xs text-ink-muted text-center max-w-sm leading-relaxed">
             Prices are estimates. Final quote depends on design complexity. Rush orders under 3 days notice incur an additional fee.
           </p>
         </motion.div>
