@@ -54,19 +54,19 @@ module.exports = {
       },
       boxShadow: {
         'neu-flat':
-          '6px 6px 14px rgba(180,140,90,0.14), -6px -6px 14px rgba(255,250,245,0.85)',
+          '6px 6px 14px rgba(180,140,90,0.08)',
         'neu-raised':
-          '10px 10px 22px rgba(180,140,90,0.22), -10px -10px 22px rgba(255,250,245,0.95)',
+          '10px 10px 22px rgba(180,140,90,0.12)',
         'neu-raised-lg':
-          '16px 16px 32px rgba(180,140,90,0.25), -14px -14px 30px rgba(255,250,245,1)',
+          '16px 16px 32px rgba(180,140,90,0.15)',
         'neu-pressed':
-          'inset 6px 6px 12px rgba(180,140,90,0.22), inset -6px -6px 12px rgba(255,250,245,0.9)',
+          'inset 6px 6px 12px rgba(180,140,90,0.12)',
         'neu-inset':
-          'inset 4px 4px 8px rgba(180,140,90,0.18), inset -4px -4px 8px rgba(255,250,245,0.85)',
+          'inset 4px 4px 8px rgba(180,140,90,0.08)',
         'neu-inset-deep':
-          'inset 8px 8px 16px rgba(180,140,90,0.3), inset -8px -8px 16px rgba(255,250,245,1)',
+          'inset 8px 8px 16px rgba(180,140,90,0.15)',
         'clay-button':
-          '0 8px 24px rgba(184,134,45,0.40), 0 4px 12px rgba(245,158,66,0.25), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(130,90,20,0.25)',
+          '0 8px 24px rgba(184,134,45,0.15), 0 4px 12px rgba(245,158,66,0.10), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(130,90,20,0.12)',
         'clay-button-amber':
           '0 8px 24px rgba(245,158,66,0.4), 0 4px 12px rgba(212,132,90,0.25), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(180,100,40,0.2)',
         'clay-button-ghost':
