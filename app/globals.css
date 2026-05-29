@@ -5,6 +5,12 @@
 :root {
   --font-playfair: 'Playfair Display', Georgia, serif;
   --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+  --font-fraunces: 'Fraunces', Georgia, serif;
+  --font-jakarta: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --surface: 245, 237, 228;
+  --ink: 42, 36, 30;
+  --shadow-dark: 180, 140, 90;
+  --shadow-light: 255, 250, 245;
   --amber-rgb: 245, 158, 66;
   --rose-gold-rgb: 201, 149, 106;
 }
@@ -34,6 +40,9 @@ body {
   }
   .label-tag {
     @apply text-xs font-semibold tracking-[0.2em] uppercase text-rose-gold;
+  }
+  .focus-clay {
+    @apply outline-none focus-visible:shadow-focus-ring;
   }
 
   /* Rose-gold + amber accent glass border — light sections */

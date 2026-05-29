@@ -24,7 +24,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-4 md:top-6 left-0 right-0 z-[100] px-4 md:px-8 pointer-events-none">
+      <header className="fixed top-4 md:top-6 left-0 right-0 z-[100] px-4 md:px-8 pointer-events-none font-jakarta">
         <nav
           className={`pointer-events-auto mx-auto max-w-6xl flex items-center justify-between gap-4 bg-surface rounded-clay-pill pl-4 pr-3 py-3 md:pl-6 md:pr-4 md:py-3 transition-shadow duration-300 ${
             scrolled ? 'shadow-neu-raised-lg' : 'shadow-neu-raised'
@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <a
               href="#order-form"
-              className="hidden sm:inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-clay-pill bg-clay-pink-deep text-ink-inverse shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press focus-clay"
+              className="hidden sm:inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-clay-pill bg-clay-pink-deep text-ink-inverse shadow-clay-button hover:-translate-y-0.5 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press focus-clay"
             >
               Get a Quote
             </a>
@@ -77,7 +77,7 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       <div
-        className={`md:hidden fixed inset-x-4 top-24 z-[99] origin-top transition-all duration-300 ease-clay ${
+        className={`md:hidden fixed inset-x-4 top-24 z-[99] origin-top transition-all duration-300 ease-clay font-jakarta ${
           open ? 'opacity-100 scale-y-100 pointer-events-auto' : 'opacity-0 scale-y-95 pointer-events-none'
         }`}
       >
