@@ -289,11 +289,24 @@ export function OrderForm() {
   const [deliveryAddressDraft, setDeliveryAddressDraft] = useState('')
   const [maxReachedStep, setMaxReachedStep] = useState(1)
   const resumeAfterEditingFromStepRef = useRef<number | null>(null)
+  const successRef = useRef<HTMLDivElement>(null)
 
   const [calendarView, setCalendarView] = useState(() => {
     const n = new Date()
     return { year: n.getFullYear(), month: n.getMonth() }
   })
+
+  useEffect(() => {
+    if (!submitted) return
+    const el = successRef.current
+    if (!el) return
+    const scrollToSuccess = () => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToSuccess)
+    })
+  }, [submitted])
 
   useEffect(() => {
     setMaxReachedStep(m => Math.max(m, step))
@@ -517,6 +530,21 @@ export function OrderForm() {
     setWizard(w => ({ ...w, submitted: true }))
   }
 
+  const handleOrderNewCake = () => {
+    setWizard({
+      form: { ...INITIAL_FORM },
+      nav: { ...INITIAL_NAV },
+      submitted: false,
+    })
+    setMaxReachedStep(1)
+    resumeAfterEditingFromStepRef.current = null
+    setOtherCelebrationModalOpen(false)
+    setDeliveryAddressModalOpen(false)
+    requestAnimationFrame(() => {
+      document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
   const canDietaryNext = (): boolean =>
     dietaryRestrictions.length > 0
 
@@ -684,50 +712,54 @@ export function OrderForm() {
   }
 
   return (
-    <section id="order-form" className="relative section-padding section-ambient overflow-hidden">
-      <div className="blob bg-clay-pink/30 w-96 h-96 top-10 -right-32 animate-float" />
-      <div className="blob bg-amber/25 w-80 h-80 bottom-10 -left-20 animate-float-delayed" />
-      <div className="relative z-10 max-w-3xl mx-auto">
+    <section id="order-form" className="section-padding section-ambient bg-amber-muted overflow-hidden">
+      <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <span className="eyebrow eyebrow-dot mb-6">Quote Request</span>
-          <h2 className="heading-lg text-ink">
+          <p className="label-tag mb-4">Quote Request</p>
+          <h2 className="heading-lg text-charcoal">
             Custom Cake{' '}
-            <span className="italic text-clay-pink-deep">Order Form</span>
+            <span className="text-rose-gold italic">Order Form</span>
           </h2>
-          <p className="mt-5 text-lg text-ink-soft max-w-md mx-auto">
+          <p className="mt-3 text-sm text-charcoal/55 max-w-md mx-auto">
             Tell us about your celebration — one step at a time. We&apos;ll follow up with a personalized quote.
           </p>
         </motion.div>
 
         {submitted ? (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-surface shadow-clay-card rounded-clay-xl p-10 md:p-12 text-center relative overflow-hidden"
-          >
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-clay-pink/30 blur-2xl" />
-            <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-clay-pill bg-clay-pink shadow-neu-inset-deep mb-6">
-              <Check size={28} className="text-clay-pink-deep" strokeWidth={2.5} />
-            </div>
-            <p className="font-display text-2xl md:text-3xl text-ink leading-relaxed mb-4 relative">
-              Your order request has been received!
-            </p>
-            {dietaryRestrictions.length > 0 && (
-              <p className="text-ink-soft text-sm mb-4 max-w-md mx-auto relative">
-                Dietary: {dietaryRestrictions.join(', ')}
+          <div className="min-h-[min(70vh,640px)] flex items-center justify-center py-6">
+            <motion.div
+              ref={successRef}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-border warm-card rounded-3xl p-8 md:p-10 text-center w-full"
+            >
+              <p className="font-serif text-xl md:text-2xl text-charcoal leading-relaxed mb-4">
+                Your order request has been received!
               </p>
-            )}
-            <p className="text-ink-soft leading-relaxed max-w-md mx-auto relative">
-              Onyinye will be in touch within 24 hours with your quote. A 50% deposit via e-transfer will be required
-              to confirm your order.
-            </p>
-          </motion.div>
+              {dietaryRestrictions.length > 0 && (
+                <p className="text-charcoal/60 text-sm mb-4 max-w-md mx-auto">
+                  Dietary: {dietaryRestrictions.join(', ')}
+                </p>
+              )}
+              <p className="text-charcoal/70 text-sm leading-relaxed max-w-md mx-auto">
+                Onyinye will be in touch within 24 hours with your quote. A 50% deposit via e-transfer will be required
+                to confirm your order.
+              </p>
+              <button
+                type="button"
+                onClick={handleOrderNewCake}
+                className="mt-8 btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
+              >
+                Order a New Cake
+              </button>
+            </motion.div>
+          </div>
         ) : (
           <form
             onSubmit={e => {
@@ -736,28 +768,31 @@ export function OrderForm() {
             }}
           >
             {/* Progress — dot-line stepper */}
-            <div className="mb-10">
-              <div className="flex items-center justify-between relative bg-surface shadow-neu-inset rounded-clay-pill px-4 py-3">
+            <div className="mb-8">
+              <div className="flex items-center justify-between relative">
+                {/* Connector line behind dots */}
+                <div className="absolute left-0 right-0 top-4 h-px bg-charcoal/10 z-0" />
                 {STEP_LABELS.map((label, i) => {
                   const n = i + 1
                   const active = step === n
                   const done = step > n
                   return (
                     <div key={label} className="flex-1 flex flex-col items-center z-10 min-w-0">
+                      {/* Dot */}
                       <div
-                        className={`w-10 h-10 rounded-clay-pill flex items-center justify-center text-xs font-bold transition-all duration-300 ease-clay mb-2 ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 ease-in-out mb-2 ${
                           done
-                            ? 'bg-clay-mint text-ink shadow-neu-flat'
+                            ? 'bg-amber border-amber text-white'
                             : active
-                              ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button'
-                              : 'bg-surface text-ink-muted shadow-neu-flat'
+                              ? 'bg-rose-gold border-rose-gold text-white shadow-[0_0_16px_rgba(201,149,106,0.5)]'
+                              : 'bg-amber-light border-charcoal/15 text-charcoal/35'
                         }`}
                       >
-                        {done ? <Check size={14} strokeWidth={3} /> : n}
+                        {done ? '✓' : n}
                       </div>
                       <span
-                        className={`text-[10px] font-bold uppercase tracking-[0.16em] text-center leading-tight ${
-                          active ? 'text-clay-pink-deep' : done ? 'text-ink-soft' : 'text-ink-muted/70'
+                        className={`text-[10px] font-semibold uppercase tracking-wider text-center leading-tight ${
+                          active ? 'text-rose-gold' : done ? 'text-charcoal/50' : 'text-charcoal/28'
                         }`}
                       >
                         {label}
@@ -766,17 +801,18 @@ export function OrderForm() {
                   )
                 })}
               </div>
-              <p className="text-center text-xs text-ink-muted mt-4 font-medium">
+              <p className="text-center text-xs text-charcoal/40 mt-3">
                 Step {step} of {TOTAL_STEPS}{progressSuffix}
               </p>
             </div>
 
-            <div className="bg-surface shadow-clay-card rounded-clay-xl p-6 md:p-8 min-h-[320px] flex flex-col">
+            <div className="glass-border warm-card rounded-3xl p-6 md:p-8 min-h-[320px] flex flex-col overflow-visible" style={{ boxShadow: '0 0 60px rgba(245,158,66,0.12), 0 8px 40px rgba(0,0,0,0.07), inset 0 2px 0 rgba(255,255,255,0.95)' }}>
               <div
-                className="mb-4 flex h-10 shrink-0 flex-nowrap items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="mb-4 shrink-0 overflow-visible px-1 pt-1 pb-1.5"
                 role="tablist"
                 aria-label="Form steps"
               >
+                <div className="flex min-h-10 flex-nowrap items-center gap-1.5 overflow-x-auto py-1 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {MAIN_STEP_TABS.map(({ step: tabStep, label }) => {
                   const locked = tabStep > maxReachedStep
                   const active = tabStep === step
@@ -789,29 +825,35 @@ export function OrderForm() {
                       aria-selected={active}
                       disabled={locked}
                       onClick={() => goToMainStepByTab(tabStep)}
-                      className={`inline-flex h-10 w-[5.375rem] shrink-0 flex-row items-center justify-center gap-1 rounded-clay-pill px-3 text-[10px] font-bold uppercase leading-none tracking-[0.14em] sm:w-[5.75rem] transition-all duration-200 ease-press ${
+                      className={`inline-flex h-10 w-[5.375rem] shrink-0 flex-row items-center justify-center rounded-full px-0 py-0 text-[10px] font-semibold uppercase leading-none tracking-wider sm:w-[5.75rem] ${
                         locked
-                          ? 'cursor-not-allowed text-ink-muted/50 opacity-50'
+                          ? 'cursor-not-allowed text-charcoal/30 opacity-40'
                           : active
-                            ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button'
+                            ? 'bg-amber/15 text-rose-gold ring-1 ring-amber/50'
                             : completed
-                              ? 'bg-surface text-ink-soft shadow-neu-flat hover:shadow-neu-raised'
-                              : 'text-ink-muted hover:text-ink'
+                              ? 'bg-charcoal/[0.06] text-charcoal/50 hover:bg-charcoal/10 hover:text-charcoal/65'
+                              : 'text-charcoal/50 hover:bg-charcoal/5 hover:text-charcoal/70'
                       }`}
                     >
-                      <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center" aria-hidden>
+                      <span
+                        className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center"
+                        aria-hidden
+                      >
                         <Check
                           size={12}
-                          strokeWidth={3}
-                          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
-                            completed ? 'scale-100 opacity-100 text-clay-pink-deep' : 'scale-0 opacity-0'
+                          strokeWidth={2.5}
+                          className={`absolute left-1/2 top-1/2 origin-center -translate-x-1/2 -translate-y-1/2 text-charcoal/40 transition-none ${
+                            completed
+                              ? 'scale-100 opacity-100'
+                              : 'scale-0 opacity-0 pointer-events-none'
                           }`}
                         />
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-center">{label}</span>
+                      <span className="min-w-0 flex-1 truncate px-0.5 text-center">{label}</span>
                     </button>
                   )
                 })}
+                </div>
               </div>
               <div className="flex min-h-0 flex-1 flex-col">
               <AnimatePresence mode="wait">
@@ -834,8 +876,8 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col"
                         >
-                          <h3 className="font-display text-2xl text-ink mb-1 text-center">What are we celebrating?</h3>
-                          <p className="text-center text-sm text-ink-muted mb-6">Tap an option to continue</p>
+                          <h3 className="font-serif text-xl text-charcoal mb-1 text-center">What are we celebrating?</h3>
+                          <p className="text-center text-xs text-charcoal/50 mb-6">Tap an option to continue</p>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {CELEBRATIONS.map(({ id, label, Icon }) => {
                               const selected = celebration === id
@@ -861,10 +903,18 @@ export function OrderForm() {
                                       nav: { ...w.nav, occasionSubStep: 2 },
                                     }))
                                   }}
-                                  className={`relative bg-surface rounded-clay-lg text-center transition-all duration-300 ease-clay overflow-hidden min-h-[140px] flex flex-col items-center justify-center p-2 ${
-                                    selected
-                                      ? 'shadow-neu-inset-deep ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                      : 'shadow-neu-raised hover:shadow-clay-float hover:-translate-y-1'
+                                  className={`glass-border rounded-2xl text-center transition-all duration-500 ease-in-out relative overflow-hidden ${
+                                    hasPhoto
+                                      ? `min-h-[140px] flex flex-col items-center justify-center p-2 border-2 ${
+                                          selected
+                                            ? 'ring-2 ring-amber ring-offset-2 ring-offset-amber-light border-amber shadow-md'
+                                            : 'border-transparent hover:border-amber/40 hover:-translate-y-0.5'
+                                        }`
+                                      : `p-5 flex flex-col items-center justify-center gap-3 min-h-[112px] ${
+                                          selected
+                                            ? 'bg-amber/15 border-amber shadow-md ring-2 ring-amber/50'
+                                            : 'bg-amber-light hover:bg-amber/10 hover:-translate-y-0.5'
+                                        }`
                                   }`}
                                 >
                                   {hasPhoto && photoSrc && (
@@ -872,17 +922,17 @@ export function OrderForm() {
                                       src={encodeURI(photoSrc)}
                                       alt=""
                                       fill
-                                      className="object-cover z-0 pointer-events-none opacity-90"
+                                      className="object-cover z-0 pointer-events-none"
                                       sizes="(max-width: 768px) 50vw, 33vw"
                                     />
                                   )}
                                   <span
-                                    className={`relative z-10 flex flex-col items-center justify-center rounded-clay-md ${
-                                      hasPhoto ? 'gap-2 bg-surface/95 px-3 py-2.5 shadow-neu-flat' : 'gap-3'
+                                    className={`relative z-10 flex flex-col items-center justify-center rounded-xl shadow-sm ${
+                                      hasPhoto ? 'gap-2 bg-white/95 px-3 py-2.5' : 'gap-3'
                                     }`}
                                   >
-                                    <Icon size={26} className={selected ? 'text-clay-pink-deep' : 'text-clay-pink-deep/80'} />
-                                    <span className={`text-sm font-bold leading-tight ${selected ? 'text-ink' : 'text-ink-soft'}`}>
+                                    <Icon size={26} className={selected ? 'text-rose-gold' : 'text-rose-gold/80'} />
+                                    <span className={`text-sm font-semibold leading-tight ${selected ? 'text-charcoal' : 'text-charcoal/80'}`}>
                                       {label}
                                     </span>
                                   </span>
@@ -902,10 +952,10 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col"
                         >
-                          <h3 className="font-display text-2xl text-ink mb-1 text-center">
+                          <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
                             How many servings do you need?
                           </h3>
-                          <p className="text-center text-sm text-ink-muted mb-6">Enter the number of servings</p>
+                          <p className="text-center text-xs text-charcoal/50 mb-6">Enter the number of servings</p>
 
                           <div className="max-w-xs mx-auto w-full">
                             <input
@@ -923,23 +973,26 @@ export function OrderForm() {
                                 }))
                               }}
                               placeholder="e.g. 50"
-                              className="w-full rounded-clay-md bg-surface shadow-neu-inset px-5 py-5 text-center text-3xl font-display font-bold text-ink focus:outline-none focus-visible:shadow-focus-ring transition-shadow"
+                              className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
                             />
 
                             {weddingEstimate !== null && (
                               <motion.div
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mt-5 rounded-clay-lg px-6 py-5 text-center bg-clay-pink-deep text-ink-inverse shadow-clay-card relative overflow-hidden"
+                                className="mt-5 rounded-2xl px-5 py-4 text-center"
+                                style={{
+                                  background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                                  boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
+                                }}
                               >
-                                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-amber/40 blur-2xl" />
-                                <p className="relative text-white/75 text-[10px] font-bold uppercase tracking-[0.18em] mb-1.5">
+                                <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
                                   Estimated starting price
                                 </p>
-                                <p className="relative font-display text-4xl font-bold text-white">
+                                <p className="font-serif text-3xl font-bold text-white">
                                   ${weddingEstimate.toLocaleString()}
                                 </p>
-                                <p className="relative text-white/70 text-xs mt-1.5">
+                                <p className="text-white/60 text-xs mt-1">
                                   ${WEDDING_PRICE_PER_SERVING}/serving · final quote on request
                                 </p>
                               </motion.div>
@@ -949,7 +1002,7 @@ export function OrderForm() {
                               type="button"
                               disabled={servings === '' || (servings as number) <= 0}
                               onClick={advanceServingsToStep2}
-                              className="mt-7 w-full inline-flex items-center justify-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-7 py-3.5 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 disabled:hover:shadow-clay-button active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press"
+                              className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                             >
                               Next
                               <ChevronRight size={16} />
@@ -970,45 +1023,48 @@ export function OrderForm() {
                     transition={{ duration: 0.25 }}
                     className="flex-1 flex flex-col"
                   >
-                    <h3 className="font-display text-2xl text-ink mb-1 text-center">Pickup date</h3>
-                    <p className="text-center text-sm text-ink-muted mb-5">We need at least 3 days&apos; notice</p>
+                    <h3 className="font-serif text-xl text-charcoal mb-1 text-center">Pickup date</h3>
+                    <p className="text-center text-xs text-charcoal/50 mb-5">We need at least 3 days&apos; notice</p>
 
                     <div
-                      className="max-w-sm mx-auto w-full rounded-clay-lg bg-surface shadow-neu-inset px-4 py-5"
+                      className="max-w-sm mx-auto w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-3 py-4 sm:px-4"
                       role="application"
                       aria-label="Pickup date calendar"
                     >
-                      <div className="flex items-center justify-between gap-2 mb-5">
+                      <div className="flex items-center justify-between gap-2 mb-4">
                         <button
                           type="button"
                           onClick={goPrevMonth}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-clay-pill bg-surface text-ink shadow-neu-raised hover:shadow-clay-float active:shadow-neu-pressed transition-all focus-clay"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-amber/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50"
                           aria-label="Previous month"
                         >
-                          <ChevronLeft size={18} aria-hidden />
+                          <ChevronLeft size={20} aria-hidden />
                         </button>
-                        <p className="font-display text-lg font-semibold text-ink text-center truncate px-1">
+                        <p className="font-serif text-base font-semibold text-charcoal text-center truncate px-1">
                           {monthTitle}
                         </p>
                         <button
                           type="button"
                           onClick={goNextMonth}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-clay-pill bg-surface text-ink shadow-neu-raised hover:shadow-clay-float active:shadow-neu-pressed transition-all focus-clay"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-amber/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50"
                           aria-label="Next month"
                         >
-                          <ChevronRight size={18} aria-hidden />
+                          <ChevronRight size={20} aria-hidden />
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                      <div className="grid grid-cols-7 gap-1 text-center mb-1">
                         {WEEKDAY_LABELS.map(d => (
-                          <div key={d} className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted py-1">
+                          <div
+                            key={d}
+                            className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/45 py-1"
+                          >
                             {d}
                           </div>
                         ))}
                       </div>
 
-                      <div className="grid grid-cols-7 gap-1.5">
+                      <div className="grid grid-cols-7 gap-1">
                         {calendarCells.map((dayNum, i) => {
                           if (dayNum === null) {
                             return (
@@ -1030,12 +1086,12 @@ export function OrderForm() {
                               type="button"
                               disabled={!selectable}
                               onClick={() => selectable && selectCalendarDay(dayNum)}
-                              className={`aspect-square min-h-[2.25rem] w-full rounded-clay-sm text-sm font-semibold transition-all duration-200 ease-press focus-clay ${
+                              className={`aspect-square min-h-[2.25rem] w-full rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 ${
                                 !selectable
-                                  ? 'cursor-not-allowed text-ink-muted/40'
+                                  ? 'cursor-not-allowed text-charcoal/25 bg-charcoal/[0.04]'
                                   : selected
-                                    ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button'
-                                    : 'text-ink hover:shadow-neu-flat hover:bg-surface'
+                                    ? 'bg-amber/20 text-charcoal ring-2 ring-amber shadow-sm'
+                                    : 'text-charcoal hover:bg-rose-gold/10'
                               }`}
                             >
                               {dayNum}
@@ -1045,7 +1101,7 @@ export function OrderForm() {
                       </div>
                     </div>
                     {showRushNote && (
-                      <p className="mt-5 text-center text-sm text-clay-pink-deep font-semibold bg-clay-pink/30 rounded-clay-md px-5 py-3.5 shadow-neu-flat max-w-sm mx-auto">
+                      <p className="mt-4 text-center text-sm text-rose-gold font-medium bg-amber/10 rounded-2xl px-4 py-3 border border-amber/25">
                         Orders under 3 days notice incur a rush fee of $15–$25
                       </p>
                     )}
@@ -1061,7 +1117,7 @@ export function OrderForm() {
                     transition={{ duration: 0.25 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    <p className="text-xs font-bold tracking-[0.18em] uppercase text-clay-pink-deep mb-3 text-center shrink-0">Cake details</p>
+                    <p className="label-tag mb-2 text-center shrink-0">Cake details</p>
 
                     <AnimatePresence mode="wait">
                       {cakeSubStep === 1 && (
@@ -1073,10 +1129,10 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col min-h-0"
                         >
-                          <h3 className="font-display text-2xl text-ink text-center mb-1 shrink-0">
+                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
                             What flavour would you like?
                           </h3>
-                          <p className="text-center text-sm text-ink-muted mb-3 shrink-0">Tap an option to continue</p>
+                          <p className="text-center text-xs text-charcoal/50 mb-3 shrink-0">Tap an option to continue</p>
                           <div className="grid grid-cols-2 grid-rows-4 gap-2 sm:gap-3 flex-1 min-h-0">
                             {FLAVOURS.map(f => {
                               const cardImage = FLAVOR_CARD_IMAGES[f] ?? null
@@ -1087,10 +1143,14 @@ export function OrderForm() {
                                   key={f}
                                   type="button"
                                   onClick={() => pickFlavour(f)}
-                                  className={`relative flex h-full min-h-[3.75rem] sm:min-h-[4.25rem] w-full items-center justify-center overflow-hidden rounded-clay-md p-2 text-center text-sm sm:text-base font-bold leading-snug transition-all duration-300 ease-clay ${
-                                    selected
-                                      ? 'bg-surface shadow-neu-inset-deep ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                      : 'bg-surface shadow-neu-raised hover:shadow-clay-float hover:-translate-y-1'
+                                  className={`glass-border rounded-2xl relative flex h-full min-h-[3.75rem] sm:min-h-[4.25rem] w-full items-center justify-center overflow-hidden px-2 py-2 text-center text-sm sm:text-base font-semibold leading-snug transition-all ${
+                                    hasPhoto
+                                      ? selected
+                                        ? 'border-rose-gold shadow-md ring-2 ring-rose-gold'
+                                        : 'border-amber/30 hover:brightness-[0.98]'
+                                      : selected
+                                        ? 'bg-rose-gold text-white border-amber shadow-md'
+                                        : 'bg-amber-light text-charcoal hover:bg-amber/10'
                                   }`}
                                 >
                                   {hasPhoto && (
@@ -1099,15 +1159,17 @@ export function OrderForm() {
                                       alt=""
                                       fill
                                       sizes="(max-width: 768px) 45vw, 200px"
-                                      className="pointer-events-none z-0 object-cover opacity-90"
+                                      className="pointer-events-none z-0 object-cover"
                                       aria-hidden
                                     />
                                   )}
                                   <span
                                     className={
                                       hasPhoto
-                                        ? 'relative z-10 rounded-clay-sm bg-surface/95 px-3 py-1.5 text-ink shadow-neu-flat'
-                                        : 'relative z-10 text-ink'
+                                        ? 'relative z-10 rounded-lg bg-white/95 px-2.5 py-1.5 text-charcoal shadow-sm'
+                                        : selected
+                                          ? 'relative z-10 text-white'
+                                          : 'relative z-10 text-charcoal'
                                     }
                                   >
                                     {f}
@@ -1128,10 +1190,10 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col min-h-0"
                         >
-                          <h3 className="font-display text-2xl text-ink text-center mb-1 shrink-0">
+                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
                             What frosting would you like?
                           </h3>
-                          <p className="text-center text-sm text-ink-muted mb-3 shrink-0">Tap an option to continue</p>
+                          <p className="text-center text-xs text-charcoal/50 mb-3 shrink-0">Tap an option to continue</p>
                           <div className="grid grid-cols-2 grid-rows-3 gap-3 flex-1 min-h-0">
                             {FROSTINGS.map(f => {
                               const photoSrc = FROSTING_CARD_IMAGES[f]
@@ -1142,10 +1204,18 @@ export function OrderForm() {
                                   key={f}
                                   type="button"
                                   onClick={() => pickFrosting(f)}
-                                  className={`relative bg-surface rounded-clay-md text-center text-sm sm:text-base font-bold leading-snug transition-all duration-300 ease-clay overflow-hidden min-h-[4.75rem] sm:min-h-[5.35rem] flex items-center justify-center p-2 ${
-                                    selected
-                                      ? 'shadow-neu-inset-deep ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                      : 'shadow-neu-raised hover:shadow-clay-float hover:-translate-y-1'
+                                  className={`glass-border rounded-2xl text-center text-sm sm:text-base font-semibold leading-snug transition-all relative overflow-hidden ${
+                                    hasPhoto
+                                      ? `min-h-[4.75rem] sm:min-h-[5.35rem] flex items-center justify-center p-2 border-2 ${
+                                          selected
+                                            ? 'ring-2 ring-amber ring-offset-2 ring-offset-amber-light border-amber shadow-md'
+                                            : 'border-transparent hover:border-amber/40 hover:-translate-y-0.5'
+                                        }`
+                                      : `flex h-full min-h-[4.5rem] sm:min-h-[5.25rem] w-full items-center justify-center px-2 py-2 ${
+                                          selected
+                                            ? 'bg-rose-gold text-white border-amber shadow-md'
+                                            : 'bg-amber-light text-charcoal hover:bg-amber/10'
+                                        }`
                                   }`}
                                 >
                                   {hasPhoto && photoSrc && (
@@ -1153,15 +1223,15 @@ export function OrderForm() {
                                       src={encodeURI(photoSrc)}
                                       alt=""
                                       fill
-                                      className="object-cover z-0 pointer-events-none opacity-90"
+                                      className="object-cover z-0 pointer-events-none"
                                       sizes="(max-width: 768px) 45vw, 200px"
                                     />
                                   )}
                                   <span
                                     className={
                                       hasPhoto
-                                        ? 'relative z-10 rounded-clay-sm bg-surface/95 px-3 py-1.5 text-ink shadow-neu-flat'
-                                        : 'relative z-10 text-ink'
+                                        ? 'relative z-10 rounded-lg bg-white/95 px-2.5 py-1.5 text-charcoal shadow-sm'
+                                        : ''
                                     }
                                   >
                                     {f}
@@ -1182,10 +1252,10 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col min-h-0"
                         >
-                          <h3 className="font-display text-2xl text-ink text-center mb-1 shrink-0">
+                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
                             Any dietary restrictions?
                           </h3>
-                          <p className="text-center text-sm text-ink-muted mb-4 shrink-0">Select all that apply</p>
+                          <p className="text-center text-xs text-charcoal/50 mb-4 shrink-0">Select all that apply</p>
                           <div className="grid grid-cols-2 gap-3 flex-1 min-h-0 content-start">
                             {DIETARY_OPTIONS.map(opt => {
                               const selected = dietaryRestrictions.includes(opt)
@@ -1194,10 +1264,10 @@ export function OrderForm() {
                                   key={opt}
                                   type="button"
                                   onClick={() => toggleDietaryOption(opt)}
-                                  className={`bg-surface rounded-clay-md flex min-h-[5.25rem] sm:min-h-[5.75rem] w-full items-center justify-center px-3 py-3 text-center text-sm sm:text-base font-bold leading-snug transition-all duration-300 ease-clay ${
+                                  className={`glass-border rounded-2xl flex min-h-[5.25rem] sm:min-h-[5.75rem] w-full items-center justify-center px-3 py-3 text-center text-sm sm:text-base font-semibold leading-snug transition-all ${
                                     selected
-                                      ? 'shadow-neu-inset-deep text-clay-pink-deep ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                      : 'shadow-neu-raised text-ink hover:shadow-clay-float hover:-translate-y-0.5'
+                                      ? 'bg-rose-gold text-white border-amber shadow-md'
+                                      : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                                   }`}
                                 >
                                   {opt}
@@ -1220,8 +1290,8 @@ export function OrderForm() {
                     transition={{ duration: 0.25 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    <h3 className="font-display text-2xl text-ink mb-1 text-center">Add-ons</h3>
-                    <p className="text-center text-sm text-ink-muted mb-4">Select any that apply — optional</p>
+                    <h3 className="font-serif text-xl text-charcoal mb-1 text-center">Add-ons</h3>
+                    <p className="text-center text-xs text-charcoal/50 mb-4">Select any that apply — optional</p>
 
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 w-full flex-1 content-start">
                       {ADD_ONS.map(({ id, label, price }) => {
@@ -1239,10 +1309,14 @@ export function OrderForm() {
                               scale: selected ? 1.04 : 1,
                             }}
                             transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-                            className={`relative aspect-square w-full bg-surface rounded-clay-md flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-center overflow-hidden transition-all duration-300 ease-clay ${
-                              selected
-                                ? 'shadow-neu-inset-deep ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                : 'shadow-neu-raised hover:shadow-clay-float hover:-translate-y-1'
+                            className={`glass-border relative aspect-square w-full rounded-2xl flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-center shadow-sm overflow-hidden ${
+                              hasPhoto
+                                ? selected
+                                  ? 'border-2 border-rose-gold ring-2 ring-rose-gold ring-offset-2 ring-offset-amber-light shadow-md'
+                                  : 'border-2 border-amber/30 bg-amber-light hover:border-amber/50 hover:-translate-y-0.5'
+                                : selected
+                                  ? 'bg-rose-gold text-white border-rose-gold ring-2 ring-rose-gold/50'
+                                  : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
                             }`}
                           >
                             {hasPhoto && photoSrc && (
@@ -1262,7 +1336,9 @@ export function OrderForm() {
                                   animate={{ scale: 1, opacity: 1 }}
                                   exit={{ scale: 0, opacity: 0 }}
                                   transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-                                  className="absolute top-2 right-2 z-20 flex h-7 w-7 items-center justify-center rounded-clay-pill bg-clay-pink-deep text-ink-inverse shadow-clay-button"
+                                  className={`absolute top-2 right-2 z-20 flex h-7 w-7 items-center justify-center rounded-full ${
+                                    hasPhoto ? 'bg-rose-gold text-white shadow-sm' : 'bg-white/25 text-white'
+                                  }`}
                                   aria-hidden
                                 >
                                   <Check size={16} strokeWidth={3} />
@@ -1270,10 +1346,12 @@ export function OrderForm() {
                               )}
                             </AnimatePresence>
                             <span
-                              className={`relative z-10 font-bold leading-snug text-[11px] sm:text-xs ${
+                              className={`relative z-10 font-semibold leading-snug text-[11px] sm:text-xs ${
                                 hasPhoto
-                                  ? 'rounded-clay-sm bg-surface/95 px-2 py-1 text-ink shadow-neu-flat'
-                                  : 'text-ink'
+                                  ? 'rounded-lg bg-white/95 px-2 py-1 text-charcoal shadow-sm'
+                                  : selected
+                                    ? 'text-white'
+                                    : 'text-charcoal'
                               }`}
                             >
                               {label}
@@ -1281,8 +1359,10 @@ export function OrderForm() {
                             <span
                               className={`relative z-10 text-xs font-bold tabular-nums ${
                                 hasPhoto
-                                  ? 'rounded-clay-sm bg-clay-pink-deep px-2 py-0.5 text-ink-inverse shadow-neu-flat'
-                                  : 'text-clay-pink-deep'
+                                  ? 'rounded-md bg-white/90 px-2 py-0.5 text-rose-gold'
+                                  : selected
+                                    ? 'text-white/90'
+                                    : 'text-rose-gold'
                               }`}
                             >
                               ${price}
@@ -1292,8 +1372,8 @@ export function OrderForm() {
                       })}
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between gap-3 rounded-clay-lg bg-surface shadow-neu-inset px-5 py-4">
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+                    <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber/30 bg-amber-light px-4 py-3">
+                      <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-charcoal/50">
                         Add-ons total
                       </span>
                       <motion.span
@@ -1301,7 +1381,7 @@ export function OrderForm() {
                         initial={{ scale: 1.08, opacity: 0.7 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                        className="font-display text-2xl sm:text-3xl font-bold text-clay-pink-deep tabular-nums"
+                        className="font-serif text-xl sm:text-2xl text-rose-gold tabular-nums"
                       >
                         ${addonTotal}
                       </motion.span>
@@ -1318,20 +1398,20 @@ export function OrderForm() {
                     transition={{ duration: 0.25 }}
                     className="flex min-h-[320px] flex-1 flex-col gap-2"
                   >
-                    <h3 className="font-display text-2xl text-ink mb-0 shrink-0 text-center">Contact</h3>
+                    <h3 className="font-serif text-xl text-charcoal mb-0 shrink-0 text-center">Contact</h3>
                     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,2fr)] gap-2">
                       <div className="flex min-h-0 flex-col overflow-hidden">
-                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-left">
-                          <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-clay-pink-deep">
+                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-amber/25 bg-amber-light px-2 py-1 text-left">
+                          <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
                             Order summary
                           </p>
-                          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-[11px] leading-tight">
+                          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-px text-[10px] leading-tight">
                             {contactSummaryRows.map(({ key, label, value }) => (
                               <div key={key} className="contents">
-                                <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+                                <span className="text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
                                   {label}
                                 </span>
-                                <span className="min-w-0 text-right break-words text-ink">{value}</span>
+                                <span className="min-w-0 text-right break-words text-charcoal/70">{value}</span>
                               </div>
                             ))}
                           </div>
@@ -1339,31 +1419,31 @@ export function OrderForm() {
                       </div>
                       <div className="flex min-h-0 flex-col gap-2">
                         <div>
-                          <label className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">Name</label>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-charcoal/45">Name</label>
                           <input
                             type="text"
                             value={name}
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, name: e.target.value } }))
                             }
-                            className="mt-2 w-full rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-sm text-ink focus:outline-none focus-visible:shadow-focus-ring transition-shadow"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="name"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">Email</label>
+                          <label className="text-xs font-semibold uppercase tracking-wider text-charcoal/45">Email</label>
                           <input
                             type="email"
                             value={email}
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, email: e.target.value } }))
                             }
-                            className="mt-2 w-full rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-sm text-ink focus:outline-none focus-visible:shadow-focus-ring transition-shadow"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="email"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-charcoal/45">
                             Phone number
                           </label>
                           <input
@@ -1372,12 +1452,12 @@ export function OrderForm() {
                             onChange={e =>
                               setWizard(w => ({ ...w, form: { ...w.form, phone: e.target.value } }))
                             }
-                            className="mt-2 w-full rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-sm text-ink focus:outline-none focus-visible:shadow-focus-ring transition-shadow"
+                            className="mt-1 w-full rounded-2xl border-2 border-amber/25 bg-amber-light px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35"
                             autoComplete="tel"
                           />
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft mb-3">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-charcoal/45 mb-2">
                             Pickup or delivery
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1391,30 +1471,30 @@ export function OrderForm() {
                                   form: { ...w.form, fulfillment: 'pickup' },
                                 }))
                               }}
-                              className={`relative overflow-hidden rounded-clay-md p-5 text-left transition-all duration-300 ease-clay ${
+                              className={`glass-border relative overflow-hidden rounded-2xl p-4 text-left transition-all ${
                                 fulfillment === 'pickup'
-                                  ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                  : 'bg-surface shadow-neu-raised hover:shadow-clay-float hover:-translate-y-0.5'
+                                  ? 'border-amber bg-rose-gold text-white shadow-md ring-2 ring-amber/55'
+                                  : 'bg-amber-light hover:bg-amber/10'
                               }`}
                             >
                               {fulfillment === 'pickup' && (
                                 <span
-                                  className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-clay-pill bg-white/25 text-white"
+                                  className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/25 text-white shadow-sm"
                                   aria-hidden
                                 >
                                   <Check size={16} strokeWidth={3} />
                                 </span>
                               )}
                               <span
-                                className={`relative z-10 font-display text-xl block ${
-                                  fulfillment === 'pickup' ? 'text-white' : 'text-ink'
+                                className={`relative z-10 font-serif text-lg block ${
+                                  fulfillment === 'pickup' ? 'text-white' : 'text-charcoal'
                                 }`}
                               >
                                 Pickup
                               </span>
                               <span
-                                className={`relative z-10 text-sm font-bold ${
-                                  fulfillment === 'pickup' ? 'text-white/95' : 'text-clay-pink-deep'
+                                className={`relative z-10 text-sm font-semibold ${
+                                  fulfillment === 'pickup' ? 'text-white/95' : 'text-rose-gold'
                                 }`}
                               >
                                 Free
@@ -1427,30 +1507,30 @@ export function OrderForm() {
                                 setDeliveryAddressDraft(deliveryAddress)
                                 setDeliveryAddressModalOpen(true)
                               }}
-                              className={`relative overflow-hidden rounded-clay-md p-5 text-left transition-all duration-300 ease-clay ${
+                              className={`glass-border relative overflow-hidden rounded-2xl p-4 text-left transition-all ${
                                 fulfillment === 'delivery'
-                                  ? 'bg-clay-pink-deep text-ink-inverse shadow-clay-button ring-2 ring-clay-pink-deep ring-offset-4 ring-offset-surface'
-                                  : 'bg-surface shadow-neu-raised hover:shadow-clay-float hover:-translate-y-0.5'
+                                  ? 'border-amber bg-rose-gold text-white shadow-md ring-2 ring-amber/55'
+                                  : 'bg-amber-light hover:bg-amber/10'
                               }`}
                             >
                               {fulfillment === 'delivery' && (
                                 <span
-                                  className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-clay-pill bg-white/25 text-white"
+                                  className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/25 text-white shadow-sm"
                                   aria-hidden
                                 >
                                   <Check size={16} strokeWidth={3} />
                                 </span>
                               )}
                               <span
-                                className={`relative z-10 font-display text-xl block ${
-                                  fulfillment === 'delivery' ? 'text-white' : 'text-ink'
+                                className={`relative z-10 font-serif text-lg block ${
+                                  fulfillment === 'delivery' ? 'text-white' : 'text-charcoal'
                                 }`}
                               >
                                 Delivery
                               </span>
                               <span
-                                className={`relative z-10 text-sm font-bold ${
-                                  fulfillment === 'delivery' ? 'text-white/95' : 'text-clay-pink-deep'
+                                className={`relative z-10 text-sm font-semibold ${
+                                  fulfillment === 'delivery' ? 'text-white/95' : 'text-rose-gold'
                                 }`}
                               >
                                 $25
@@ -1458,7 +1538,7 @@ export function OrderForm() {
                             </button>
                           </div>
                           {fulfillment === 'delivery' && deliveryAddress.trim().length > 0 && (
-                            <p className="text-xs text-ink-soft break-words mt-2">
+                            <p className="text-xs text-charcoal/55 break-words mt-1">
                               Delivery to: {deliveryAddress}
                             </p>
                           )}
@@ -1471,7 +1551,7 @@ export function OrderForm() {
               </div>
 
               <div
-                className={`flex items-center gap-3 mt-8 pt-6 border-t border-ink/[0.06] ${
+                className={`flex items-center gap-3 mt-8 pt-6 border-t border-charcoal/10 ${
                   step === 3 || step === 5 || (step === 2 && cakeSubStep === 3)
                     ? 'justify-between'
                     : 'justify-start'
@@ -1481,7 +1561,7 @@ export function OrderForm() {
                   type="button"
                   onClick={goBack}
                   disabled={step === 1 && occasionSubStep === 1}
-                  className="inline-flex items-center gap-1.5 rounded-clay-pill bg-surface px-5 py-2.5 text-sm font-bold text-ink-soft shadow-clay-button-ghost hover:shadow-neu-raised hover:text-ink active:shadow-neu-pressed disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 ease-press focus-clay"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-charcoal/20 px-5 py-2.5 text-sm font-semibold text-charcoal/65 hover:text-charcoal hover:border-charcoal/35 hover:bg-charcoal/5 disabled:opacity-30 disabled:pointer-events-none transition-all duration-300"
                 >
                   <ChevronLeft size={16} />
                   Back
@@ -1491,7 +1571,7 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canDietaryNext()}
-                    className="inline-flex items-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-7 py-3 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press focus-clay"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Next
                     <ChevronRight size={16} />
@@ -1502,7 +1582,7 @@ export function OrderForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-7 py-3 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press focus-clay"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Next
                     <ChevronRight size={16} />
@@ -1512,7 +1592,7 @@ export function OrderForm() {
                   <button
                     type="submit"
                     disabled={!canAdvance()}
-                    className="inline-flex items-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-8 py-3 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press focus-clay"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
                   >
                     Submit request
                     <ChevronRight size={16} />
@@ -1534,7 +1614,7 @@ export function OrderForm() {
                   <button
                     type="button"
                     aria-label="Close dialog"
-                    className="absolute inset-0 bg-ink/55 backdrop-blur-sm"
+                    className="absolute inset-0 bg-charcoal/45 backdrop-blur-[1px]"
                     onClick={() => setOtherCelebrationModalOpen(false)}
                   />
                   <motion.div
@@ -1545,13 +1625,13 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md bg-surface rounded-clay-xl p-7 shadow-clay-float"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
-                    <h4 id="other-celebration-title" className="font-display text-2xl text-ink text-center mb-2">
+                    <h4 id="other-celebration-title" className="font-serif text-lg text-charcoal text-center mb-1">
                       Tell us more
                     </h4>
-                    <p className="text-center text-sm text-ink-soft mb-5">What are you celebrating?</p>
+                    <p className="text-center text-xs text-charcoal/55 mb-4">What are you celebrating?</p>
                     <label htmlFor="other-celebration-input" className="sr-only">
                       Celebration details
                     </label>
@@ -1562,13 +1642,13 @@ export function OrderForm() {
                       value={otherCelebrationDraft}
                       onChange={e => setOtherCelebrationDraft(e.target.value)}
                       placeholder="e.g. graduation, engagement party, housewarming…"
-                      className="w-full rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus-visible:shadow-focus-ring resize-none mb-5 transition-shadow"
+                      className="w-full rounded-xl border border-charcoal/15 bg-amber-light/60 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-amber/40 resize-none mb-4 rounded-2xl"
                     />
                     <div className="flex flex-wrap gap-2 justify-end">
                       <button
                         type="button"
                         onClick={() => setOtherCelebrationModalOpen(false)}
-                        className="rounded-clay-pill px-5 py-2.5 text-sm font-bold text-ink-soft hover:text-ink hover:bg-surface hover:shadow-neu-flat transition-all duration-200"
+                        className="rounded-full px-4 py-2.5 text-sm font-semibold text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 transition-colors"
                       >
                         Cancel
                       </button>
@@ -1589,7 +1669,7 @@ export function OrderForm() {
                           }))
                           setOtherCelebrationModalOpen(false)
                         }}
-                        className="inline-flex items-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-6 py-2.5 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press"
+                        className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-5 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all btn-glow"
                       >
                         Next
                         <ChevronRight size={18} aria-hidden />
@@ -1610,7 +1690,7 @@ export function OrderForm() {
                   <button
                     type="button"
                     aria-label="Close dialog"
-                    className="absolute inset-0 bg-ink/55 backdrop-blur-sm"
+                    className="absolute inset-0 bg-charcoal/45 backdrop-blur-[1px]"
                     onClick={() => setDeliveryAddressModalOpen(false)}
                   />
                   <motion.div
@@ -1621,13 +1701,13 @@ export function OrderForm() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-md bg-surface rounded-clay-xl p-7 shadow-clay-float"
+                    className="relative z-10 w-full max-w-md glass-border warm-card rounded-3xl p-5 shadow-xl"
                     onClick={e => e.stopPropagation()}
                   >
-                    <h4 id="delivery-address-title" className="font-display text-2xl text-ink text-center mb-2">
+                    <h4 id="delivery-address-title" className="font-serif text-lg text-charcoal text-center mb-1">
                       Delivery address
                     </h4>
-                    <p className="text-center text-sm text-ink-soft mb-5">
+                    <p className="text-center text-xs text-charcoal/55 mb-4">
                       Enter the full address where you&apos;d like the cake delivered.
                     </p>
                     <label htmlFor="delivery-address-input" className="sr-only">
@@ -1640,13 +1720,13 @@ export function OrderForm() {
                       value={deliveryAddressDraft}
                       onChange={e => setDeliveryAddressDraft(e.target.value)}
                       placeholder="Street address, unit, buzzer code, city, postal code…"
-                      className="w-full rounded-clay-md bg-surface shadow-neu-inset px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus-visible:shadow-focus-ring resize-none mb-5 transition-shadow"
+                      className="w-full rounded-xl border border-charcoal/15 bg-amber-light/60 px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-amber/40 resize-none mb-4 rounded-2xl"
                     />
                     <div className="flex flex-wrap gap-2 justify-end">
                       <button
                         type="button"
                         onClick={() => setDeliveryAddressModalOpen(false)}
-                        className="rounded-clay-pill px-5 py-2.5 text-sm font-bold text-ink-soft hover:text-ink hover:bg-surface hover:shadow-neu-flat transition-all duration-200"
+                        className="rounded-full px-4 py-2.5 text-sm font-semibold text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 transition-colors"
                       >
                         Cancel
                       </button>
@@ -1666,7 +1746,7 @@ export function OrderForm() {
                           }))
                           setDeliveryAddressModalOpen(false)
                         }}
-                        className="inline-flex items-center gap-2 rounded-clay-pill bg-clay-pink-deep text-ink-inverse font-bold text-sm px-6 py-2.5 shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press"
+                        className="inline-flex items-center gap-1 rounded-full bg-rose-gold text-white font-bold text-sm px-5 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all btn-glow"
                       >
                         Save
                         <ChevronRight size={18} aria-hidden />

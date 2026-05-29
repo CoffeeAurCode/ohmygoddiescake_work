@@ -3,30 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --font-fraunces: 'Fraunces', Georgia, serif;
-  --font-jakarta: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --surface: 245, 237, 228;
-  --ink: 42, 36, 30;
-  --shadow-dark: 180, 140, 90;
-  --shadow-light: 255, 250, 245;
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+  --amber-rgb: 245, 158, 66;
+  --rose-gold-rgb: 201, 149, 106;
 }
 
 html {
   scroll-behavior: smooth;
-  background-color: #F3EDE4;
 }
 
 body {
-  background-color: #F3EDE4;
-  color: #2A241E;
-  font-family: var(--font-jakarta);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-::selection {
-  background: rgba(240, 206, 122, 0.55);
-  color: #2A241E;
+  background-color: #FFF8EC;
+  color: #2D2D2D;
+  font-family: var(--font-dm-sans);
 }
 
 @layer utilities {
@@ -34,27 +24,84 @@ body {
     @apply px-6 md:px-12 lg:px-24 py-20 md:py-28;
   }
   .heading-xl {
-    @apply font-display font-medium text-4xl md:text-5xl lg:text-7xl leading-[1.05] tracking-tight;
-    font-variation-settings: "opsz" 144, "SOFT" 100;
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl leading-tight;
   }
   .heading-lg {
-    @apply font-display font-medium text-3xl md:text-4xl lg:text-5xl leading-[1.1] tracking-tight;
-    font-variation-settings: "opsz" 120, "SOFT" 100;
+    @apply font-serif text-3xl md:text-4xl leading-tight;
   }
   .heading-md {
-    @apply font-display font-medium text-2xl md:text-3xl leading-[1.15] tracking-tight;
-    font-variation-settings: "opsz" 100, "SOFT" 100;
+    @apply font-serif text-2xl md:text-3xl leading-tight;
   }
-  .eyebrow {
-    @apply inline-flex items-center gap-2 text-xs font-semibold tracking-[0.22em] uppercase text-rose-gold px-4 py-2 rounded-clay-pill bg-surface shadow-neu-inset;
+  .label-tag {
+    @apply text-xs font-semibold tracking-[0.2em] uppercase text-rose-gold;
   }
-  .eyebrow-dot::before {
-    content: '';
-    @apply w-1.5 h-1.5 rounded-full bg-clay-pink-deep;
+
+  /* Rose-gold + amber accent glass border — light sections */
+  .glass-border {
+    border: 2px solid rgba(201, 149, 106, 0.45);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.08),
+      0 0 32px rgba(245, 158, 66, 0.08),
+      inset 0 2px 0 rgba(255, 255, 255, 0.9),
+      0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
   }
-  .focus-clay {
-    @apply outline-none focus-visible:shadow-focus-ring;
+  .glass-border:hover {
+    border-color: rgba(201, 149, 106, 0.75);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 40px rgba(245, 158, 66, 0.14),
+      inset 0 2px 0 rgba(255, 255, 255, 0.95),
+      0 6px 28px rgba(0, 0, 0, 0.07);
   }
+
+  /* Rose-gold + amber accent glass border — dark sections */
+  .glass-border-dark {
+    border: 2px solid rgba(201, 149, 106, 0.55);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 28px rgba(245, 158, 66, 0.12),
+      inset 0 2px 0 rgba(255, 255, 255, 0.12);
+    transition: border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  }
+  .glass-border-dark:hover {
+    border-color: rgba(201, 149, 106, 0.9);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.25),
+      0 0 44px rgba(245, 158, 66, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  /* Accent frame for image containers */
+  .glass-border-img {
+    border: 2px solid rgba(201, 149, 106, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.08),
+      0 0 20px rgba(245, 158, 66, 0.08);
+    transition: box-shadow 0.5s ease-in-out;
+  }
+  .glass-border-img:hover {
+    box-shadow:
+      0 0 0 1px rgba(201, 149, 106, 0.15),
+      0 0 32px rgba(245, 158, 66, 0.15);
+  }
+
+  /* Warm card — amber-tinted background + soft glow */
+  .warm-card {
+    background: rgba(255, 248, 236, 0.75);
+    box-shadow:
+      0 0 40px rgba(245, 158, 66, 0.09),
+      0 4px 24px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.5s ease-in-out, transform 0.5s ease-in-out;
+  }
+  .warm-card:hover {
+    box-shadow:
+      0 0 56px rgba(245, 158, 66, 0.16),
+      0 8px 32px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+
+  /* Ambient section lighting — radial amber halo */
   .section-ambient {
     position: relative;
   }
@@ -63,51 +110,64 @@ body {
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse at 15% 20%, rgba(240, 206, 122, 0.22) 0%, transparent 55%),
-      radial-gradient(ellipse at 85% 80%, rgba(245, 158, 66, 0.14) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 50%, rgba(184, 134, 45, 0.08) 0%, transparent 70%);
+      radial-gradient(ellipse at 20% 50%, rgba(245, 158, 66, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(201, 149, 106, 0.06) 0%, transparent 55%);
     pointer-events: none;
     z-index: 0;
   }
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(48px);
-    pointer-events: none;
-    opacity: 0.55;
+
+  /* Button amber glow */
+  .btn-glow:hover {
+    box-shadow:
+      0 0 28px rgba(245, 158, 66, 0.45),
+      0 0 16px rgba(201, 149, 106, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.18);
   }
-  .clay-press {
-    @apply transition-all duration-200 ease-press active:scale-[0.96] active:shadow-clay-pressed;
+  .btn-glow-outline:hover {
+    box-shadow: 0 0 22px rgba(245, 158, 66, 0.35);
+  }
+  .btn-amber-glow:hover {
+    box-shadow:
+      0 0 28px rgba(245, 158, 66, 0.45),
+      0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Footer Instagram icon */
+  .footer-instagram-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .footer-instagram-btn:hover {
+    border-color: rgba(245, 158, 66, 0.4);
+    box-shadow: 0 0 16px rgba(245, 158, 66, 0.3);
   }
 }
 
-/* ─── Grain overlay ─────────────────────────────────────────────────────── */
+/* ─── Grain / noise texture overlay ─────────────────────────────────────── */
 .grain-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.025;
-  mix-blend-mode: multiply;
+  opacity: 0.032;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
 }
 
-/* ─── Scroll progress bar ───────────────────────────────────────────────── */
+/* ─── Scroll progress bar ────────────────────────────────────────────────── */
 .scroll-progress-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   z-index: 99999;
-  background: linear-gradient(90deg, #F0CE7A 0%, #F59E42 50%, #B8862D 100%);
+  background: linear-gradient(90deg, #C9956A 0%, #F59E42 50%, #FAD7A0 100%);
   transform-origin: left center;
-  box-shadow: 0 0 12px rgba(240, 206, 122, 0.6);
 }
 
-/* ─── Marquee strip ─────────────────────────────────────────────────────── */
+/* ─── Marquee strip (Services + Reviews) ────────────────────────────────── */
 @keyframes marquee {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -116,7 +176,7 @@ body {
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee 28s linear infinite;
+  animation: marquee 24s linear infinite;
   will-change: transform;
 }
 
@@ -139,12 +199,12 @@ body {
 
 .footer-gradient-border {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #F0CE7A, #F59E42, #B8862D, #F59E42, #F0CE7A, transparent);
+  background: linear-gradient(90deg, transparent, #C9956A, #F59E42, #FAD7A0, #F59E42, #C9956A, transparent);
   background-size: 300% 100%;
   animation: gradient-shift 6s ease infinite;
 }
 
-/* ─── Footer link underline ─────────────────────────────────────────────── */
+/* ─── Footer link draw-in underline ─────────────────────────────────────── */
 .footer-link-animated {
   position: relative;
   display: inline-block;
@@ -153,31 +213,14 @@ body {
 .footer-link-animated::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: -1px;
   left: 0;
   width: 0;
   height: 1px;
-  background: #F0CE7A;
+  background: #FAD7A0;
   transition: width 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .footer-link-animated:hover::after {
   width: 100%;
-}
-
-/* ─── Reduced motion ────────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-float-delayed,
-  .animate-breathe,
-  .animate-drift,
-  .animate-wobble {
-    animation: none !important;
-  }
-  .marquee-track {
-    animation: none !important;
-  }
-  html {
-    scroll-behavior: auto;
-  }
 }

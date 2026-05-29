@@ -1,77 +1,91 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { FileText, DollarSign, CheckCircle, Clock, Calendar, CreditCard, ArrowRight } from 'lucide-react'
+import { FileText, Cake, CheckCircle, Clock, Sparkles, CreditCard } from 'lucide-react'
 
 const steps = [
   {
     icon: FileText,
-    tone: 'pink' as const,
     step: '01',
-    title: 'Fill Out Our Quote Form',
-    body: 'Choose your occasion, size, flavour, and add-ons. Takes less than 2 minutes.',
+    title: 'Fill Out the Cake Order Form',
+    body: 'Tell us about your dream cake — flavour, design, occasion, and servings. Takes less than 2 minutes.',
     accent: Clock,
     accentLabel: '< 2 min',
   },
   {
-    icon: DollarSign,
-    tone: 'amber' as const,
+    icon: Cake,
     step: '02',
-    title: 'Receive Your Custom Quote',
-    body: 'Get your personalised quote within 48 hours — no back and forth.',
-    accent: Calendar,
-    accentLabel: 'Within 48 hrs',
+    title: 'Customize Your Cake',
+    body: 'Our baker reviews your order and reaches out to finalize every detail — design, colours, and any special touches.',
+    accent: Sparkles,
+    accentLabel: 'Personalized',
   },
   {
     icon: CheckCircle,
-    tone: 'violet' as const,
     step: '03',
-    title: 'Approve & Pay Your Deposit',
-    body: 'Confirm your order with a 50% deposit via e-transfer to lock in your date.',
+    title: 'Confirm & Lock In Your Date',
+    body: "Once your cake is finalized, you'll receive a payment link for your 50% deposit to secure your order.",
     accent: CreditCard,
     accentLabel: '50% deposit',
   },
 ]
 
-const toneBg = {
-  pink:   'bg-clay-pink text-clay-pink-deep',
-  amber:  'bg-amber-glow text-amber-deep',
-  violet: 'bg-clay-violet text-ink-inverse',
+const cardVariants = {
+  hidden: { opacity: 0, rotateX: -8, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    rotateX: 0,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      delay: i * 0.12,
+      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+    },
+  }),
 }
 
 export default function HowItWorks() {
   return (
-    <section id="process" className="relative section-padding section-ambient overflow-hidden">
-      <div className="blob bg-clay-violet/30 w-80 h-80 top-20 -left-32 animate-float" />
-      <div className="blob bg-amber/30 w-80 h-80 bottom-10 -right-24 animate-float-delayed" />
+    <section id="process" className="section-padding section-ambient bg-amber-muted overflow-hidden">
       <div className="relative z-10 max-w-6xl mx-auto">
+
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center mb-16"
         >
-          <span className="eyebrow eyebrow-dot mb-6">The Process</span>
-          <h2 className="heading-lg text-ink">
+          <p className="label-tag mb-4">The Process</p>
+          <h2 className="heading-lg text-charcoal">
             How to Order Your{' '}
-            <span className="italic text-clay-pink-deep">Custom Cake</span>
+            <span className="text-rose-gold italic">Custom Cake</span>
           </h2>
-          <p className="mt-5 text-ink-soft max-w-xl mx-auto text-lg leading-relaxed">
+          <p className="mt-4 text-charcoal/55 max-w-xl mx-auto text-sm">
             Three simple steps from first message to first bite. We keep it straightforward so you can focus on celebrating.
           </p>
         </motion.div>
 
+        {/* Timeline */}
         <div className="relative">
-          {/* Dotted connector */}
-          <div className="hidden md:block absolute top-14 left-[16.666%] right-[16.666%] h-0.5">
-            <svg width="100%" height="2" viewBox="0 0 100 2" preserveAspectRatio="none">
+          {/* SVG connector line with draw-in animation */}
+          <div
+            className="hidden md:block absolute top-12 left-[16.666%] right-[16.666%]"
+            style={{ overflow: 'visible', height: '2px' }}
+          >
+            <svg
+              width="100%"
+              height="2"
+              viewBox="0 0 100 2"
+              preserveAspectRatio="none"
+              style={{ overflow: 'visible' }}
+            >
               <motion.path
                 d="M0 1 L100 1"
-                stroke="#C9956A"
-                strokeOpacity="0.45"
-                strokeWidth="0.4"
-                strokeDasharray="1.5 1.5"
+                stroke="rgba(245,158,66,0.4)"
+                strokeWidth="0.25"
+                strokeDasharray="1.2 1.2"
                 fill="none"
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
@@ -79,52 +93,54 @@ export default function HowItWorks() {
                 transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.2 }}
               />
             </svg>
+            {/* Animated glow dot */}
             <motion.div
               animate={{ x: ['0%', '100%', '0%'] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-clay-pink-deep shadow-clay-glow-pink"
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-rose-gold shadow-[0_0_12px_rgba(201,149,106,0.7)]"
             />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 md:gap-6">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {steps.map((s, i) => {
               const Icon = s.icon
               const AccentIcon = s.accent
               return (
                 <motion.div
                   key={s.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="visible"
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.12 }}
-                  className="relative flex flex-col items-center text-center"
+                  style={{ perspective: 800 }}
+                  className="relative flex flex-col items-center md:items-start text-center md:text-left"
                 >
-                  {/* Step circle */}
-                  <div className="relative mb-7 z-10">
+                  {/* Step circle with pulse */}
+                  <div className="relative mb-6 z-10">
                     <motion.div
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.6 }}
-                      className={`w-28 h-28 rounded-clay-pill ${toneBg[s.tone]} shadow-clay-card flex items-center justify-center`}
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.7 }}
+                      className="w-24 h-24 rounded-full bg-amber-light border-2 border-amber/20 flex items-center justify-center shadow-[0_0_32px_rgba(245,158,66,0.12)]"
                     >
-                      <div className="w-20 h-20 rounded-clay-pill bg-surface shadow-neu-inset-deep flex items-center justify-center">
-                        <Icon size={30} className="text-clay-pink-deep" />
-                      </div>
+                      <Icon size={28} className="text-rose-gold" />
                     </motion.div>
-                    <span className="absolute -top-1 -right-1 w-9 h-9 rounded-clay-pill bg-ink text-ink-inverse flex items-center justify-center text-xs font-bold font-display shadow-clay-card">
-                      {i + 1}
-                    </span>
                   </div>
 
                   {/* Content card */}
-                  <div className="bg-surface rounded-clay-lg shadow-neu-raised p-7 w-full relative overflow-hidden hover:shadow-clay-float hover:-translate-y-1 transition-all duration-300">
-                    <span className="absolute -bottom-4 -right-2 font-display text-8xl font-bold text-clay-pink/25 leading-none select-none">
+                  <div className="glass-border warm-card rounded-3xl p-6 w-full relative overflow-hidden">
+                    {/* Ghost step number */}
+                    <span className="absolute bottom-3 right-4 font-serif text-6xl font-bold text-[#A67C52]/55 leading-none select-none">
                       {s.step}
                     </span>
-                    <h3 className="font-display text-xl text-ink mb-2.5 leading-snug relative">{s.title}</h3>
-                    <p className="text-sm text-ink-soft leading-relaxed mb-5 relative">{s.body}</p>
-                    <div className="relative inline-flex items-center gap-2 bg-surface shadow-neu-inset rounded-clay-pill px-3.5 py-1.5">
-                      <AccentIcon size={12} className="text-clay-pink-deep" />
-                      <span className="text-xs font-bold text-ink-soft tracking-wide">{s.accentLabel}</span>
+
+                    <h3 className="font-serif text-lg text-charcoal mb-2 pr-8 leading-snug">{s.title}</h3>
+                    <p className="text-sm text-charcoal/60 leading-relaxed mb-4">{s.body}</p>
+
+                    {/* Accent chip */}
+                    <div className="inline-flex items-center gap-1.5 bg-amber-glow/30 rounded-full px-3 py-1">
+                      <AccentIcon size={11} className="text-rose-gold" />
+                      <span className="text-[11px] font-semibold text-charcoal/70">{s.accentLabel}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -133,19 +149,19 @@ export default function HowItWorks() {
           </div>
         </div>
 
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mt-14 flex justify-center"
+          transition={{ delay: 0.45, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-10 flex justify-center"
         >
           <a
             href="#order-form"
-            className="group inline-flex items-center gap-2.5 px-10 py-4 rounded-clay-pill font-semibold text-base bg-clay-pink-deep text-ink-inverse shadow-clay-button hover:shadow-clay-glow-pink hover:-translate-y-0.5 active:scale-[0.96] active:shadow-clay-pressed transition-all duration-200 ease-press"
+            className="btn-glow btn-amber-glow bg-rose-gold text-white text-sm font-semibold px-10 py-4 rounded-full hover:bg-opacity-90 transition-all duration-500 ease-in-out"
           >
-            Get My Custom Quote
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            Order My Cake
           </a>
         </motion.div>
       </div>

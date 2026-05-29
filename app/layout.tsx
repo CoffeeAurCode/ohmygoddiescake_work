@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
-import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google'
+import { Playfair_Display, DM_Sans } from 'next/font/google'
 import './globals.css'
 import ScrollProgressBar from '@/components/ScrollProgressBar'
 
-const fraunces = Fraunces({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  variable: '--font-fraunces',
+  variable: '--font-playfair',
   display: 'swap',
 })
 
-const jakarta = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-jakarta',
+  variable: '--font-dm-sans',
   display: 'swap',
 })
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jakarta.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
       <body>
         <ScrollProgressBar />
         <div className="grain-overlay" aria-hidden="true" />
