@@ -166,6 +166,8 @@ const ADD_ONS = [
   { id: 'cherries', label: 'Cherries', price: 5 },
   { id: 'miniLiquor', label: 'Mini liquor bottles', price: 7 },
   { id: 'burnaway', label: 'Burn-away image', price: 40 },
+  { id: 'pearls', label: 'Pearls', price: 5 },
+  { id: 'ribbons', label: 'Ribbons', price: 5 },
 ] as const
 
 type AddonId = (typeof ADD_ONS)[number]['id']
@@ -202,14 +204,12 @@ type OrderFormValues = {
   fulfillment: 'pickup' | 'delivery' | ''
   /** Required when fulfillment is delivery. */
   deliveryAddress: string
-  /** Dietary restriction labels; `None` is mutually exclusive with other options. */
-  dietaryRestrictions: string[]
 }
 
 type OrderFormNav = {
   step: number
   occasionSubStep: number
-  /** Cake sub-steps: 1=flavour, 2=frosting, 3=dietary */
+  /** Cake sub-steps: 1=flavour, 2=frosting */
   cakeSubStep: number
 }
 
@@ -218,7 +218,6 @@ function cakeDetailsComplete(form: OrderFormValues): boolean {
 }
 
 function cakeNavFromForm(form: OrderFormValues): Pick<OrderFormNav, 'cakeSubStep'> {
-  if (cakeDetailsComplete(form)) return { cakeSubStep: 3 }
   if (form.flavour) return { cakeSubStep: 2 }
   return { cakeSubStep: 1 }
 }
@@ -242,7 +241,6 @@ const INITIAL_FORM: OrderFormValues = {
   phone: '',
   fulfillment: '',
   deliveryAddress: '',
-  dietaryRestrictions: [],
 }
 
 const INITIAL_NAV: OrderFormNav = {
@@ -251,7 +249,7 @@ const INITIAL_NAV: OrderFormNav = {
   cakeSubStep: 1,
 }
 
-const DIETARY_OPTIONS = ['Gluten-free', 'Dairy-free', 'Vegan', 'Halal', 'None'] as const
+
 
 export function OrderForm() {
   const [minPickupStr, setMinPickupStr] = useState('')
@@ -280,7 +278,6 @@ export function OrderForm() {
     phone,
     fulfillment,
     deliveryAddress,
-    dietaryRestrictions,
   } = form
 
   const [otherCelebrationModalOpen, setOtherCelebrationModalOpen] = useState(false)
@@ -371,7 +368,6 @@ export function OrderForm() {
     if (step === 1 && occasionSubStep === 2) return ' · Servings'
     if (step === 2 && cakeSubStep === 1) return ' · Flavour'
     if (step === 2 && cakeSubStep === 2) return ' · Frosting'
-    if (step === 2 && cakeSubStep === 3) return ' · Dietary'
     if (step === 3) return ' · Add-ons'
     if (step === 4) return ' · Date'
     if (step === 5) return ' · Contact'
@@ -423,11 +419,6 @@ export function OrderForm() {
     rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
 
     rows.push({ key: 'frosting', label: 'Frosting', value: frosting || '—' })
-    rows.push({
-      key: 'dietary',
-      label: 'Dietary',
-      value: dietaryRestrictions.length === 0 ? '—' : dietaryRestrictions.join(', '),
-    })
     rows.push({ key: 'pickup', label: 'Pickup date', value: formatPickupDisplay(pickupDate) })
 
     if (addonIds.length > 0) {
@@ -453,7 +444,6 @@ export function OrderForm() {
     addonTotal,
     celebration,
     celebrationOtherNote,
-    dietaryRestrictions,
     flavour,
     frosting,
     pickupDate,
@@ -545,8 +535,7 @@ export function OrderForm() {
     })
   }
 
-  const canDietaryNext = (): boolean =>
-    dietaryRestrictions.length > 0
+
 
   const advanceToAddOnsStepWithResume = () => {
     const resumeSnap = resumeAfterEditingFromStepRef.current
@@ -561,10 +550,6 @@ export function OrderForm() {
   }
 
   const goNext = () => {
-    if (step === 2 && cakeSubStep === 3 && canDietaryNext()) {
-      advanceToAddOnsStepWithResume()
-      return
-    }
     if (step === 3 && canAdvance()) {
       setWizard(w => ({ ...w, nav: { ...w.nav, step: 4 } }))
     }
@@ -594,14 +579,10 @@ export function OrderForm() {
     if (step <= 1) return
 
     if (step === 2 && cakeSubStep > 1) {
-      if (cakeSubStep === 3) {
-        setWizard(w => ({ ...w, nav: { ...w.nav, cakeSubStep: 2 } }))
-        return
-      }
       if (cakeSubStep === 2) {
         setWizard(w => ({
           ...w,
-          form: { ...w.form, frosting: '', dietaryRestrictions: [] },
+          form: { ...w.form, frosting: '' },
           nav: { ...w.nav, cakeSubStep: 1 },
         }))
         return
@@ -616,7 +597,6 @@ export function OrderForm() {
           ...w.form,
           flavour: '',
           frosting: '',
-          dietaryRestrictions: [],
         },
         nav: {
           step: 1,
@@ -658,39 +638,17 @@ export function OrderForm() {
   const pickFrosting = (f: string) => {
     setWizard(w => {
       const nextForm = { ...w.form, frosting: f }
-      const nextNav = { ...w.nav }
-      if (w.nav.step === 2 && cakeDetailsComplete(nextForm)) {
-        nextNav.cakeSubStep = 3
+      const resumeSnap = resumeAfterEditingFromStepRef.current
+      const willResume = resumeSnap != null && resumeSnap > 3
+      const nextNav = { ...w.nav, step: willResume ? resumeSnap : 3 }
+      if (willResume) {
+        resumeAfterEditingFromStepRef.current = null
       }
       return { ...w, form: nextForm, nav: nextNav }
     })
   }
 
-  const selectDietaryNone = () => {
-    const resumeSnap = resumeAfterEditingFromStepRef.current
-    const willResume = resumeSnap != null && resumeSnap > 3
-    setWizard(w => ({
-      ...w,
-      form: { ...w.form, dietaryRestrictions: ['None'] },
-      nav: { ...w.nav, step: willResume ? resumeSnap : 3 },
-    }))
-    if (willResume) {
-      resumeAfterEditingFromStepRef.current = null
-    }
-  }
 
-  const toggleDietaryOption = (id: string) => {
-    if (id === 'None') {
-      selectDietaryNone()
-      return
-    }
-    setWizard(w => {
-      const withoutNone = w.form.dietaryRestrictions.filter(x => x !== 'None')
-      const has = withoutNone.includes(id)
-      const next = has ? withoutNone.filter(x => x !== id) : [...withoutNone, id]
-      return { ...w, form: { ...w.form, dietaryRestrictions: next } }
-    })
-  }
 
   const goToMainStepByTab = (target: number) => {
     if (target > maxReachedStep) return
@@ -742,11 +700,6 @@ export function OrderForm() {
               <p className="font-serif text-xl md:text-2xl text-charcoal leading-relaxed mb-4">
                 Your order request has been received!
               </p>
-              {dietaryRestrictions.length > 0 && (
-                <p className="text-charcoal/60 text-sm mb-4 max-w-md mx-auto">
-                  Dietary: {dietaryRestrictions.join(', ')}
-                </p>
-              )}
               <p className="text-charcoal/70 text-sm leading-relaxed max-w-md mx-auto">
                 Onyinye will be in touch within 24 hours with your quote. A 50% deposit via e-transfer will be required
                 to confirm your order.
@@ -1243,40 +1196,7 @@ export function OrderForm() {
                         </motion.div>
                       )}
 
-                      {cakeSubStep === 3 && (
-                        <motion.div
-                          key="cake-sub-3-dietary"
-                          initial={{ opacity: 0, x: 14 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -14 }}
-                          transition={{ duration: 0.22 }}
-                          className="flex-1 flex flex-col min-h-0"
-                        >
-                          <h3 className="font-serif text-xl text-charcoal text-center mb-1 shrink-0">
-                            Any dietary restrictions?
-                          </h3>
-                          <p className="text-center text-xs text-charcoal/50 mb-4 shrink-0">Select all that apply</p>
-                          <div className="grid grid-cols-2 gap-3 flex-1 min-h-0 content-start">
-                            {DIETARY_OPTIONS.map(opt => {
-                              const selected = dietaryRestrictions.includes(opt)
-                              return (
-                                <button
-                                  key={opt}
-                                  type="button"
-                                  onClick={() => toggleDietaryOption(opt)}
-                                  className={`glass-border rounded-2xl flex min-h-[5.25rem] sm:min-h-[5.75rem] w-full items-center justify-center px-3 py-3 text-center text-sm sm:text-base font-semibold leading-snug transition-all ${
-                                    selected
-                                      ? 'bg-rose-gold text-white border-amber shadow-md'
-                                      : 'bg-amber-light text-charcoal border-amber/30 hover:bg-amber/10'
-                                  }`}
-                                >
-                                  {opt}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
+
                     </AnimatePresence>
                   </motion.div>
                 )}

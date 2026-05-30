@@ -47,13 +47,7 @@ export default function About() {
             </div>
 
             <div className="flex-1">
-              {/* Background watermark word */}
-              <span
-                className="absolute -top-6 -left-2 font-serif italic text-[clamp(5rem,12vw,9rem)] font-bold text-charcoal/[0.035] leading-none select-none pointer-events-none"
-                aria-hidden
-              >
-                Story
-              </span>
+
 
               <motion.p {...fadeUp(0)} className="label-tag mb-4 relative">
                 Our Story
@@ -76,7 +70,7 @@ export default function About() {
                   important moments.
                 </motion.p>
                 <motion.p {...fadeUp(0.32)}>
-                  Today, O&apos; My Goodies Custom Cakes is built on one belief — that a cake made
+                  Today, Ony&apos;s Boutique is built on one belief — that a cake made
                   for a milestone should feel as extraordinary as the milestone itself.
                 </motion.p>
               </div>

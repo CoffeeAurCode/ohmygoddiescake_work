@@ -28,14 +28,14 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "O' My Goodies Custom Cakes | Calgary Custom Cakes",
+  title: "Ony's Boutique Custom Cakes | Calgary Custom Cakes",
   description:
     "Luxury custom cakes in Calgary, made with elevated design and exceptional taste. Wedding cakes, birthday cakes, and celebration cakes crafted to make every moment unforgettable.",
   keywords: ["custom cakes Calgary", "wedding cakes Calgary", "birthday cakes Calgary", "luxury cakes Calgary"],
   openGraph: {
-    title: "O' My Goodies Custom Cakes",
+    title: "Ony's Boutique Custom Cakes",
     description: "Luxury custom cakes in Calgary. Elevated design, exceptional taste.",
-    siteName: "O' My Goodies Custom Cakes",
+    siteName: "Ony's Boutique Custom Cakes",
   },
 }
 

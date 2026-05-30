@@ -15,6 +15,8 @@ const addons = [
   { name: 'Cherries',             price: '$5' },
   { name: 'Mini Liquor Bottles',  price: '$7' },
   { name: 'Burnaway Image',       price: '$40' },
+  { name: 'Pearls',               price: '$5' },
+  { name: 'Ribbons',              price: '$5' },
 ]
 
 export default function AddOns() {

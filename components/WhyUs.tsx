@@ -35,7 +35,7 @@ export default function WhyUs() {
         >
           <p className="label-tag mb-4">Why Choose Us</p>
           <h2 className="heading-lg text-charcoal">
-            What Sets O&apos; My Goodies{' '}
+            What Sets Ony&apos;s Boutique{' '}
             <span className="text-rose-gold italic">Apart</span>
           </h2>
         </motion.div>

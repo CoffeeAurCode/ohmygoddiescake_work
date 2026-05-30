@@ -39,7 +39,7 @@ const testimonials = [
 
 const starSizes = [14, 16, 18, 16, 14]
 
-const reviewMarqueeText = "★★★★★  5-Star Reviews  ·  Calgary  ·  O' My Goodies  ·  "
+const reviewMarqueeText = "★★★★★  5-Star Reviews  ·  Calgary  ·  Ony's Boutique  ·  "
 
 export default function Reviews() {
   return (
@@ -61,7 +61,7 @@ export default function Reviews() {
             <span className="text-rose-gold italic">Calgary</span>
           </h2>
           <p className="mt-4 text-charcoal/55 max-w-xl mx-auto text-sm leading-relaxed">
-            Real celebrations, real reactions — here&apos;s what clients say about working with O&apos; My Goodies.
+            Real celebrations, real reactions — here&apos;s what clients say about working with Ony&apos;s Boutique.
           </p>
         </motion.div>
 

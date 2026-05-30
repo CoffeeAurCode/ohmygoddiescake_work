@@ -40,7 +40,7 @@ export default function Footer() {
               style={{ background: 'radial-gradient(ellipse at center, rgba(245,158,66,0.12) 0%, transparent 70%)' }}
               aria-hidden
             />
-            <p className="font-serif text-2xl text-white mb-3 relative">O&apos; My Goodies</p>
+            <p className="font-serif text-2xl text-white mb-3 relative">Ony&apos;s Boutique</p>
             <p className="text-white/40 text-sm leading-relaxed max-w-xs">
               Luxury custom cakes in Downtown Calgary. Elevated design, exceptional taste — made for your most important moments.
             </p>
@@ -79,7 +79,7 @@ export default function Footer() {
             <ul className="space-y-3.5">
               <li className="flex items-start gap-3 text-sm text-white/40">
                 <MapPin size={14} className="text-amber flex-shrink-0 mt-0.5" />
-                <span className="leading-snug">1122 15 Ave SW<br />Calgary, AB · T2R 1K5<br />(Home Bakery)</span>
+                <span className="leading-snug">Calgary Beltline</span>
               </li>
               <li>
                 <a
@@ -92,11 +92,11 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:omygoodies00@gmail.com"
+                  href="mailto:omygoodiesyyc@gmail.com"
                   className="footer-link-animated flex items-center gap-3 text-sm text-white/40 hover:text-amber-glow transition-colors duration-400 ease-in-out group"
                 >
                   <Mail size={14} className="text-amber flex-shrink-0" />
-                  <span>omygoodies00@gmail.com</span>
+                  <span>omygoodiesyyc@gmail.com</span>
                 </a>
               </li>
             </ul>
@@ -111,7 +111,7 @@ export default function Footer() {
             <div className="flex-1 h-px" style={{ background: 'rgba(245,158,66,0.1)' }} />
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/20 pt-2">
-            <p>© {new Date().getFullYear()} O&apos; My Goodies Custom Cakes. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Ony&apos;s Boutique Custom Cakes. All rights reserved.</p>
             <p>Business Reg. TN23607229 · Calgary, AB</p>
           </div>
         </div>

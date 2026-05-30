@@ -16,13 +16,14 @@ const tabIcons: Record<Tab, typeof Cake> = {
 
 const celebrationData = {
   rows: [
-    { label: 'Small',  six: { price: '$185', num: 185 }, eight: { price: '$240', num: 240 } },
-    { label: 'Medium', six: { price: '$245', num: 245 }, eight: { price: '$325', num: 325 } },
-    { label: 'Tall',   six: { price: '$325', num: 325 }, eight: { price: '$425', num: 425 } },
-  ],
-  other: [
-    { label: 'Cupcakes', note: 'per dozen', price: '$72', num: 72 },
-    { label: 'Cupcake Set', note: '4" cake + 8 cupcakes', price: '$185', num: 185 },
+    { size: '6" (2 layers)',  servings: '8–10',   price: '$120', num: 120 },
+    { size: '6" (3 layers)',  servings: '10–15',  price: '$145', num: 145 },
+    { size: '6" (4 layers)',  servings: '15–20',  price: '$165', num: 165 },
+    { size: '8" (2 layers)',  servings: '15–20',  price: '$165', num: 165 },
+    { size: '8" (3 layers)',  servings: '20–25',  price: '$195', num: 195 },
+    { size: '8" (4 layers)',  servings: '25–30',  price: '$225', num: 225 },
+    { size: '10" (3 layers)', servings: '35–45',  price: '$295', num: 295 },
+    { size: '10" (4 layers)', servings: '45–55',  price: '$345', num: 345 },
   ],
 }
 
@@ -95,25 +96,27 @@ function AnimatedPrice({
   )
 }
 
-/* Single row for the birthday comparison table */
+/* Single row for the celebration pricing table */
 function BirthdayRow({
-  label,
-  six,
-  eight,
+  size,
+  servings,
+  price,
+  num,
   last,
 }: {
-  label: string
-  six: { price: string; num: number }
-  eight: { price: string; num: number }
+  size: string
+  servings: string
+  price: string
+  num: number
   last: boolean
 }) {
   return (
     <div
       className={`grid grid-cols-3 px-6 py-3.5 ${!last ? 'border-b border-amber/10' : ''} hover:bg-amber-glow/10 transition-colors duration-300`}
     >
-      <span className="text-xs font-semibold text-charcoal/60 self-center">{label}</span>
-      <AnimatedPrice num={six.num} fallback={six.price} className="font-serif text-lg font-bold text-charcoal text-center self-center block" />
-      <AnimatedPrice num={eight.num} fallback={eight.price} className="font-serif text-lg font-bold text-rose-gold text-right self-center block" />
+      <span className="text-sm font-semibold text-charcoal self-center">{size}</span>
+      <span className="text-sm text-charcoal/55 text-center self-center">{servings}</span>
+      <AnimatedPrice num={num} fallback={price} className="font-serif text-lg font-bold text-rose-gold text-right self-center block" />
     </div>
   )
 }
@@ -131,28 +134,22 @@ function ExtraCard({ label, note, price, num }: { label: string; note: string; p
 
 function BirthdayPanel() {
   return (
-    <div className="space-y-5">
-      <div className="glass-border warm-card rounded-3xl overflow-hidden">
-        <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Size</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-center">6&quot; Cake</span>
-          <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">8&quot; Cake</span>
-        </div>
-        {celebrationData.rows.map((row, i) => (
-          <BirthdayRow
-            key={row.label}
-            label={row.label}
-            six={row.six}
-            eight={row.eight}
-            last={i === celebrationData.rows.length - 1}
-          />
-        ))}
+    <div className="glass-border warm-card rounded-3xl overflow-hidden">
+      <div className="grid grid-cols-3 px-6 py-3 bg-amber-glow/20 border-b border-amber/15">
+        <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45">Size</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-center">Servings</span>
+        <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal/45 text-right">Starting Price</span>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {celebrationData.other.map(item => (
-          <ExtraCard key={item.label} label={item.label} note={item.note} price={item.price} num={item.num} />
-        ))}
-      </div>
+      {celebrationData.rows.map((row, i) => (
+        <BirthdayRow
+          key={row.size}
+          size={row.size}
+          servings={row.servings}
+          price={row.price}
+          num={row.num}
+          last={i === celebrationData.rows.length - 1}
+        />
+      ))}
     </div>
   )
 }
