@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management Guide — Ony's Boutique</title>
+  <style>
+    /* ── Brand tokens ── */
+    :root {
+      --cream:      #F3EDE4;
+      --cream-dark: #EAE0D3;
+      --rose:       #C9956A;
+      --rose-light: #E8C4A8;
+      --gold:       #C5A35A;
+      --ink:        #2A241E;
+      --ink-light:  #5A4E44;
+      --white:      #FFFFFF;
+      --tip-bg:     #FFF8F0;
+      --warn-bg:    #FFF3E8;
+      --warn-border:#C9956A;
+      --step-bg:    #FAF5EF;
+      --muted:      #8C7A6A;
+    }
+
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    /* ── Layout shell ── */
+    .page-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 36px 24px 28px;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    .site-header .logo-line {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--rose-light);
+      margin-bottom: 10px;
+    }
+    .site-header h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--cream);
+    }
+    .site-header .subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--rose-light);
+    }
+
+    /* ── TOC sidebar strip ── */
+    .toc-strip {
+      background: var(--cream-dark);
+      border-bottom: 2px solid var(--rose-light);
+      padding: 16px 24px;
+      display: flex;
+      gap: 8px 20px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .toc-strip a {
+      color: var(--ink-light);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .toc-strip a:hover { color: var(--rose); text-decoration: underline; }
+    .toc-label {
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    /* ── Section wrappers ── */
+    .section {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 36px 40px;
+      margin-top: 32px;
+      border: 1px solid var(--cream-dark);
+      box-shadow: 0 2px 12px rgba(42,36,30,0.07);
+    }
+
+    .section-badge {
+      display: inline-block;
+      background: var(--rose);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 20px;
+      padding: 3px 12px;
+      margin-bottom: 10px;
+    }
+
+    .section h2 {
+      font-size: clamp(18px, 3vw, 24px);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .section h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 24px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section h3 .step-num {
+      background: var(--rose);
+      color: var(--white);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .section p { margin-bottom: 12px; }
+    .section ul, .section ol {
+      padding-left: 22px;
+      margin-bottom: 14px;
+    }
+    .section li { margin-bottom: 5px; }
+
+    /* ── Flow diagram (Section 0) ── */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 28px 0;
+    }
+    .flow-node {
+      background: var(--step-bg);
+      border: 2px solid var(--rose-light);
+      border-radius: 10px;
+      padding: 14px 28px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--ink);
+      width: min(360px, 100%);
+      position: relative;
+    }
+    .flow-node .icon {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+    .flow-arrow {
+      font-size: 24px;
+      color: var(--rose);
+      margin: 4px 0;
+      line-height: 1;
+    }
+
+    /* ── Phone mockup (Section 1) ── */
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0;
+    }
+    .phone-shell {
+      background: #1C1C1E;
+      border-radius: 42px;
+      padding: 18px 14px;
+      width: 280px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      position: relative;
+    }
+    .phone-shell::before {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 6px;
+      background: #3A3A3C;
+      border-radius: 3px;
+      margin: 0 auto 14px;
+    }
+    .phone-screen {
+      background: #F2F2F7;
+      border-radius: 26px;
+      padding: 16px 12px;
+      min-height: 200px;
+    }
+    .sms-header {
+      text-align: center;
+      font-size: 11px;
+      color: #8E8E93;
+      margin-bottom: 10px;
+    }
+    .sms-bubble {
+      background: #E5E5EA;
+      border-radius: 18px 18px 18px 4px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #1C1C1E;
+      white-space: pre-line;
+    }
+    .sms-time {
+      text-align: right;
+      font-size: 10px;
+      color: #8E8E93;
+      margin-top: 6px;
+    }
+
+    /* ── SMS field labels ── */
+    .sms-labels {
+      margin: 16px 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sms-label-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: var(--step-bg);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 14px;
+    }
+    .sms-label-key {
+      font-weight: 700;
+      color: var(--rose);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    /* ── Annotated order mockup (Section 3) ── */
+    .order-mockup {
+      background: #F9F5F0;
+      border: 1.5px solid var(--rose-light);
+      border-radius: 10px;
+      padding: 20px 24px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13.5px;
+      line-height: 1.7;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    .order-mockup .order-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--rose);
+      border-bottom: 1px solid var(--rose-light);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+    .order-mockup .divider {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    .order-mockup .row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .order-mockup .row-text { flex: 1; min-width: 200px; }
+    .order-mockup .row-tag {
+      font-family: system-ui, sans-serif;
+      font-size: 11px;
+      background: var(--rose);
+      color: var(--white);
+      border-radius: 20px;
+      padding: 1px 9px;
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    /* ── Screenshot placeholder ── */
+    .screenshot-placeholder {
+      margin: 20px 0;
+    }
+    .placeholder-box {
+      background: var(--cream-dark);
+      border: 2px dashed var(--rose-light);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      color: var(--ink-light);
+      font-size: 14px;
+    }
+    .placeholder-box .ph-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+    .placeholder-box .ph-title { font-weight: 700; font-size: 15px; color: var(--ink); }
+    .placeholder-box small {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .screenshot-placeholder figcaption {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* ── Callout boxes ── */
+    .tip-box, .warn-box, .important-box {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .tip-box {
+      background: var(--tip-bg);
+      border-left: 4px solid var(--gold);
+    }
+    .warn-box {
+      background: var(--warn-bg);
+      border-left: 4px solid var(--rose);
+    }
+    .important-box {
+      background: #FFF0E8;
+      border: 2px solid var(--warn-border);
+      border-radius: 10px;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body strong { display: block; margin-bottom: 3px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .callout-body p { margin-bottom: 0; }
+
+    /* ── Numbered step list ── */
+    .step-list {
+      counter-reset: steps;
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 16px;
+    }
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      background: var(--step-bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      background: var(--rose);
+      color: var(--white);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Troubleshooting table ── */
+    .trouble-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+    .trouble-table th {
+      background: var(--ink);
+      color: var(--cream);
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+    .trouble-table th:first-child { border-radius: 8px 0 0 0; }
+    .trouble-table th:last-child  { border-radius: 0 8px 0 0; }
+    .trouble-table td {
+      padding: 12px 16px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .trouble-table tr:nth-child(odd) td  { background: var(--step-bg); }
+    .trouble-table tr:nth-child(even) td { background: var(--white); }
+    .trouble-table tr:last-child td { border-bottom: none; }
+    .trouble-table td:first-child { font-weight: 600; color: var(--ink); min-width: 200px; }
+    .trouble-table td:last-child  { color: var(--ink-light); }
+
+    /* ── Footer ── */
+    .guide-footer {
+      text-align: center;
+      padding: 40px 24px 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .guide-footer a { color: var(--rose); }
+
+    /* ── Bold highlight spans ── */
+    .highlight { color: var(--rose); font-weight: 700; }
+
+    /* ───────────────────────────────────────────
+       PRINT STYLESHEET
+    ─────────────────────────────────────────── */
+    @media print {
+      body { font-size: 13px; background: white; color: black; }
+      .toc-strip { display: none; }
+      .site-header { background: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        margin-top: 20px;
+        padding: 20px 24px;
+        break-inside: avoid;
+      }
+      .screenshot-placeholder .placeholder-box {
+        border: 1px dashed #999;
+        padding: 16px;
+      }
+      .flow-node { break-inside: avoid; }
+      .phone-shell { box-shadow: none; border: 1px solid #ccc; }
+      .order-mockup { border: 1px solid #ccc; }
+      .tip-box, .warn-box, .important-box {
+        border: 1px solid #999;
+        background: #f9f9f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .trouble-table th { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      a { color: inherit; text-decoration: none; }
+      .guide-footer { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════ -->
+<header class="site-header">
+  <p class="logo-line">Ony's Boutique Custom Cakes &middot; Calgary AB</p>
+  <h1>How to Manage Your Orders</h1>
+  <p class="subtitle">A plain-English guide for Onyinye &mdash; no tech knowledge needed</p>
+</header>
+
+<!-- Table of contents strip -->
+<nav class="toc-strip" aria-label="Sections">
+  <span class="toc-label">Jump to:</span>
+  <a href="#s0">How It Works</a>
+  <a href="#s1">Your SMS</a>
+  <a href="#s2">Finding Orders</a>
+  <a href="#s3">Order Details</a>
+  <a href="#s4">Your Calendar</a>
+  <a href="#s5">Customer List</a>
+  <a href="#s6">Cancel &amp; Reschedule</a>
+  <a href="#s7">Troubleshooting</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 0 — HOW THE SYSTEM WORKS
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s0">
+    <span class="section-badge">Overview</span>
+    <h2>How the System Works</h2>
+    <p>
+      When someone submits an order on your website, <strong>two things happen automatically</strong>:
+      you get a text message with a summary, and the order is added to your Square Appointments calendar.
+      <strong>You don't need to do anything &mdash; it's all automatic.</strong>
+    </p>
+
+    <div class="flow-diagram" aria-label="Order flow diagram">
+      <div class="flow-node">
+        <span class="icon">🌐</span>
+        Customer fills out the order form on your website
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node">
+        <span class="icon">📱</span>
+        You get an SMS on your phone with a summary
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node">
+        <span class="icon">📅</span>
+        Booking appears in your Square Appointments calendar
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node">
+        <span class="icon">👤</span>
+        Customer record saved in Square Customers
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Good to know</strong>
+        <p>You only need to check your phone for the SMS. Everything else lives in Square, which you can open on your phone or computer any time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 1 — THE SMS YOU RECEIVE
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s1">
+    <span class="section-badge">Section 1</span>
+    <h2>The Text Message (SMS) You Receive</h2>
+    <p>Every time a new order comes in, your phone will receive a text message that looks like this:</p>
+
+    <!-- Phone mockup -->
+    <div class="phone-wrap" aria-label="Example SMS notification">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <p class="sms-header">Messages &middot; Today 2:14 PM</p>
+          <div class="sms-bubble">NEW ORDER - Ony's Boutique
+From: Jane Smith (587-555-1234)
+Date: 2026-07-15 | Pickup
+Occasion: Birthday
+Cake: Chocolate, Buttercream, 24 servings
+Add-ons: freshFlorals, disco</div>
+          <p class="sms-time">2:14 PM &nbsp;✓</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Field-by-field labels -->
+    <div class="sms-labels">
+      <div class="sms-label-row">
+        <span class="sms-label-key">From</span>
+        <span>Customer name and phone number &mdash; tap to call or text them back</span>
+      </div>
+      <div class="sms-label-row">
+        <span class="sms-label-key">Date</span>
+        <span>The pickup or delivery date they chose on the form</span>
+      </div>
+      <div class="sms-label-row">
+        <span class="sms-label-key">Occasion</span>
+        <span>What the cake is for (Birthday, Wedding, Corporate, etc.)</span>
+      </div>
+      <div class="sms-label-row">
+        <span class="sms-label-key">Cake</span>
+        <span>Flavor, frosting, and how many servings they need</span>
+      </div>
+      <div class="sms-label-row">
+        <span class="sms-label-key">Add-ons</span>
+        <span>Any extras they selected (florals, disco balls, etc.)</span>
+      </div>
+    </div>
+
+    <!-- Screenshot 1 placeholder -->
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 1 &mdash; Real SMS on your phone</span>
+        <small>Take this after submitting a test order through the website &mdash; then replace this box with the actual screenshot</small>
+      </div>
+      <figcaption>Your phone's Messages app showing a live order notification from the website</figcaption>
+    </figure>
+
+    <div class="tip-box">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Tip</strong>
+        <p>You don't need to reply to the SMS. It's just a heads-up. The full details &mdash; including the customer's email &mdash; are in your Square calendar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 2 — FINDING YOUR ORDERS IN SQUARE
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s2">
+    <span class="section-badge">Section 2</span>
+    <h2>Finding Your Orders in Square</h2>
+    <p>Your orders live in <strong>Square Appointments</strong>. Here's how to get there:</p>
+
+    <!-- Step 2a -->
+    <h3><span class="step-num">1</span> Open Square</h3>
+    <p>On your phone or computer, open the <span class="highlight">Square app</span> or go to <strong>squareup.com</strong> and sign in to your <em>Ony's Boutique Cakes</em> account.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 2 &mdash; Square Dashboard home screen</span>
+        <small>squareup.com after signing in &mdash; shows the main left navigation menu</small>
+      </div>
+      <figcaption>The Square Dashboard home screen with the main menu visible on the left</figcaption>
+    </figure>
+
+    <!-- Step 2b -->
+    <h3><span class="step-num">2</span> Go to Appointments</h3>
+    <p>Tap or click <span class="highlight">Appointments</span> in the left-hand menu.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 3 &mdash; Left nav with "Appointments" highlighted</span>
+        <small>The left sidebar of Square Dashboard with the Appointments link circled or highlighted</small>
+      </div>
+      <figcaption>Click "Appointments" in the Square left navigation menu</figcaption>
+    </figure>
+
+    <!-- Step 2c -->
+    <h3><span class="step-num">3</span> Find the date</h3>
+    <p>
+      Use the calendar at the top to navigate to the <strong>date the customer chose</strong> for pickup or delivery.
+      New orders appear as coloured appointment blocks on that date.
+    </p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 4 &mdash; Appointments calendar with a booking visible</span>
+        <small>Navigate to a date with a test booking &mdash; the booking block should be visible</small>
+      </div>
+      <figcaption>The Appointments calendar view showing a booking block on a specific date</figcaption>
+    </figure>
+
+    <div class="tip-box">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Tip about the time</strong>
+        <p>All orders are stored at <strong>12:00 PM</strong> on the pickup/delivery date. This is just how they're saved &mdash; it doesn't mean the customer is coming at noon. The actual time is something you agree with the customer separately.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 3 — READING AN ORDER'S DETAILS
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s3">
+    <span class="section-badge">Section 3</span>
+    <h2>Reading an Order's Details</h2>
+
+    <!-- Step 3a -->
+    <h3><span class="step-num">1</span> Click the appointment</h3>
+    <p>Tap or click the appointment block in the calendar to open it.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 5 &mdash; Appointment detail popup</span>
+        <small>Click a test booking &mdash; shows the popup with the customer name and "CAKE ORDER - Ony's Boutique" at the top of the notes</small>
+      </div>
+      <figcaption>The appointment detail panel opens when you click a booking block</figcaption>
+    </figure>
+
+    <!-- Step 3b -->
+    <h3><span class="step-num">2</span> Read the Notes</h3>
+    <p>All order details are in the <span class="highlight">Notes</span> field. Here's what each line means:</p>
+
+    <!-- Annotated order mockup -->
+    <div class="order-mockup" aria-label="Example order notes in Square">
+      <div class="order-title">CAKE ORDER &mdash; Ony's Boutique</div>
+      <div class="divider">---</div>
+      <div class="row">
+        <span class="row-text">Occasion: Birthday</span>
+        <span class="row-tag">What it's for</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Occasion notes: 50th birthday celebration!</span>
+        <span class="row-tag">Extra note from customer</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Servings: 24</span>
+        <span class="row-tag">How many people</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Cake: Chocolate + Buttercream frosting</span>
+        <span class="row-tag">Flavor &amp; frosting</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Add-ons: Fresh florals, Disco balls</span>
+        <span class="row-tag">Extras they want</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Fulfillment: Pickup</span>
+        <span class="row-tag">Pickup or delivery</span>
+      </div>
+      <div class="divider">---</div>
+      <div class="row">
+        <span class="row-text">Customer: Jane Smith</span>
+        <span class="row-tag">Full name</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Email: jane@example.com</span>
+        <span class="row-tag">For follow-up emails</span>
+      </div>
+      <div class="row">
+        <span class="row-text">Phone: 587-555-1234</span>
+        <span class="row-tag">Tap to call</span>
+      </div>
+    </div>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 6 &mdash; Real appointment notes in Square</span>
+        <small>Open a live order in Square Dashboard and scroll to the Notes section &mdash; screenshot the full note block</small>
+      </div>
+      <figcaption>The Notes panel inside Square Appointments showing a real order's details</figcaption>
+    </figure>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 4 — MANAGING YOUR CALENDAR
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s4">
+    <span class="section-badge">Section 4</span>
+    <h2>Managing Your Calendar</h2>
+
+    <!-- 4a -->
+    <h3><span class="step-num" style="background:var(--gold)">a</span> Day, Week, and Month views</h3>
+    <p>Switch between <span class="highlight">Day</span>, <span class="highlight">Week</span>, and <span class="highlight">Month</span> view using the buttons at the top right of the Appointments screen. Week view is usually the most useful &mdash; you can see all upcoming orders at a glance.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 7 &mdash; Day / Week / Month toggle</span>
+        <small>Top bar of Square Appointments with the view selector buttons visible</small>
+      </div>
+      <figcaption>Use the toggle buttons to switch between Day, Week, and Month views</figcaption>
+    </figure>
+
+    <!-- 4b -->
+    <h3><span class="step-num" style="background:var(--gold)">b</span> A busy week</h3>
+    <p>During busy periods you'll see multiple bookings stacked across different dates. Each block shows the customer's name so you know who it's for at a glance.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 8 &mdash; Week view with several bookings</span>
+        <small>Submit several test orders on different dates, then screenshot the Week view</small>
+      </div>
+      <figcaption>Week view showing multiple cake orders across different days</figcaption>
+    </figure>
+
+    <!-- 4c -->
+    <h3><span class="step-num" style="background:var(--gold)">c</span> Colours and status</h3>
+    <p>Square shows bookings in different colours based on their status:</p>
+    <ul>
+      <li><strong>Upcoming bookings</strong> &mdash; shown in your brand colour (blue or the colour you set in Square)</li>
+      <li><strong>Past bookings</strong> &mdash; shown in grey once the date has passed</li>
+      <li><strong>Cancelled bookings</strong> &mdash; may be hidden or shown with a strikethrough</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 5 — YOUR CUSTOMER LIST
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s5">
+    <span class="section-badge">Section 5</span>
+    <h2>Your Customer List</h2>
+
+    <!-- 5a -->
+    <h3><span class="step-num" style="background:var(--gold)">a</span> Where to find it</h3>
+    <p>Every customer who orders through the website is <strong>automatically saved</strong> in <span class="highlight">Square Customers</span>. You can find it in the left menu under <strong>Customers</strong>.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 9 &mdash; Square Customers list</span>
+        <small>After test orders are submitted, go to Customers in the left menu &mdash; screenshot the list showing names, emails, and phone numbers</small>
+      </div>
+      <figcaption>Square Customers list showing customer names, emails, and phone numbers</figcaption>
+    </figure>
+
+    <!-- 5b -->
+    <h3><span class="step-num" style="background:var(--gold)">b</span> What's saved for each customer</h3>
+    <ul>
+      <li>Full name</li>
+      <li>Email address</li>
+      <li>Phone number</li>
+      <li>Their booking history (all orders they've ever placed)</li>
+    </ul>
+    <p>This list builds up over time &mdash; after a few months you'll have a full record of everyone who has ever ordered from you.</p>
+
+    <!-- 5c -->
+    <h3><span class="step-num" style="background:var(--gold)">c</span> Finding a specific customer</h3>
+    <p>Use the <span class="highlight">search bar</span> at the top of the Customers page to find someone by name, email, or phone number.</p>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 10 &mdash; Customer search bar</span>
+        <small>Type a test customer's name into the search bar and screenshot the result</small>
+      </div>
+      <figcaption>Searching for a customer by name in the Square Customers list</figcaption>
+    </figure>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 6 — CANCELLING OR RESCHEDULING
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s6">
+    <span class="section-badge">Section 6</span>
+    <h2>Cancelling or Rescheduling a Booking</h2>
+
+    <!-- 6a — Cancel -->
+    <h3><span class="step-num" style="background:var(--rose)">a</span> Cancelling a booking</h3>
+    <p>If a customer calls to cancel their order:</p>
+
+    <ol class="step-list">
+      <li>Open <strong>Appointments</strong> in Square</li>
+      <li>Navigate to their booking date and click the appointment block</li>
+      <li>Click the <strong>three dots (&hellip;)</strong> menu in the top right of the appointment panel</li>
+      <li>Select <span class="highlight">Cancel appointment</span></li>
+      <li>Confirm when Square asks you</li>
+    </ol>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 11 &mdash; Appointment (&hellip;) menu open</span>
+        <small>Open an appointment, click the three-dot menu, and screenshot it with "Cancel appointment" visible</small>
+      </div>
+      <figcaption>The three-dot (⋯) menu inside an appointment, showing the Cancel option</figcaption>
+    </figure>
+
+    <div class="important-box warn-box">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Important</strong>
+        <p>Cancelling in Square does <strong>NOT</strong> automatically notify the customer. You should call or text them separately to confirm the cancellation.</p>
+      </div>
+    </div>
+
+    <!-- 6b — Reschedule -->
+    <h3><span class="step-num" style="background:var(--rose)">b</span> Rescheduling to a new date</h3>
+    <p>If a customer wants to change their pickup or delivery date:</p>
+
+    <ol class="step-list">
+      <li>Open the existing appointment in Square Appointments</li>
+      <li>Click <strong>Edit</strong></li>
+      <li>Change the date to the new date</li>
+      <li>Click <span class="highlight">Save</span></li>
+    </ol>
+
+    <figure class="screenshot-placeholder">
+      <div class="placeholder-box">
+        <span class="ph-icon">📸</span>
+        <span class="ph-title">Screenshot 12 &mdash; Appointment edit screen</span>
+        <small>Open an appointment, click Edit, and screenshot the edit form with the date field visible</small>
+      </div>
+      <figcaption>The appointment edit screen with the date field highlighted for changing</figcaption>
+    </figure>
+
+    <div class="tip-box">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Alternative</strong>
+        <p>If changing the date is complicated, you can also cancel the old booking and ask the customer to submit a new order through the website with the correct date. Either approach works fine.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 7 — TROUBLESHOOTING
+  ═══════════════════════════════════════════════ -->
+  <section class="section" id="s7">
+    <span class="section-badge">Section 7</span>
+    <h2>Troubleshooting</h2>
+    <p>If something doesn't look right, check the table below first:</p>
+
+    <table class="trouble-table">
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>What to do</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>I submitted an order but didn't get an SMS</td>
+          <td>Check your phone signal. If signal is fine, contact your developer &mdash; the Twilio number may need to be checked.</td>
+        </tr>
+        <tr>
+          <td>The booking isn't showing on my calendar</td>
+          <td>Check the date &mdash; bookings always appear at 12:00 PM on the pickup/delivery date. Try switching to Week or Month view to make it easier to spot.</td>
+        </tr>
+        <tr>
+          <td>I see a booking but the notes are empty</td>
+          <td>This shouldn't happen. Contact your developer and give them the booking ID (visible in the appointment URL in your browser).</td>
+        </tr>
+        <tr>
+          <td>A customer submitted the form twice by accident</td>
+          <td>Open Square Appointments, find both bookings for that customer, keep one, and cancel the other using the steps in Section 6.</td>
+        </tr>
+        <tr>
+          <td>I can't find the Appointments section in Square</td>
+          <td>Make sure you're logged into the correct Square account &mdash; the one for <strong>Ony's Boutique Cakes</strong>. Ask your developer for the login details if needed.</td>
+        </tr>
+        <tr>
+          <td>The website form isn't working / customers say they can't submit</td>
+          <td>Contact your developer. The Square or Twilio service may be temporarily down. In the meantime, take orders by phone.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box" style="margin-top:24px">
+      <span class="callout-icon">📞</span>
+      <div class="callout-body">
+        <strong>Need help?</strong>
+        <p>Contact your developer with as much detail as possible: what happened, when, and any error messages you saw. A screenshot always helps!</p>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════ -->
+<footer class="guide-footer">
+  <p>Ony's Boutique Custom Cakes &mdash; Calgary, AB &mdash; Order Management Guide</p>
+  <p style="margin-top:4px">Last updated: June 2026 &middot; Prepared by your developer</p>
+</footer>
+
+</body>
+</html>

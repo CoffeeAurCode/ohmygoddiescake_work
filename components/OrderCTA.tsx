@@ -280,6 +280,8 @@ export function OrderForm() {
     deliveryAddress,
   } = form
 
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [otherCelebrationModalOpen, setOtherCelebrationModalOpen] = useState(false)
   const [otherCelebrationDraft, setOtherCelebrationDraft] = useState('')
   const [deliveryAddressModalOpen, setDeliveryAddressModalOpen] = useState(false)
@@ -515,9 +517,24 @@ export function OrderForm() {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canAdvance()) return
-    setWizard(w => ({ ...w, submitted: true }))
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const res = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong')
+      setWizard(w => ({ ...w, submitted: true }))
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Submission failed')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleOrderNewCake = () => {
@@ -527,6 +544,7 @@ export function OrderForm() {
       submitted: false,
     })
     setMaxReachedStep(1)
+    setSubmitError('')
     resumeAfterEditingFromStepRef.current = null
     setOtherCelebrationModalOpen(false)
     setDeliveryAddressModalOpen(false)
@@ -717,7 +735,7 @@ export function OrderForm() {
           <form
             onSubmit={e => {
               e.preventDefault()
-              if (step === TOTAL_STEPS) handleSubmit()
+              if (step === TOTAL_STEPS) void handleSubmit()
             }}
           >
             {/* Progress — dot-line stepper */}
@@ -1472,7 +1490,7 @@ export function OrderForm() {
 
               <div
                 className={`flex items-center gap-3 mt-8 pt-6 border-t border-charcoal/10 ${
-                  step === 3 || step === 5 || (step === 2 && cakeSubStep === 3)
+                  step === 3 || step === 5
                     ? 'justify-between'
                     : 'justify-start'
                 }`}
@@ -1486,17 +1504,6 @@ export function OrderForm() {
                   <ChevronLeft size={16} />
                   Back
                 </button>
-                {step === 2 && cakeSubStep === 3 && (
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!canDietaryNext()}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
-                  >
-                    Next
-                    <ChevronRight size={16} />
-                  </button>
-                )}
                 {step === 3 && (
                   <button
                     type="button"
@@ -1509,14 +1516,19 @@ export function OrderForm() {
                   </button>
                 )}
                 {step === 5 && (
-                  <button
-                    type="submit"
-                    disabled={!canAdvance()}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
-                  >
-                    Submit request
-                    <ChevronRight size={16} />
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    {submitError && (
+                      <p className="text-red-500 text-sm">{submitError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={!canAdvance() || submitting}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-2.5 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
+                    >
+                      {submitting ? 'Sending your order...' : 'Submit request'}
+                      {!submitting && <ChevronRight size={16} />}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

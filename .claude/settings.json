@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$d = $input | Out-String | ConvertFrom-Json; $fp = $d.tool_input.file_path; if ($fp -and $fp -notmatch 'CLAUDE\\.md$') { $f = 'C:\\Users\\BIT\\Coding\\ohmygoddiescake_work\\CLAUDE.md'; $today = Get-Date -Format 'yyyy-MM-dd'; (Get-Content $f -Encoding UTF8) -replace '\\*\\*\\d{4}-\\d{2}-\\d{2}\\*\\*', \"**$today**\" | Set-Content $f -Encoding UTF8 } 2>$null",
+            "statusMessage": "Updating CLAUDE.md timestamp..."
+          }
+        ]
+      }
+    ]
+  }
+}
