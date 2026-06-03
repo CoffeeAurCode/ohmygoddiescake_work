@@ -14,11 +14,12 @@ async function main() {
     includeRelatedObjects: true,
   })
 
-  const parentId = varResult.object?.itemVariationData?.itemId
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const parentId = (varResult.object as any)?.itemVariationData?.itemId
   if (!parentId) throw new Error('Could not find parent item ID from service variation')
   console.log('Parent item ID:', parentId)
 
-  const parentItem = varResult.relatedObjects?.find((o) => o.id === parentId)
+  const parentItem = varResult.relatedObjects?.find((o) => o.id === parentId) as any
   if (!parentItem) throw new Error('Parent item not in relatedObjects')
 
   console.log('Current productType:', parentItem.itemData?.productType ?? '(none)')
@@ -38,7 +39,7 @@ async function main() {
     },
   })
 
-  console.log('\nUpdated! New productType:', catalogObject?.itemData?.productType)
+  console.log('\nUpdated! New productType:', (catalogObject as any)?.itemData?.productType)
   console.log('New version:', catalogObject?.version?.toString())
   console.log('\nGo to Square Dashboard > Appointments > Services - "Custom Cake Order" should now appear there.')
   console.log('Assign Onyinye Ekwulugo to it.')
