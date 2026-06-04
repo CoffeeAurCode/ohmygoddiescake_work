@@ -31,6 +31,8 @@ export type OrderPayload = {
   celebration: string
   celebrationOtherNote: string
   servings: number | ''
+  cakeSize?: string
+  cakeLayers?: number | ''
   flavour: string
   frosting: string
   addonIds: string[]
@@ -54,6 +56,8 @@ const ADDON_LABELS: Record<string, string> = {
   burnaway: 'Burn-away image (+$40)',
   pearls: 'Pearls (+$5)',
   ribbons: 'Ribbons (+$5)',
+  stacking: 'Stacking fee (+$40)',
+  fondantTier: 'Fondant covered tier (+$50)',
 }
 
 export function buildBookingNote(order: OrderPayload): string {
@@ -71,11 +75,16 @@ export function buildBookingNote(order: OrderPayload): string {
     ? `\nOccasion notes: ${order.celebrationOtherNote}`
     : ''
 
+  const sizeLine =
+    order.cakeSize && order.cakeLayers
+      ? `\nSize: ${order.cakeSize} / ${order.cakeLayers} layers`
+      : ''
+
   return [
     `CAKE ORDER - Ony's Boutique`,
     `---`,
     `Occasion: ${order.celebration}${occasionNote}`,
-    `Servings: ${order.servings || 'TBD'}`,
+    `Servings: ${order.servings || 'TBD'}${sizeLine}`,
     `Cake: ${order.flavour || 'TBD'} + ${order.frosting || 'TBD'} frosting`,
     `Add-ons: ${addons}`,
     `Fulfillment: ${fulfillmentLine}`,

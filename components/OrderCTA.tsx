@@ -168,6 +168,8 @@ const ADD_ONS = [
   { id: 'burnaway', label: 'Burn-away image', price: 40 },
   { id: 'pearls', label: 'Pearls', price: 5 },
   { id: 'ribbons', label: 'Ribbons', price: 5 },
+  { id: 'stacking', label: 'Stacking fee', price: 40 },
+  { id: 'fondantTier', label: 'Fondant covered tier', price: 50 },
 ] as const
 
 type AddonId = (typeof ADD_ONS)[number]['id']
@@ -190,10 +192,26 @@ const ADD_ON_CARD_IMAGES: Partial<Record<AddonId, string>> = {
 
 const WEDDING_PRICE_PER_SERVING = 13
 
+const BIRTHDAY_PRICING = [
+  { size: '6"', layers: 2, servings: '8–10',  price: 120 },
+  { size: '6"', layers: 3, servings: '10–15', price: 145 },
+  { size: '6"', layers: 4, servings: '15–20', price: 165 },
+  { size: '8"', layers: 2, servings: '15–20', price: 165 },
+  { size: '8"', layers: 3, servings: '20–25', price: 195 },
+  { size: '8"', layers: 4, servings: '25–30', price: 225 },
+  { size: '10"', layers: 3, servings: '35–45', price: 295 },
+  { size: '10"', layers: 4, servings: '45–55', price: 345 },
+] as const
+
+const CORPORATE_PRICE_PER_SERVING = 9
+const CORPORATE_MIN_SERVINGS = 30
+
 type OrderFormValues = {
   celebration: string
   celebrationOtherNote: string
   servings: number | ''
+  cakeSize: string
+  cakeLayers: number | ''
   flavour: string
   frosting: string
   addonIds: string[]
@@ -232,6 +250,8 @@ const INITIAL_FORM: OrderFormValues = {
   celebration: '',
   celebrationOtherNote: '',
   servings: '',
+  cakeSize: '',
+  cakeLayers: '',
   flavour: '',
   frosting: '',
   addonIds: [],
@@ -269,6 +289,8 @@ export function OrderForm() {
     celebration,
     celebrationOtherNote,
     servings,
+    cakeSize,
+    cakeLayers,
     pickupDate,
     flavour,
     frosting,
@@ -367,14 +389,17 @@ export function OrderForm() {
 
   const progressSuffix = useMemo(() => {
     if (step === 1 && occasionSubStep === 1) return ' · Occasion'
-    if (step === 1 && occasionSubStep === 2) return ' · Servings'
+    if (step === 1 && occasionSubStep === 2) {
+      if (celebration === 'Wedding' || celebration === 'Corporate') return ' · Servings'
+      return ' · Size & Layers'
+    }
     if (step === 2 && cakeSubStep === 1) return ' · Flavour'
     if (step === 2 && cakeSubStep === 2) return ' · Frosting'
     if (step === 3) return ' · Add-ons'
     if (step === 4) return ' · Date'
     if (step === 5) return ' · Contact'
     return ''
-  }, [step, occasionSubStep, cakeSubStep])
+  }, [step, occasionSubStep, cakeSubStep, celebration])
 
   const showRushNote = useMemo(() => {
     if (!pickupDate || !minPickupStr) return false
@@ -418,6 +443,14 @@ export function OrderForm() {
 
     rows.push({ key: 'servings', label: 'Servings', value: servings !== '' ? String(servings) : '—' })
 
+    if (cakeSize && cakeLayers !== '') {
+      rows.push({ key: 'size', label: 'Size', value: `${cakeSize} · ${cakeLayers} layers` })
+      const pricingRow = BIRTHDAY_PRICING.find(r => r.size === cakeSize && r.layers === cakeLayers)
+      if (pricingRow) {
+        rows.push({ key: 'base-price', label: 'Base price', value: `$${pricingRow.price}` })
+      }
+    }
+
     rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
 
     rows.push({ key: 'frosting', label: 'Frosting', value: frosting || '—' })
@@ -444,6 +477,8 @@ export function OrderForm() {
   }, [
     addonIds,
     addonTotal,
+    cakeSize,
+    cakeLayers,
     celebration,
     celebrationOtherNote,
     flavour,
@@ -491,13 +526,15 @@ export function OrderForm() {
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case 1:
-        return (
+      case 1: {
+        const baseOk =
           !!celebration &&
-          servings !== '' &&
-          (servings as number) > 0 &&
           (celebration !== 'Other' || celebrationOtherNote.trim().length > 0)
-        )
+        if (celebration === 'Wedding' || celebration === 'Corporate') {
+          return baseOk && servings !== '' && (servings as number) > 0
+        }
+        return baseOk && !!cakeSize && cakeLayers !== ''
+      }
       case 2:
         return !!flavour && !!frosting
       case 3:
@@ -615,6 +652,8 @@ export function OrderForm() {
           ...w.form,
           flavour: '',
           frosting: '',
+          cakeSize: '',
+          cakeLayers: '',
         },
         nav: {
           step: 1,
@@ -923,62 +962,178 @@ export function OrderForm() {
                           transition={{ duration: 0.22 }}
                           className="flex-1 flex flex-col"
                         >
-                          <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
-                            How many servings do you need?
-                          </h3>
-                          <p className="text-center text-xs text-charcoal/50 mb-6">Enter the number of servings</p>
+                          {/* ── Wedding: servings + per-serving estimate ── */}
+                          {celebration === 'Wedding' && (
+                            <>
+                              <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
+                                How many servings do you need?
+                              </h3>
+                              <p className="text-center text-xs text-charcoal/50 mb-6">Enter the number of guests / servings</p>
+                              <div className="max-w-xs mx-auto w-full">
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={servings === '' ? '' : servings}
+                                  onChange={e => {
+                                    const val = e.target.value
+                                    setWizard(w => ({
+                                      ...w,
+                                      form: {
+                                        ...w.form,
+                                        servings: val === '' ? '' : Math.max(1, parseInt(val, 10) || 1),
+                                      },
+                                    }))
+                                  }}
+                                  placeholder="e.g. 50"
+                                  className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
+                                />
+                                {weddingEstimate !== null && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-5 rounded-2xl px-5 py-4 text-center"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                                      boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
+                                    }}
+                                  >
+                                    <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
+                                      Estimated starting price
+                                    </p>
+                                    <p className="font-serif text-3xl font-bold text-white">
+                                      ${weddingEstimate.toLocaleString()}
+                                    </p>
+                                    <p className="text-white/60 text-xs mt-1">
+                                      ${WEDDING_PRICE_PER_SERVING}/serving · final quote on request
+                                    </p>
+                                  </motion.div>
+                                )}
+                                <button
+                                  type="button"
+                                  disabled={servings === '' || (servings as number) <= 0}
+                                  onClick={advanceServingsToStep2}
+                                  className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
+                                >
+                                  Next
+                                  <ChevronRight size={16} />
+                                </button>
+                              </div>
+                            </>
+                          )}
 
-                          <div className="max-w-xs mx-auto w-full">
-                            <input
-                              type="number"
-                              min={1}
-                              value={servings === '' ? '' : servings}
-                              onChange={e => {
-                                const val = e.target.value
-                                setWizard(w => ({
-                                  ...w,
-                                  form: {
-                                    ...w.form,
-                                    servings: val === '' ? '' : Math.max(1, parseInt(val, 10) || 1),
-                                  },
-                                }))
-                              }}
-                              placeholder="e.g. 50"
-                              className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
-                            />
+                          {/* ── Corporate: servings + $9/serving estimate ── */}
+                          {celebration === 'Corporate' && (
+                            <>
+                              <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
+                                How many servings do you need?
+                              </h3>
+                              <p className="text-center text-xs text-charcoal/50 mb-6">Sheet cake · $9/serving · minimum {CORPORATE_MIN_SERVINGS} servings</p>
+                              <div className="max-w-xs mx-auto w-full">
+                                <input
+                                  type="number"
+                                  min={CORPORATE_MIN_SERVINGS}
+                                  value={servings === '' ? '' : servings}
+                                  onChange={e => {
+                                    const val = e.target.value
+                                    setWizard(w => ({
+                                      ...w,
+                                      form: {
+                                        ...w.form,
+                                        servings: val === '' ? '' : Math.max(1, parseInt(val, 10) || 1),
+                                      },
+                                    }))
+                                  }}
+                                  placeholder={`e.g. ${CORPORATE_MIN_SERVINGS}`}
+                                  className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
+                                />
+                                {servings !== '' && (servings as number) > 0 && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-5 rounded-2xl px-5 py-4 text-center"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                                      boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
+                                    }}
+                                  >
+                                    <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
+                                      Estimated starting price
+                                    </p>
+                                    <p className="font-serif text-3xl font-bold text-white">
+                                      ${(Math.max(CORPORATE_MIN_SERVINGS, servings as number) * CORPORATE_PRICE_PER_SERVING).toLocaleString()}
+                                    </p>
+                                    <p className="text-white/60 text-xs mt-1">
+                                      ${CORPORATE_PRICE_PER_SERVING}/serving · minimum ${CORPORATE_MIN_SERVINGS * CORPORATE_PRICE_PER_SERVING} · final quote on request
+                                    </p>
+                                  </motion.div>
+                                )}
+                                <button
+                                  type="button"
+                                  disabled={servings === '' || (servings as number) <= 0}
+                                  onClick={advanceServingsToStep2}
+                                  className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
+                                >
+                                  Next
+                                  <ChevronRight size={16} />
+                                </button>
+                              </div>
+                            </>
+                          )}
 
-                            {weddingEstimate !== null && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-5 rounded-2xl px-5 py-4 text-center"
-                                style={{
-                                  background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
-                                  boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
-                                }}
-                              >
-                                <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
-                                  Estimated starting price
-                                </p>
-                                <p className="font-serif text-3xl font-bold text-white">
-                                  ${weddingEstimate.toLocaleString()}
-                                </p>
-                                <p className="text-white/60 text-xs mt-1">
-                                  ${WEDDING_PRICE_PER_SERVING}/serving · final quote on request
-                                </p>
-                              </motion.div>
-                            )}
-
-                            <button
-                              type="button"
-                              disabled={servings === '' || (servings as number) <= 0}
-                              onClick={advanceServingsToStep2}
-                              className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
-                            >
-                              Next
-                              <ChevronRight size={16} />
-                            </button>
-                          </div>
+                          {/* ── Birthday / Anniversary / Baby Shower / Other: size + layers grid ── */}
+                          {celebration !== 'Wedding' && celebration !== 'Corporate' && (
+                            <>
+                              <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
+                                Choose your cake size
+                              </h3>
+                              <p className="text-center text-xs text-charcoal/50 mb-4">Tap a size to continue</p>
+                              <div className="grid grid-cols-2 gap-2.5">
+                                {BIRTHDAY_PRICING.map(row => {
+                                  const rowKey = `${row.size}-${row.layers}`
+                                  const selected = cakeSize === row.size && cakeLayers === row.layers
+                                  return (
+                                    <button
+                                      key={rowKey}
+                                      type="button"
+                                      onClick={() => {
+                                        const midpoint = parseInt(row.servings.split('–')[1] ?? row.servings, 10) || 10
+                                        setWizard(w => ({
+                                          ...w,
+                                          form: {
+                                            ...w.form,
+                                            cakeSize: row.size,
+                                            cakeLayers: row.layers,
+                                            servings: midpoint,
+                                          },
+                                        }))
+                                        advanceServingsToStep2()
+                                      }}
+                                      className={`glass-border rounded-2xl p-3.5 text-left transition-all duration-300 relative ${
+                                        selected
+                                          ? 'bg-rose-gold border-amber shadow-md ring-2 ring-amber/55'
+                                          : 'bg-amber-light border-amber/30 hover:bg-amber/10 hover:-translate-y-0.5'
+                                      }`}
+                                    >
+                                      <div className="flex items-start justify-between gap-1 mb-1.5">
+                                        <span className={`font-serif text-lg font-bold leading-none ${selected ? 'text-white' : 'text-charcoal'}`}>
+                                          {row.size}
+                                        </span>
+                                        <span className={`font-serif text-lg font-bold leading-none tabular-nums ${selected ? 'text-white' : 'text-rose-gold'}`}>
+                                          ${row.price}
+                                        </span>
+                                      </div>
+                                      <p className={`text-[11px] font-medium leading-snug ${selected ? 'text-white/80' : 'text-charcoal/55'}`}>
+                                        {row.layers} layers · {row.servings} servings
+                                      </p>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                              <p className="mt-4 text-center text-[11px] text-charcoal/40">
+                                Final price may vary with design complexity or rush fee
+                              </p>
+                            </>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
