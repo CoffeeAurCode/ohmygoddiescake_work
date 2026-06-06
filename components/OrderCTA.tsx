@@ -188,6 +188,10 @@ const ADD_ON_CARD_IMAGES: Partial<Record<AddonId, string>> = {
   cherries: '/Addon Cherries.png',
   miniLiquor: '/Addon Mini Liquor Bottles.png',
   burnaway: '/Burn-away Image.png',
+  pearls: '/Addon Pearls.png',
+  ribbons: '/Addon Ribbons.png',
+  stacking: '/Addon Stacking.png',
+  fondantTier: '/Addon Fondant.png',
 }
 
 const WEDDING_PRICE_PER_SERVING = 13
