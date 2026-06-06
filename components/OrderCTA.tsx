@@ -206,6 +206,20 @@ const BIRTHDAY_PRICING = [
 const CORPORATE_PRICE_PER_SERVING = 9
 const CORPORATE_MIN_SERVINGS = 30
 
+/**
+ * Maps a requested servings count to the price of the smallest standard cake
+ * (from BIRTHDAY_PRICING) whose serving range covers it. Falls back to the
+ * largest tier when the request exceeds every range. Used for Birthday /
+ * Anniversary / Baby Shower / Other occasions, which no longer pick a size.
+ */
+function nearestBirthdayPrice(servings: number): number {
+  for (const row of BIRTHDAY_PRICING) {
+    const upper = parseInt(row.servings.split('–')[1] ?? row.servings, 10) || 0
+    if (upper >= servings) return row.price
+  }
+  return BIRTHDAY_PRICING[BIRTHDAY_PRICING.length - 1].price
+}
+
 type OrderFormValues = {
   celebration: string
   celebrationOtherNote: string
@@ -289,8 +303,6 @@ export function OrderForm() {
     celebration,
     celebrationOtherNote,
     servings,
-    cakeSize,
-    cakeLayers,
     pickupDate,
     flavour,
     frosting,
@@ -389,10 +401,7 @@ export function OrderForm() {
 
   const progressSuffix = useMemo(() => {
     if (step === 1 && occasionSubStep === 1) return ' · Occasion'
-    if (step === 1 && occasionSubStep === 2) {
-      if (celebration === 'Wedding' || celebration === 'Corporate') return ' · Servings'
-      return ' · Size & Layers'
-    }
+    if (step === 1 && occasionSubStep === 2) return ' · Servings'
     if (step === 2 && cakeSubStep === 1) return ' · Flavour'
     if (step === 2 && cakeSubStep === 2) return ' · Frosting'
     if (step === 3) return ' · Add-ons'
@@ -427,10 +436,17 @@ export function OrderForm() {
     }, 0)
   }, [addonIds])
 
-  const weddingEstimate = useMemo(() => {
-    if (celebration !== 'Wedding' || servings === '' || servings <= 0) return null
-    return servings * WEDDING_PRICE_PER_SERVING
+  const cakeBase = useMemo(() => {
+    if (servings === '' || (servings as number) <= 0) return null
+    const n = servings as number
+    if (celebration === 'Wedding') return n * WEDDING_PRICE_PER_SERVING
+    if (celebration === 'Corporate') {
+      return Math.max(CORPORATE_MIN_SERVINGS, n) * CORPORATE_PRICE_PER_SERVING
+    }
+    return nearestBirthdayPrice(n)
   }, [celebration, servings])
+
+  const orderTotal = (cakeBase ?? 0) + addonTotal
 
   const contactSummaryRows = useMemo(() => {
     const rows: { key: string; label: string; value: string }[] = []
@@ -443,13 +459,7 @@ export function OrderForm() {
 
     rows.push({ key: 'servings', label: 'Servings', value: servings !== '' ? String(servings) : '—' })
 
-    if (cakeSize && cakeLayers !== '') {
-      rows.push({ key: 'size', label: 'Size', value: `${cakeSize} · ${cakeLayers} layers` })
-      const pricingRow = BIRTHDAY_PRICING.find(r => r.size === cakeSize && r.layers === cakeLayers)
-      if (pricingRow) {
-        rows.push({ key: 'base-price', label: 'Base price', value: `$${pricingRow.price}` })
-      }
-    }
+    rows.push({ key: 'cake-estimate', label: 'Cake estimate', value: cakeBase !== null ? `$${cakeBase}` : '—' })
 
     rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
 
@@ -473,12 +483,14 @@ export function OrderForm() {
       })
     }
 
+    rows.push({ key: 'order-total', label: 'Estimated total', value: `$${orderTotal}` })
+
     return rows
   }, [
     addonIds,
     addonTotal,
-    cakeSize,
-    cakeLayers,
+    cakeBase,
+    orderTotal,
     celebration,
     celebrationOtherNote,
     flavour,
@@ -530,10 +542,7 @@ export function OrderForm() {
         const baseOk =
           !!celebration &&
           (celebration !== 'Other' || celebrationOtherNote.trim().length > 0)
-        if (celebration === 'Wedding' || celebration === 'Corporate') {
-          return baseOk && servings !== '' && (servings as number) > 0
-        }
-        return baseOk && !!cakeSize && cakeLayers !== ''
+        return baseOk && servings !== '' && (servings as number) > 0
       }
       case 2:
         return !!flavour && !!frosting
@@ -562,7 +571,7 @@ export function OrderForm() {
       const res = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, estimatedTotal: orderTotal }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong')
@@ -987,7 +996,7 @@ export function OrderForm() {
                                   placeholder="e.g. 50"
                                   className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
                                 />
-                                {weddingEstimate !== null && (
+                                {cakeBase !== null && (
                                   <motion.div
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -1001,7 +1010,7 @@ export function OrderForm() {
                                       Estimated starting price
                                     </p>
                                     <p className="font-serif text-3xl font-bold text-white">
-                                      ${weddingEstimate.toLocaleString()}
+                                      ${cakeBase.toLocaleString()}
                                     </p>
                                     <p className="text-white/60 text-xs mt-1">
                                       ${WEDDING_PRICE_PER_SERVING}/serving · final quote on request
@@ -1046,7 +1055,7 @@ export function OrderForm() {
                                   placeholder={`e.g. ${CORPORATE_MIN_SERVINGS}`}
                                   className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
                                 />
-                                {servings !== '' && (servings as number) > 0 && (
+                                {cakeBase !== null && (
                                   <motion.div
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -1060,7 +1069,7 @@ export function OrderForm() {
                                       Estimated starting price
                                     </p>
                                     <p className="font-serif text-3xl font-bold text-white">
-                                      ${(Math.max(CORPORATE_MIN_SERVINGS, servings as number) * CORPORATE_PRICE_PER_SERVING).toLocaleString()}
+                                      ${cakeBase.toLocaleString()}
                                     </p>
                                     <p className="text-white/60 text-xs mt-1">
                                       ${CORPORATE_PRICE_PER_SERVING}/serving · minimum ${CORPORATE_MIN_SERVINGS * CORPORATE_PRICE_PER_SERVING} · final quote on request
@@ -1080,58 +1089,67 @@ export function OrderForm() {
                             </>
                           )}
 
-                          {/* ── Birthday / Anniversary / Baby Shower / Other: size + layers grid ── */}
+                          {/* ── Birthday / Anniversary / Baby Shower / Other: servings + estimate ── */}
                           {celebration !== 'Wedding' && celebration !== 'Corporate' && (
                             <>
                               <h3 className="font-serif text-xl text-charcoal mb-1 text-center">
-                                Choose your cake size
+                                How many servings do you need?
                               </h3>
-                              <p className="text-center text-xs text-charcoal/50 mb-4">Tap a size to continue</p>
-                              <div className="grid grid-cols-2 gap-2.5">
-                                {BIRTHDAY_PRICING.map(row => {
-                                  const rowKey = `${row.size}-${row.layers}`
-                                  const selected = cakeSize === row.size && cakeLayers === row.layers
-                                  return (
-                                    <button
-                                      key={rowKey}
-                                      type="button"
-                                      onClick={() => {
-                                        const midpoint = parseInt(row.servings.split('–')[1] ?? row.servings, 10) || 10
-                                        setWizard(w => ({
-                                          ...w,
-                                          form: {
-                                            ...w.form,
-                                            cakeSize: row.size,
-                                            cakeLayers: row.layers,
-                                            servings: midpoint,
-                                          },
-                                        }))
-                                        advanceServingsToStep2()
-                                      }}
-                                      className={`glass-border rounded-2xl p-3.5 text-left transition-all duration-300 relative ${
-                                        selected
-                                          ? 'bg-rose-gold border-amber shadow-md ring-2 ring-amber/55'
-                                          : 'bg-amber-light border-amber/30 hover:bg-amber/10 hover:-translate-y-0.5'
-                                      }`}
-                                    >
-                                      <div className="flex items-start justify-between gap-1 mb-1.5">
-                                        <span className={`font-serif text-lg font-bold leading-none ${selected ? 'text-white' : 'text-charcoal'}`}>
-                                          {row.size}
-                                        </span>
-                                        <span className={`font-serif text-lg font-bold leading-none tabular-nums ${selected ? 'text-white' : 'text-rose-gold'}`}>
-                                          ${row.price}
-                                        </span>
-                                      </div>
-                                      <p className={`text-[11px] font-medium leading-snug ${selected ? 'text-white/80' : 'text-charcoal/55'}`}>
-                                        {row.layers} layers · {row.servings} servings
-                                      </p>
-                                    </button>
-                                  )
-                                })}
+                              <p className="text-center text-xs text-charcoal/50 mb-6">Enter the number of guests / servings</p>
+                              <div className="max-w-xs mx-auto w-full">
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={servings === '' ? '' : servings}
+                                  onChange={e => {
+                                    const val = e.target.value
+                                    setWizard(w => ({
+                                      ...w,
+                                      form: {
+                                        ...w.form,
+                                        servings: val === '' ? '' : Math.max(1, parseInt(val, 10) || 1),
+                                        cakeSize: '',
+                                        cakeLayers: '',
+                                      },
+                                    }))
+                                  }}
+                                  placeholder="e.g. 20"
+                                  className="w-full rounded-2xl border-2 border-amber/30 bg-amber-light px-5 py-4 text-center text-2xl font-serif text-charcoal focus:outline-none focus:ring-2 focus:ring-rose-gold/35 focus:border-rose-gold/40"
+                                />
+                                {cakeBase !== null && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-5 rounded-2xl px-5 py-4 text-center"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                                      boxShadow: '0 4px 20px rgba(201,149,106,0.3)',
+                                    }}
+                                  >
+                                    <p className="text-white/75 text-xs font-semibold uppercase tracking-widest mb-1">
+                                      Estimated starting price
+                                    </p>
+                                    <p className="font-serif text-3xl font-bold text-white">
+                                      ${cakeBase.toLocaleString()}
+                                    </p>
+                                    <p className="text-white/60 text-xs mt-1">
+                                      final quote on request
+                                    </p>
+                                  </motion.div>
+                                )}
+                                <button
+                                  type="button"
+                                  disabled={servings === '' || (servings as number) <= 0}
+                                  onClick={advanceServingsToStep2}
+                                  className="mt-6 w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-rose-gold text-white font-bold text-sm px-7 py-3 hover:bg-opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-500 ease-in-out btn-glow btn-amber-glow shadow-md"
+                                >
+                                  Next
+                                  <ChevronRight size={16} />
+                                </button>
+                                <p className="mt-4 text-center text-[11px] text-charcoal/40">
+                                  Final price may vary with design complexity or rush fee
+                                </p>
                               </div>
-                              <p className="mt-4 text-center text-[11px] text-charcoal/40">
-                                Final price may vary with design complexity or rush fee
-                              </p>
                             </>
                           )}
                         </motion.div>
@@ -1493,21 +1511,43 @@ export function OrderForm() {
                   >
                     <h3 className="font-serif text-xl text-charcoal mb-0 shrink-0 text-center">Contact</h3>
                     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,2fr)] gap-2">
-                      <div className="flex min-h-0 flex-col overflow-hidden">
+                      <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
                         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-amber/25 bg-amber-light px-2 py-1 text-left">
                           <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
                             Order summary
                           </p>
                           <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-px text-[10px] leading-tight">
-                            {contactSummaryRows.map(({ key, label, value }) => (
-                              <div key={key} className="contents">
-                                <span className="text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
-                                  {label}
-                                </span>
-                                <span className="min-w-0 text-right break-words text-charcoal/70">{value}</span>
-                              </div>
-                            ))}
+                            {contactSummaryRows
+                              .filter(({ key }) => key !== 'order-total')
+                              .map(({ key, label, value }) => (
+                                <div key={key} className="contents">
+                                  <span className="text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
+                                    {label}
+                                  </span>
+                                  <span className="min-w-0 text-right break-words text-charcoal/70">{value}</span>
+                                </div>
+                              ))}
                           </div>
+                        </div>
+                        <div
+                          className="flex shrink-0 items-center justify-between gap-3 rounded-2xl px-4 py-3"
+                          style={{
+                            background: 'linear-gradient(135deg, #C9956A 0%, #D4845A 100%)',
+                            boxShadow: '0 4px 18px rgba(201,149,106,0.3)',
+                          }}
+                        >
+                          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-white/80">
+                            Estimated total
+                          </span>
+                          <motion.span
+                            key={orderTotal}
+                            initial={{ scale: 1.08, opacity: 0.7 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                            className="font-serif text-2xl sm:text-3xl font-bold text-white tabular-nums"
+                          >
+                            ${orderTotal.toLocaleString()}
+                          </motion.span>
                         </div>
                       </div>
                       <div className="flex min-h-0 flex-col gap-2">

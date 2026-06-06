@@ -39,6 +39,8 @@ export type OrderPayload = {
   pickupDate: string
   fulfillment: 'pickup' | 'delivery' | ''
   deliveryAddress: string
+  /** Estimated whole-order total (cake + add-ons), computed client-side. */
+  estimatedTotal?: number
 }
 
 const ADDON_LABELS: Record<string, string> = {
@@ -87,6 +89,7 @@ export function buildBookingNote(order: OrderPayload): string {
     `Servings: ${order.servings || 'TBD'}${sizeLine}`,
     `Cake: ${order.flavour || 'TBD'} + ${order.frosting || 'TBD'} frosting`,
     `Add-ons: ${addons}`,
+    `Estimated total: ${order.estimatedTotal != null ? `$${order.estimatedTotal}` : 'TBD'}`,
     `Fulfillment: ${fulfillmentLine}`,
     `---`,
     `Customer: ${order.name}`,

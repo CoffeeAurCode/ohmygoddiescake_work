@@ -23,6 +23,7 @@ export function buildSmsText(order: {
   fulfillment: string
   deliveryAddress: string
   phone: string
+  estimatedTotal?: number
 }): string {
   const addons = order.addonIds.length > 0 ? order.addonIds.join(', ') : 'none'
   const pickup =
@@ -35,6 +36,7 @@ export function buildSmsText(order: {
     `Date: ${order.pickupDate} | ${pickup}\n` +
     `Occasion: ${order.celebration}\n` +
     `Cake: ${order.flavour}, ${order.frosting}, ${order.servings} servings\n` +
-    `Add-ons: ${addons}`
+    `Add-ons: ${addons}\n` +
+    `Est. total: ${order.estimatedTotal != null ? `$${order.estimatedTotal}` : 'TBD'}`
   )
 }
