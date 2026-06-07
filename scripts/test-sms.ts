@@ -11,6 +11,7 @@ async function main() {
     frosting: 'Buttercream',
     addonIds: ['disco', 'freshFlorals'],
     pickupDate: '2026-08-15',
+  pickupTime: '12:00 PM',
     fulfillment: 'delivery',
     deliveryAddress: '456 Oak Ave SW, Calgary AB',
     phone: '587-555-9999',

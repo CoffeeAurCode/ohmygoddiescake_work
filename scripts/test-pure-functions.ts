@@ -27,6 +27,7 @@ const baseOrder = {
   frosting: 'Buttercream',
   addonIds: ['disco', 'crown'],
   pickupDate: '2026-08-15',
+  pickupTime: '12:00 PM',
   fulfillment: 'pickup' as const,
   deliveryAddress: '',
 }
@@ -83,6 +84,7 @@ const smsOrder = {
   frosting: 'Buttercream',
   addonIds: ['disco', 'freshFlorals'],
   pickupDate: '2026-08-15',
+  pickupTime: '10:00 AM',
   fulfillment: 'pickup',
   deliveryAddress: '',
   phone: '587-555-9999',

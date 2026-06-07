@@ -33,6 +33,7 @@ const testOrder = {
   frosting: 'Buttercream',
   addonIds: ['disco', 'crown'],
   pickupDate: '2026-12-31',
+  pickupTime: '12:00 PM',
   fulfillment: 'pickup' as const,
   deliveryAddress: '',
 }

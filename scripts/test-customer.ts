@@ -14,6 +14,7 @@ async function main() {
     frosting: 'Buttercream',
     addonIds: ['disco'],
     pickupDate: '2026-08-15',
+  pickupTime: '12:00 PM',
     fulfillment: 'pickup' as const,
     deliveryAddress: '',
   }

@@ -14,6 +14,7 @@ async function main() {
     frosting: 'Fondant',
     addonIds: ['freshFlorals', 'pearls'],
     pickupDate: '2026-09-20',
+  pickupTime: '12:00 PM',
     fulfillment: 'delivery' as const,
     deliveryAddress: '123 Main St NW, Calgary AB T2N 1A1',
   }
