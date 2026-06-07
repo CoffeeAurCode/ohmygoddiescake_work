@@ -1566,21 +1566,21 @@ export function OrderForm() {
                     className="flex min-h-[320px] flex-1 flex-col gap-2"
                   >
                     <h3 className="font-serif text-xl text-charcoal mb-0 shrink-0 text-center">Contact</h3>
-                    <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,2fr)] gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col gap-3">
                       <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
-                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-amber/25 bg-amber-light px-2 py-1 text-left">
-                          <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
+                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border-2 border-amber/25 bg-amber-light px-4 py-3 text-left">
+                          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-charcoal/40">
                             Order summary
                           </p>
-                          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-px text-[10px] leading-tight">
+                          <div className="flex flex-col gap-2">
                             {contactSummaryRows
                               .filter(({ key }) => key !== 'order-total')
                               .map(({ key, label, value }) => (
-                                <div key={key} className="contents">
-                                  <span className="text-[9px] font-semibold uppercase tracking-wider text-charcoal/45">
+                                <div key={key} className="flex items-baseline justify-between gap-3">
+                                  <span className="shrink-0 text-xs font-semibold text-charcoal/55">
                                     {label}
                                   </span>
-                                  <span className="min-w-0 text-right break-words text-charcoal/70">{value}</span>
+                                  <span className="min-w-0 text-right text-sm font-medium text-charcoal break-words">{value}</span>
                                 </div>
                               ))}
                           </div>
@@ -1592,7 +1592,7 @@ export function OrderForm() {
                             boxShadow: '0 4px 18px rgba(201,149,106,0.3)',
                           }}
                         >
-                          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-white/80">
+                          <span className="text-xs font-semibold uppercase tracking-widest text-white/80">
                             Estimated total
                           </span>
                           <motion.span
