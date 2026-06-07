@@ -168,8 +168,6 @@ const ADD_ONS = [
   { id: 'burnaway', label: 'Burn-away image', price: 40 },
   { id: 'pearls', label: 'Pearls', price: 5 },
   { id: 'ribbons', label: 'Ribbons', price: 5 },
-  { id: 'stacking', label: 'Stacking fee', price: 40 },
-  { id: 'fondantTier', label: 'Fondant covered tier', price: 50 },
 ] as const
 
 type AddonId = (typeof ADD_ONS)[number]['id']
@@ -190,9 +188,9 @@ const ADD_ON_CARD_IMAGES: Partial<Record<AddonId, string>> = {
   burnaway: '/Burn-away Image.png',
   pearls: '/Addon Pearls.png',
   ribbons: '/Addon Ribbons.png',
-  stacking: '/Addon Stacking.png',
-  fondantTier: '/Addon Fondant.png',
 }
+
+const FONDANT_SURCHARGE = 50
 
 const WEDDING_PRICE_PER_SERVING = 13
 
@@ -234,6 +232,7 @@ type OrderFormValues = {
   frosting: string
   addonIds: string[]
   pickupDate: string
+  pickupTime: string
   name: string
   email: string
   phone: string
@@ -264,6 +263,8 @@ type OrderWizardState = {
   submitted: boolean
 }
 
+const PICKUP_TIME_SLOTS = ['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'] as const
+
 const INITIAL_FORM: OrderFormValues = {
   celebration: '',
   celebrationOtherNote: '',
@@ -274,6 +275,7 @@ const INITIAL_FORM: OrderFormValues = {
   frosting: '',
   addonIds: [],
   pickupDate: '',
+  pickupTime: '',
   name: '',
   email: '',
   phone: '',
@@ -308,6 +310,7 @@ export function OrderForm() {
     celebrationOtherNote,
     servings,
     pickupDate,
+    pickupTime,
     flavour,
     frosting,
     addonIds,
@@ -450,7 +453,9 @@ export function OrderForm() {
     return nearestBirthdayPrice(n)
   }, [celebration, servings])
 
-  const orderTotal = (cakeBase ?? 0) + addonTotal
+  const fondantSurcharge = frosting === 'Fondant' ? FONDANT_SURCHARGE : 0
+
+  const orderTotal = (cakeBase ?? 0) + addonTotal + fondantSurcharge
 
   const contactSummaryRows = useMemo(() => {
     const rows: { key: string; label: string; value: string }[] = []
@@ -468,7 +473,13 @@ export function OrderForm() {
     rows.push({ key: 'flavour', label: 'Flavour', value: flavour || '—' })
 
     rows.push({ key: 'frosting', label: 'Frosting', value: frosting || '—' })
-    rows.push({ key: 'pickup', label: 'Pickup date', value: formatPickupDisplay(pickupDate) })
+    if (frosting === 'Fondant') {
+      rows.push({ key: 'fondant-surcharge', label: 'Fondant surcharge', value: '+$50' })
+    }
+    const pickupValue = pickupTime
+      ? `${formatPickupDisplay(pickupDate)} at ${pickupTime}`
+      : formatPickupDisplay(pickupDate)
+    rows.push({ key: 'pickup', label: 'Pickup', value: pickupValue })
 
     if (addonIds.length > 0) {
       const addonParts = addonIds.map(id => {
@@ -500,6 +511,7 @@ export function OrderForm() {
     flavour,
     frosting,
     pickupDate,
+    pickupTime,
     servings,
   ])
 
@@ -535,7 +547,14 @@ export function OrderForm() {
     if (minPickupStr !== '' && ymd < minPickupStr) return
     setWizard(w => ({
       ...w,
-      form: { ...w.form, pickupDate: ymd },
+      form: { ...w.form, pickupDate: ymd, pickupTime: '' },
+    }))
+  }
+
+  const selectPickupTime = (slot: string) => {
+    setWizard(w => ({
+      ...w,
+      form: { ...w.form, pickupTime: slot },
       nav: { ...w.nav, step: 5 },
     }))
   }
@@ -553,7 +572,7 @@ export function OrderForm() {
       case 3:
         return true
       case 4:
-        return !!pickupDate && minPickupStr !== '' && pickupDate >= minPickupStr
+        return !!pickupDate && minPickupStr !== '' && pickupDate >= minPickupStr && !!pickupTime
       case 5:
         return (
           name.trim().length > 0 &&
@@ -1253,6 +1272,39 @@ export function OrderForm() {
                         Orders under 3 days notice incur a rush fee of $15–$25
                       </p>
                     )}
+
+                    <AnimatePresence>
+                      {pickupDate && (
+                        <motion.div
+                          key="time-slots"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.22 }}
+                          className="mt-5 max-w-sm mx-auto w-full"
+                        >
+                          <p className="text-center text-xs font-semibold uppercase tracking-wider text-charcoal/50 mb-3">
+                            Select a pickup time
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                            {PICKUP_TIME_SLOTS.map(slot => (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => selectPickupTime(slot)}
+                                className={`rounded-xl px-2 py-3 text-sm font-semibold transition-all duration-200 ${
+                                  pickupTime === slot
+                                    ? 'bg-rose-gold text-white shadow-md ring-2 ring-amber/50'
+                                    : 'bg-amber-light border-2 border-amber/30 text-charcoal hover:bg-amber/15 hover:border-amber/50'
+                                }`}
+                              >
+                                {slot}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
 

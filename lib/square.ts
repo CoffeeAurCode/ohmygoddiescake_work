@@ -37,6 +37,7 @@ export type OrderPayload = {
   frosting: string
   addonIds: string[]
   pickupDate: string
+  pickupTime: string
   fulfillment: 'pickup' | 'delivery' | ''
   deliveryAddress: string
   /** Estimated whole-order total (cake + add-ons), computed client-side. */
@@ -82,6 +83,10 @@ export function buildBookingNote(order: OrderPayload): string {
       ? `\nSize: ${order.cakeSize} / ${order.cakeLayers} layers`
       : ''
 
+  const pickupLine = order.pickupTime
+    ? `${order.pickupDate} at ${order.pickupTime}`
+    : order.pickupDate
+
   return [
     `CAKE ORDER - Ony's Boutique`,
     `---`,
@@ -89,6 +94,7 @@ export function buildBookingNote(order: OrderPayload): string {
     `Servings: ${order.servings || 'TBD'}${sizeLine}`,
     `Cake: ${order.flavour || 'TBD'} + ${order.frosting || 'TBD'} frosting`,
     `Add-ons: ${addons}`,
+    `Pickup: ${pickupLine}`,
     `Estimated total: ${order.estimatedTotal != null ? `$${order.estimatedTotal}` : 'TBD'}`,
     `Fulfillment: ${fulfillmentLine}`,
     `---`,
@@ -137,8 +143,16 @@ export async function createBooking(
   })
   const serviceVariationVersion = svcObj?.version ?? BigInt(1)
 
-  // noon Calgary MDT (UTC-6)
-  const startAt = `${order.pickupDate}T18:00:00Z`
+  // Map display time slots (Calgary MDT = UTC-6) to UTC offsets
+  const TIME_TO_UTC: Record<string, string> = {
+    '8:00 AM':  'T14:00:00Z',
+    '10:00 AM': 'T16:00:00Z',
+    '12:00 PM': 'T18:00:00Z',
+    '2:00 PM':  'T20:00:00Z',
+    '4:00 PM':  'T22:00:00Z',
+  }
+  const timeOffset = TIME_TO_UTC[order.pickupTime] ?? 'T18:00:00Z'
+  const startAt = `${order.pickupDate}${timeOffset}`
 
   const { booking } = await squareClient.bookings.create({
     idempotencyKey: crypto.randomUUID(),
