@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, DM_Sans, Fraunces, Plus_Jakarta_Sans } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import ScrollProgressBar from '@/components/ScrollProgressBar'
 
@@ -46,6 +47,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable} ${fraunces.variable} ${jakarta.variable}`}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18161715420"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18161715420');
+          `}
+        </Script>
+      </head>
       <body>
         <ScrollProgressBar />
         <div className="grain-overlay" aria-hidden="true" />

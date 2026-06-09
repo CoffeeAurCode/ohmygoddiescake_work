@@ -599,6 +599,11 @@ export function OrderForm() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong')
       setWizard(w => ({ ...w, submitted: true }))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const _gtag = typeof window !== 'undefined' ? (window as any).gtag : undefined
+      if (typeof _gtag === 'function') {
+        _gtag('event', 'conversion', { send_to: 'AW-18161715420/NNfUCML6urscENyRl9RD' })
+      }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')
     } finally {
