@@ -1,13 +1,35 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Cake, Crown, Utensils } from 'lucide-react'
 import Image from 'next/image'
 
-const featuredServices = [
-  { icon: Utensils, label: 'Dessert Tables', img: '/18FB0FAB-46E3-49BE-B543-73CF7120E76F.png' },
-  { icon: Cake, label: 'Custom Celebration Cakes', img: '/Celebration Birthday.png' },
+const servicesList = [
+  {
+    icon: Cake,
+    label: 'Custom Cakes',
+    img: '/custom-cakes-premium.png',
+    description: 'Bespoke designs tailored for your most special personal milestones and celebrations.',
+  },
+  {
+    icon: Crown,
+    label: 'Wedding Cakes',
+    img: '/wedding-cakes-premium.png',
+    description: 'Breathtaking multi-tiered masterpieces crafted to make your dream day unforgettable.',
+  },
+  {
+    icon: Utensils,
+    label: 'Dessert Tables',
+    img: '/0E16201C-4525-4570-8F96-FA20816FE2C3.png',
+    description: 'Curated spreads of premium sweet treats and showstopping multi-tiered centerpieces.',
+  },
+  {
+    icon: Cake,
+    label: 'Custom Celebration Cakes',
+    img: '/F8FF9757-50F0-4FF1-B6C5-EB0B30785CB4.png',
+    description: 'Luxurious multi-tier cakes designed to elevate any corporate or social milestone.',
+  },
 ]
 
 const marqueeItems = [
@@ -19,15 +41,6 @@ const marqueeItems = [
 
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const img1Y = useTransform(scrollYProgress, [0, 1], ['0%', '-8%'])
-  const img2Y = useTransform(scrollYProgress, [0, 1], ['0%', '-4%'])
-  const img3Y = useTransform(scrollYProgress, [0, 1], ['0%', '-6%'])
-  const img4Y = useTransform(scrollYProgress, [0, 1], ['0%', '-3%'])
-  const parallaxOffsets = [img1Y, img2Y, img3Y, img4Y]
 
   return (
     <section ref={sectionRef} id="services" className="section-padding section-ambient bg-amber-light overflow-hidden">
@@ -56,101 +69,48 @@ export default function Services() {
         </motion.div>
 
         {/* Bento grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          {/* Left column: 2 stacked feature images with parallax */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col gap-4"
-          >
-            {/* Feature image 1 — parallax */}
-            <motion.div
-              style={{ y: img1Y, height: '260px' }}
-              className="glass-border-img relative rounded-3xl overflow-hidden"
-            >
-              <Image
-                src="/2FEC4DEF-3821-4C38-B1E6-2E15D3C2D88C.png"
-                alt="Custom cake showcase"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 text-white text-[11px] font-semibold tracking-wider uppercase">
-                  Custom Cakes
-                </span>
-                <span className="w-7 h-7 rounded-full bg-rose-gold flex items-center justify-center flex-shrink-0">
-                  <Cake size={13} className="text-white" />
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Feature image 2 — parallax */}
-            <motion.div
-              style={{ y: img2Y, minHeight: '220px' }}
-              className="glass-border-img relative rounded-3xl overflow-hidden flex-1"
-            >
-              <Image
-                src="/33FBA6D8-734C-456D-8D4C-199419FEA82C.png"
-                alt="Wedding cake showcase"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 text-white text-[11px] font-semibold tracking-wider uppercase">
-                  Wedding Cakes
-                </span>
-                <span className="w-7 h-7 rounded-full bg-rose-gold flex items-center justify-center flex-shrink-0">
-                  <Crown size={13} className="text-white" />
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Right column: 2 stacked feature images (same design as left) */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex flex-col gap-4"
-          >
-            {featuredServices.map((s, i) => {
-              const Icon = s.icon
-              const y = parallaxOffsets[i + 2]
-              return (
-                <motion.div
-                  key={s.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
-                  style={{ y, minHeight: i === 0 ? '260px' : '220px' }}
-                  className="glass-border-img relative rounded-3xl overflow-hidden flex-1"
-                >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          {servicesList.map((service, index) => {
+            const Icon = service.icon
+            return (
+              <motion.div
+                key={service.label}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                className="group relative rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 bg-white/5 border border-white/10 backdrop-blur-sm h-[280px] sm:h-[340px] md:h-[380px] flex flex-col justify-end p-6 md:p-8"
+              >
+                {/* Background Image with Zoom on Hover */}
+                <div className="absolute inset-0 z-0">
                   <Image
-                    src={s.img}
-                    alt={s.label}
+                    src={service.img}
+                    alt={service.label}
                     fill
-                    className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                    <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 text-white text-[11px] font-semibold tracking-wider uppercase">
-                      {s.label}
+                  {/* Premium overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-500 group-hover:via-black/40" />
+                </div>
+
+                {/* Content Container */}
+                <div className="relative z-10 flex flex-col gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3.5 py-1.5 text-white text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase">
+                      {service.label}
                     </span>
-                    <span className="w-7 h-7 rounded-full bg-rose-gold flex items-center justify-center flex-shrink-0">
-                      <Icon size={13} className="text-white" />
+                    <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-rose-gold/90 backdrop-blur-sm flex items-center justify-center text-white border border-white/20 group-hover:bg-rose-gold group-hover:scale-110 transition-all duration-300">
+                      <Icon size={14} className="sm:w-4 sm:h-4" />
                     </span>
                   </div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
+                  
+                  <p className="text-white/70 text-xs sm:text-sm font-light mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 leading-relaxed max-w-md">
+                    {service.description}
+                  </p>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
 
         {/* CTA */}
