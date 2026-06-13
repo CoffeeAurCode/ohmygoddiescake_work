@@ -602,7 +602,13 @@ export function OrderForm() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const _gtag = typeof window !== 'undefined' ? (window as any).gtag : undefined
       if (typeof _gtag === 'function') {
-        _gtag('event', 'conversion', { send_to: 'AW-18161715420/NNfUCML6urscENyRl9RD' })
+        _gtag('event', 'conversion', {
+          send_to: 'AW-18161715420/NNfUCML6urscENyRl9RD',
+          value: orderTotal,
+          currency: 'CAD',
+        })
+      } else {
+        console.warn('[gtag] Conversion not tracked — gtag failed to load')
       }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')

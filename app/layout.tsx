@@ -47,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable} ${fraunces.variable} ${jakarta.variable}`}>
-      <head>
+      <body>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18161715420"
           strategy="afterInteractive"
@@ -60,8 +60,6 @@ export default function RootLayout({
             gtag('config', 'AW-18161715420');
           `}
         </Script>
-      </head>
-      <body>
         <ScrollProgressBar />
         <div className="grain-overlay" aria-hidden="true" />
         {children}
