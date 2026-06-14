@@ -1,6 +1,14 @@
 ﻿# Ony's Boutique - Codebase Context
 
-> **Auto-maintained.** This file is updated by Claude whenever source files are edited. Read this before touching any file.
+> **This is the authoritative context for the whole codebase.** Claude Code automatically
+> loads this file at the start of **every** session, so read it instead of re-reading every
+> source file. Treat it as the source of truth for structure, conventions, and IDs.
+>
+> **How it stays current (see [Maintaining This File](#maintaining-this-file) at the bottom):**
+> 1. Claude Code loads `CLAUDE.md` into context on every session start — no manual step needed.
+> 2. A `PostToolUse` hook in `.claude/settings.json` fires after any `Edit`/`Write` to a
+>    source file and reminds Claude to reconcile the affected section of this file before
+>    finishing. Keep this file in sync as part of normal work — do not let it drift.
 
 ---
 
@@ -14,7 +22,9 @@
 | Site title | "Ony's Boutique Custom Cakes \| Calgary Custom Cakes" |
 | GitHub remote | `https://github.com/CoffeeAurCode/ohmygoddiescake_work` |
 
-**What it is:** A single-page marketing + ordering website. The order form POSTs to `/api/book` which creates a Square Appointment and sends an SMS to the bakery. No payment is collected on the site.
+**What it is:** A single-page marketing + ordering website. The order form POSTs to `/api/book`
+which upserts a Square Customer, creates a Square Appointment (Bookings API), and sends an SMS to
+the bakery via Twilio. No payment is collected on the site.
 
 ---
 
@@ -23,14 +33,20 @@
 | Layer | Library / Version |
 |---|---|
 | Framework | Next.js 16.2.4 (App Router) |
-| UI | React 19.2.5 + TypeScript 5 |
-| Styling | Tailwind CSS 3.4.1 + PostCSS/Autoprefixer |
+| UI runtime | React 19.2.5 + React DOM 19.2.5 |
+| Types | TypeScript 5, `@types/react` ^18, `@types/react-dom` ^18 (types lag the 19 runtime) |
+| Styling | Tailwind CSS 3.4.1 + PostCSS 8 + Autoprefixer |
 | Animation (React) | Framer Motion 11.18.2 |
 | Animation (imperative) | GSAP 3.15.0 |
 | Icons | Lucide React 0.525.0 |
-| Fonts | Playfair Display, DM Sans, Plus Jakarta Sans, Fraunces (Google Fonts via layout.tsx) |
-| Booking backend | Square SDK (`square`) — Appointments + Customers APIs |
-| SMS | Twilio (`twilio`) — notifies bakery on every order |
+| Fonts | Playfair Display, DM Sans, Plus Jakarta Sans, Fraunces (Google Fonts via `layout.tsx`) |
+| Booking backend | Square SDK `square` ^44.1.0 — Customers + Bookings (Appointments) + Catalog APIs |
+| SMS | Twilio `twilio` ^6.0.2 — notifies bakery on every order |
+| Analytics | Google Ads/Analytics gtag `AW-18161715420` + Microsoft Clarity (`x5m78bkkkd`), both loaded in `layout.tsx` via `next/script` |
+| Scripts env | `dotenv` ^17.4.2 (dev dep) — loads `.env.local` in standalone `tsx` scripts |
+
+> `node_modules` also contains `square-legacy` (a transitive/transitional dependency). Application
+> code imports from `square` (v44), not `square-legacy`.
 
 ---
 
@@ -43,11 +59,13 @@ npm run build      # production build
 npm start          # serve production build
 
 # One-off scripts (run from project root)
-npx tsx scripts/verify-square.ts   # confirm all 3 Square IDs resolve
-npx tsx scripts/test-all.ts        # full automated test suite (9 checks)
-npx tsx scripts/test-sms.ts        # send a test SMS to BAKERY_PHONE_NUMBER
-npx tsx scripts/test-booking.ts    # create a test booking in isolation
-npx tsx scripts/test-customer.ts   # test customer upsert in isolation
+npx tsx scripts/verify-square.ts        # confirm all 3 Square IDs resolve
+npx tsx scripts/test-all.ts             # full automated test suite
+npx tsx scripts/test-pure-functions.ts  # test buildBookingNote / buildSmsText (no network)
+npx tsx scripts/test-sms.ts             # send a test SMS to BAKERY_PHONE_NUMBER
+npx tsx scripts/test-booking.ts         # create a test booking in isolation
+npx tsx scripts/test-customer.ts        # test customer upsert in isolation
+npx tsx scripts/check-bookings.ts       # debug: dump booking/service/team-member profiles
 ```
 
 Dev server config lives in `.claude/launch.json` (port 3000).
@@ -69,7 +87,11 @@ TWILIO_FROM_NUMBER=+13653892801
 BAKERY_PHONE_NUMBER=+919998064026
 ```
 
-**Critical pattern:** `lib/square.ts` and `lib/sms.ts` initialize their clients lazily (at call time, not module load time). This is required because scripts load `.env.local` via `config({ path: '.env.local' })` in the module body — ES module hoisting means the client must not be created at the top level or env vars won't be set yet. Next.js API routes are unaffected (Next.js loads env before any module), but do NOT revert the lazy pattern.
+**Critical pattern:** `lib/square.ts` and `lib/sms.ts` initialize their clients lazily (at call
+time, not module load time). This is required because scripts load `.env.local` via
+`config({ path: '.env.local' })` in the module body — ES module hoisting means the client must not
+be created at the top level or env vars won't be set yet. Next.js API routes are unaffected
+(Next.js loads env before any module), but do NOT revert the lazy pattern.
 
 ---
 
@@ -78,8 +100,8 @@ BAKERY_PHONE_NUMBER=+919998064026
 ```
 ohmygoddiescake_work/
   app/
-    layout.tsx            # Root layout - font imports, <html>, metadata, ScrollProgressBar
-    page.tsx              # Main page - imports & orders all section components
+    layout.tsx            # Root layout - fonts, <html>, metadata, gtag + Microsoft Clarity scripts, ScrollProgressBar, grain overlay
+    page.tsx              # Main page - imports & orders the rendered section components
     globals.css           # All global utilities, animations, grain overlay, marquee keyframes
     api/
       book/
@@ -89,10 +111,10 @@ ohmygoddiescake_work/
     Hero.tsx              # Full-screen video background, Framer Motion staggered headline
     Services.tsx          # Bento/parallax image grid - 3 service cards
     HowItWorks.tsx        # 3-step timeline (fill form -> customize -> confirm)
-    Pricing.tsx           # Price tables: Birthday, Wedding, Corporate, Extras
-    OrderCTA.tsx          # 5-step order form — LIVE, POSTs to /api/book on submit
+    Pricing.tsx           # Price tables: Birthday, Wedding, Corporate, Extras (NOT rendered in page.tsx)
+    OrderCTA.tsx          # 5-step order wizard — LIVE, POSTs to /api/book. Exports named `OrderForm`
     FlavorsOptions.tsx    # Tabbed display: Flavors / Frostings / Sizes (used inside OrderCTA)
-    AddOns.tsx            # Add-on picker: disco balls, florals, etc.
+    AddOns.tsx            # Add-on picker: disco balls, florals, etc. (used inside OrderCTA)
     Reviews.tsx           # Testimonials marquee strip
     About.tsx             # "Our Story" - founded 2020, Ony's background
     Footer.tsx            # Contact, nav links, Instagram
@@ -104,17 +126,18 @@ ohmygoddiescake_work/
     SectionReveal.tsx     # Scroll-triggered fade-in wrapper (Framer Motion whileInView)
     ScrollProgressBar.tsx # Thin progress bar at top of viewport tied to page scroll
   lib/
-    square.ts             # Square client (lazy Proxy) + OrderPayload type + helpers
+    square.ts             # Square client (lazy) + OrderPayload type + booking/customer helpers
     sms.ts                # Twilio client (lazy) + notifyBakery() + buildSmsText()
   scripts/
-    setup-square.ts       # One-time: create "Custom Cake Order" service in Square Catalog
-    fix-service-type.ts   # One-time: set productType=APPOINTMENTS_SERVICE (already run)
-    verify-square.ts      # Confirm all 3 Square IDs resolve — run after any ID change
-    test-all.ts           # Full automated test suite (9 checks, all PASS as of 2026-06-03)
-    test-customer.ts      # Isolated customer upsert test
-    test-booking.ts       # Isolated booking creation test
-    test-sms.ts           # Isolated SMS send test
-    check-bookings.ts     # Debug: dump booking profile + service variation + team member profiles
+    setup-square.ts          # One-time: create "Custom Cake Order" service in Square Catalog
+    fix-service-type.ts      # One-time: set productType=APPOINTMENTS_SERVICE (already run)
+    verify-square.ts         # Confirm all 3 Square IDs resolve — run after any ID change
+    test-all.ts              # Full automated test suite
+    test-pure-functions.ts   # Unit-test pure formatters (buildBookingNote/buildSmsText), no network
+    test-customer.ts         # Isolated customer upsert test
+    test-booking.ts          # Isolated booking creation test
+    test-sms.ts              # Isolated SMS send test
+    check-bookings.ts        # Debug: dump booking profile + service variation + team member profiles
   public/
     logo.svg
     2165958_Ceremony_Wedding_1920x1080.mp4   # Hero video
@@ -124,70 +147,77 @@ ohmygoddiescake_work/
     Frosting_*.png        # Buttercream, Fondant, Ganache, Naked, SemiNaked
     Addon_*.png           # Butterflies, Cherries, Crown, DippedStrawberries, Disco, etc.
     [UUID].jpg/png        # Portfolio showcase photos
-  tailwind.config.js      # Custom color palette, shadows, animations - read before adding styles
-  next.config.js          # Minimal (empty options object)
-  tsconfig.json           # Target ES2017, strict mode
+  tailwind.config.js    # Custom color palette, shadows, animations - read before adding styles
+  next.config.js        # Minimal (empty options object)
+  tsconfig.json         # Target ES2017, strict mode
   postcss.config.js
   package.json
+  client-guide.html     # Client-facing guide for using the Square Dashboard (BUILT)
   .claude/
-    launch.json           # Dev server launch config
-    settings.json         # Claude Code hooks
-  INTEGRATION_COMPLETE.md # Full record of what was built, IDs, test results, known limitations
-  CLIENT_GUIDE_PLAN.md    # Plan for client-facing HTML guide on using Square Dashboard
+    launch.json         # Dev server launch config
+    settings.json       # Claude Code hooks (incl. CLAUDE.md sync reminder)
+  INTEGRATION_COMPLETE.md     # Record of what was built, IDs, test results, known limitations
+  CLIENT_GUIDE_PLAN.md        # Plan behind client-guide.html
   SQUARE_INTEGRATION_PLAN.md  # Original implementation spec (reference)
   SQUARE_TEST_PLAN.md         # Test strategy reference
+  SQUARE_FULL_TEST_PLAN.md    # Expanded test plan reference
+  SESSION_*.md                # Transient Claude session logs — not project docs, safe to ignore
 ```
 
 ---
 
 ## Page Composition (`app/page.tsx`)
 
-Components render in this order — single page scroll flow:
+Components render in this order — single page scroll flow. `OrderForm` is imported as a **named**
+export from `OrderCTA.tsx` (`import { OrderForm } from '@/components/OrderCTA'`); there is no
+default export. Most below-the-fold sections are wrapped in `<SectionReveal>`:
 
 1. `<Navbar />`
 2. `<Hero />`
 3. `<Services />`
-4. `<HowItWorks />`
-5. `<Pricing />`
-6. `<OrderCTA />` ← main conversion section, form is live
-7. `<Reviews />`
-8. `<About />`
-9. `<Footer />`
+4. `<SectionReveal><HowItWorks /></SectionReveal>`
+5. `<SectionReveal><OrderForm /></SectionReveal>` ← main conversion section, form is live
+6. `<SectionReveal><Reviews /></SectionReveal>`
+7. `<SectionReveal><About /></SectionReveal>`
+8. `<Footer />`
 
-**Not currently on the page:** `FAQ`, `Policies`, `WhyUs` — built but not imported in `page.tsx`.
+**Built but NOT currently rendered in `page.tsx`:** `Pricing`, `FAQ`, `Policies`, `WhyUs`.
 
 ---
 
 ## OrderCTA.tsx — Key Component Detail
 
-The most complex component. Self-contained 5-step wizard, fully wired to the backend:
+The most complex component. Self-contained multi-step wizard, fully wired to the backend. Exported
+as the named function `OrderForm()`. `TOTAL_STEPS = 5`.
 
-| Step | Content |
-|---|---|
-| 1 | Occasion selection (Birthday, Wedding, Corporate, Baby Shower, Anniversary, Other) |
-| 2 | Cake customization — flavor, frosting, size, layers (uses `FlavorsOptions`) |
-| 3 | Add-on selection (uses `AddOns`) |
-| 4 | Date picker — custom calendar UI with date validation |
-| 5 | Contact form — name, email, phone, notes + **Submit** button |
+| Step | `STEP_LABELS` | Tab label | Content |
+|---|---|---|---|
+| 1 | Celebrate | Occasion | Occasion selection (Birthday, Wedding, Corporate, Baby Shower, Anniversary, Other) |
+| 2 | Cake | Cake | Flavor, frosting, size, layers, servings (uses `FlavorsOptions`) |
+| 3 | Add-ons | Add-ons | Add-on selection (uses `AddOns`) |
+| 4 | Date | Summary | Custom calendar date picker + pickup time slot + fulfillment (pickup/delivery) |
+| 5 | Contact | Contact | Name, email, phone, notes + **Submit** button |
 
 - All wizard state is local React (`useState`).
-- On submit: POSTs `form` state to `POST /api/book`.
-- `submitting` state disables button and shows "Sending your order..." label.
-- `submitError` state shows inline error if the API call fails.
+- On submit: POSTs the `OrderPayload`-shaped `form` state to `POST /api/book`.
+- `submitting` state disables the button and shows a sending label.
+- `submitError` state shows an inline error if the API call fails.
 - `submitted: true` triggers the success confirmation screen.
-- Dynamic pricing preview updates as user selects options.
+- Dynamic pricing preview (`estimatedTotal`) updates as the user selects options.
 
 ---
 
 ## `app/api/book/route.ts` — API Route
 
-Receives `OrderPayload`, runs three operations in sequence:
+`POST /api/book`. Parses JSON into `OrderPayload`; rejects with 400 if `name`, `email`, or
+`pickupDate` is missing. Then runs three operations in sequence:
 
 1. `upsertCustomer(order)` — searches Square by email; creates if not found
-2. `createBooking(customerId, order, note)` — creates Square Appointment at noon MDT on `pickupDate`
-3. `notifyBakery(smsText)` — sends Twilio SMS to `BAKERY_PHONE_NUMBER` (non-fatal: logs error but doesn't fail the order if SMS fails)
+2. `createBooking(customerId, order, note)` — creates Square Appointment at the chosen pickup slot
+3. `notifyBakery(smsText)` — sends Twilio SMS to `BAKERY_PHONE_NUMBER`
+   (**non-fatal**: logs the error but does not fail the order if SMS fails)
 
-Returns `{ success: true, bookingId }` on success, `{ error: string }` with 400/500 on failure.
+Returns `{ success: true, bookingId }` (200) on success; `{ error: string }` with 400/500 on failure.
 
 ---
 
@@ -195,13 +225,25 @@ Returns `{ success: true, bookingId }` on success, `{ error: string }` with 400/
 
 | Export | Type | Description |
 |---|---|---|
-| `squareClient` | `SquareClient` (Proxy) | Lazy Square client — reads env vars at first call |
-| `OrderPayload` | type | Shape of the form data POSTed to `/api/book` |
-| `buildBookingNote(order)` | function | Formats multi-line appointment note for Square calendar |
+| `getSquareClient()` | function | Lazily creates & caches the `SquareClient` (reads env at first call) |
+| `squareClient` | `SquareClient` (Proxy) | Convenience proxy that forwards to `getSquareClient()` |
+| `OrderPayload` | type | Shape of the form data POSTed to `/api/book` (see below) |
+| `buildBookingNote(order)` | function | Formats the multi-line appointment note for the Square calendar |
 | `upsertCustomer(order)` | async function | Search-or-create customer in Square CRM, returns `customerId` |
-| `createBooking(customerId, order, note)` | async function | Creates appointment, fetches real service variation version dynamically |
+| `createBooking(customerId, order, note)` | async function | Creates the appointment (fetches the real service-variation version dynamically) |
 
-Booking time is always `${pickupDate}T18:00:00Z` (noon Calgary MDT / UTC-6). This is a calendar record, not a real appointment time.
+`ADDON_LABELS` is a module-private map turning add-on IDs into human labels (with prices) for the note.
+
+**`OrderPayload` fields:** `name`, `email`, `phone`, `celebration`, `celebrationOtherNote`,
+`servings` (`number | ''`), `cakeSize?`, `cakeLayers?` (`number | ''`), `flavour`, `frosting`,
+`addonIds: string[]`, `pickupDate`, `pickupTime`, `fulfillment: 'pickup' | 'delivery' | ''`,
+`deliveryAddress`, `estimatedTotal?`.
+
+**Booking start time:** `createBooking` maps the selected `pickupTime` (Calgary MDT, UTC-6) to a UTC
+slot — `8:00 AM→T14:00Z`, `10:00 AM→T16:00Z`, `12:00 PM→T18:00Z`, `2:00 PM→T20:00Z`,
+`4:00 PM→T22:00Z` — defaulting to noon (`T18:00:00Z`) if the slot is unrecognized.
+`upsertCustomer` uses a deterministic idempotency key derived from the email hash so rapid duplicate
+submissions don't create two customer records.
 
 ---
 
@@ -209,8 +251,8 @@ Booking time is always `${pickupDate}T18:00:00Z` (noon Calgary MDT / UTC-6). Thi
 
 | Export | Description |
 |---|---|
-| `notifyBakery(body)` | Sends SMS via Twilio to `BAKERY_PHONE_NUMBER` |
-| `buildSmsText(order)` | Builds compact order summary string for SMS |
+| `notifyBakery(body)` | Sends SMS via Twilio to `BAKERY_PHONE_NUMBER` (lazy client init) |
+| `buildSmsText(order)` | Builds a compact order summary string (name, phone, date, fulfillment, occasion, cake, add-ons, `estimatedTotal`) |
 
 ---
 
@@ -239,7 +281,8 @@ Booking time is always `${pickupDate}T18:00:00Z` (noon Calgary MDT / UTC-6). Thi
 | `clay-pink/gold/violet/mint/cream/sky` | Various | Decorative chip/badge colors |
 
 ### Shadows
-Custom neumorphic shadow utilities in `tailwind.config.js`: `shadow-raised`, `shadow-pressed`, `shadow-inset-*`. Use these instead of raw Tailwind shadow classes.
+Custom neumorphic shadow utilities in `tailwind.config.js`: `shadow-raised`, `shadow-pressed`,
+`shadow-inset-*`. Use these instead of raw Tailwind shadow classes.
 
 ### Typography
 - **Headings:** Playfair Display (serif)
@@ -263,10 +306,10 @@ All keyframes live in `globals.css`, registered in `tailwind.config.js`:
 - **Static data in components.** Prices, flavor lists, add-on lists are hardcoded arrays inside their respective component files.
 - **`lib/square.ts` and `lib/sms.ts` are server-only.** Never import them from client components — they read secret env vars.
 - **Lazy client init.** Both Square and Twilio clients must be created inside function calls, not at module top level. See env var note above.
-- **Scripts use `config({ path: '.env.local' })`** as the first two lines — not `import 'dotenv/config'` which loads `.env`.
+- **Scripts use `config({ path: '.env.local' })`** as the first lines — not `import 'dotenv/config'` which loads `.env`.
 - **Tailwind-first styling.** Avoid raw CSS unless it must be a keyframe or complex selector — put those in `globals.css`.
 - **SectionReveal wrapper** — wrap any new full-width section with `<SectionReveal>` for consistent scroll-reveal behavior.
-- **Images go in `/public`** and are referenced with Next.js `<Image>` component for optimization.
+- **Images go in `/public`** and are referenced with the Next.js `<Image>` component for optimization.
 - **Single-page app** — there are no sub-routes. Do not add `app/` subdirectories unless explicitly requested.
 
 ---
@@ -276,13 +319,35 @@ All keyframes live in `globals.css`, registered in `tailwind.config.js`:
 - No rate limiting on `/api/book` — add Vercel edge middleware before high-traffic launch
 - No email confirmation to customer — could add Resend/SendGrid in the same route
 - No CMS or admin panel
-- FAQ, Policies, WhyUs components built but not rendered in page.tsx
-- No analytics or tracking
+- `Pricing`, `FAQ`, `Policies`, `WhyUs` components built but not rendered in `page.tsx`
 - No authentication
-- Client HTML guide (`client-guide.html`) not yet built — see `CLIENT_GUIDE_PLAN.md`
+
+---
+
+## Maintaining This File
+
+This file is the codebase context every Claude session starts from, so it must stay accurate.
+
+- **Auto-loaded:** Claude Code reads `CLAUDE.md` into context automatically at session start.
+  New sessions get the full picture here instead of re-reading every source file.
+- **Auto-reminded:** `.claude/settings.json` defines a `PostToolUse` hook (matcher `Edit|Write`)
+  that fires whenever a source file under `app/`, `components/`, `lib/`, `scripts/`, or a root
+  config file is edited. The hook injects a reminder for Claude to update the relevant section of
+  this file and bump the **Last Updated** date below before ending the turn.
+- **When you change code, update the matching section here in the same turn** — directory map,
+  exports tables, page composition, env vars, IDs, or conventions. Do not rely on the date alone;
+  the date is meaningful only if the content is reconciled with it.
 
 ---
 
 ## Last Updated
 
-**2026-06-03** — Square + Twilio integration complete and live on production. All 9 automated tests passing.
+**2026-06-14** — Added the Microsoft Clarity analytics snippet (project `x5m78bkkkd`) to
+`app/layout.tsx` via `next/script` (`afterInteractive`), alongside the existing gtag; updated the
+Tech Stack analytics row and the layout.tsx directory-map entry to reflect it.
+
+**2026-06-14** — Synced CLAUDE.md to the live codebase: corrected page composition (Pricing not
+rendered; `OrderForm` is OrderCTA's named export; sections wrapped in `SectionReveal`), documented
+Google Analytics gtag, expanded `OrderPayload` and pickup-time→UTC mapping, added
+`getSquareClient`, `test-pure-functions.ts`, `client-guide.html`, and `SQUARE_FULL_TEST_PLAN.md`.
+Replaced the cosmetic timestamp-bump hook with a content-sync reminder hook.
