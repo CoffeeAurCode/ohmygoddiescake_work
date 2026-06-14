@@ -7,8 +7,8 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command": "$d = $input | Out-String | ConvertFrom-Json; $fp = $d.tool_input.file_path; if ($fp -and $fp -notmatch 'CLAUDE\\.md$') { $f = 'C:\\Users\\BIT\\Coding\\ohmygoddiescake_work\\CLAUDE.md'; $today = Get-Date -Format 'yyyy-MM-dd'; (Get-Content $f -Encoding UTF8) -replace '\\*\\*\\d{4}-\\d{2}-\\d{2}\\*\\*', \"**$today**\" | Set-Content $f -Encoding UTF8 } 2>$null",
-            "statusMessage": "Updating CLAUDE.md timestamp..."
+            "command": "try { $d = $input | Out-String | ConvertFrom-Json; $fp = $d.tool_input.file_path; if ($fp) { $n = ($fp -replace '\\\\','/'); $base = ($n -split '/')[-1]; if ($n -notmatch '\\.md$' -and ($n -match '/(app|components|lib|scripts)/' -or $base -in @('tailwind.config.js','next.config.js','tsconfig.json','package.json','postcss.config.js'))) { $msg = 'You edited a source file (' + $base + '). Before ending this turn, reconcile the matching CLAUDE.md section (directory map, exports tables, page composition, env vars, IDs, conventions) with this change and bump its Last Updated date so CLAUDE.md stays the accurate codebase context.'; @{ hookSpecificOutput = @{ hookEventName = 'PostToolUse'; additionalContext = $msg } } | ConvertTo-Json -Compress -Depth 5 } } } catch {}",
+            "statusMessage": "Checking CLAUDE.md is in sync..."
           }
         ]
       }
